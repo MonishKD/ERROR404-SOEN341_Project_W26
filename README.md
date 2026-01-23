@@ -25,7 +25,7 @@ Edit or remove meals from the planner
 Prevent duplicates for the same week
 
 # Team Members
-Laila, Ishrak, SImran, Monish, Liliana
+Laila, Ishrak, Simran, Monish, Liliana
 
 # Roles
 Frontend (HTML, CSS): Ishrak, Simran
