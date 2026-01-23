@@ -23,3 +23,13 @@ Day of the week
 Meal type (breakfast/lunch/dinner/snack)
 Edit or remove meals from the planner
 Prevent duplicates for the same week
+
+# Team Members
+Laila, Ishrak, SImran, Monish, Liliana
+
+# Roles
+Frontend (HTML, CSS): Ishrak, Simran
+Backend (JavaScript, NodeJS): Monish, Laila, Liliana
+Database (MongoDB, SQL/NoSQL) or JSON File: Monish, Ishrak
+Scrum Master for sprint 1: Simran
+
