@@ -1,37 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
+    <title>Meal Planner Login</title>
     <link rel="stylesheet" href="styles.css">
-
-    <script src="script.js" defer></script>
+    <script src="script.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div class="login-container">
-        <h2>Login</h2>
-        <form id="login-form">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button class="cssbuttons-io-button" type="submit">Get started!
-                <div class="icon">
-                    <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0 0h24v24H0z" fill="none"></path>
-                        <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
-                            fill="currentColor"></path>
-                    </svg>
+
+    <div class="page">
+
+        <div class="card">
+
+            <!-- Header image section -->
+            <div class="card-header">
+                <div class="overlay">
+                    <div class="header-icon">🍴</div>
+                    <h1>Welcome to MealMajor</h1>
+                    <p>Your personalized meal plans, one click at a time</p>
                 </div>
-            </button>
-        </form>
+            </div>
+
+            <!-- Form section -->
+            <div class="card-body">
+
+                <p class="subtitle">👨‍🍳 Log in to continue your meal planning journey!</p>
+
+                <form>
+
+                    <label>Email address</label>
+                    <input type="email" placeholder="Enter your email address">
+
+                    <div class="password-row">
+                        <label>Password</label>
+                        <a href="#">Forgot password?</a>
+                    </div>
+
+                    <input type="password" placeholder="Enter your password">
+
+                    <div class="remember">
+                        <input type="checkbox">
+                        <span>Remember me</span>
+                    </div>
+
+                    <button class="cssbuttons-io-button" type="submit">
+                        <span>
+                            Sign In
+                            <div class="icon">
+                                <svg height="24" width="24" viewBox="0 0 24 24">
+                                    <path fill="none" d="M0 0h24v24H0z"></path>
+                                    <path fill="currentColor"
+                                        d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </span>
+                    </button>
+                </form>
+
+                <p class="create">
+                    Don't have an account? <a href="sign-up-page.html">Create account</a> <!-- Go to sign-up page -->
+                </p>
+
+            </div>
+
+        </div>
+
     </div>
+
+</body>
 
 </html>
