@@ -11,4 +11,14 @@ async function login(userId, password) {
   return { token: "demo-token", user: { userId } };
 }
 
-module.exports = { login };
+async function register(userId, password, email) {
+  // TODO
+  // check if user exists
+  // hash password
+  // store user in DB
+  return {
+    message: "User registered successfully"
+  };
+}
+
+module.exports = { login, register };
