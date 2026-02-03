@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMajor - Home</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="home-styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
+</head>
+
+<body>
+
+    <!--Navigation bar-->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">🍴</span>
+                <span class="brand-name">MealMajor</span>
+            </div>
+            <div class="nav-links">
+                <a href="home-page.html" class="nav-link active">Home</a>
+                <a href="#" class="nav-link">Recipes</a>
+                <a href="#" class="nav-link">Meal Planner</a>
+                <a href="edit-profile.html" class="nav-link">Profile</a>
+                <a href="login-page.html" class="nav-link logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!--Main content-->
+    <div class="profile-container">
+
+        <!--Welcome section-->
+        <section class="welcome-section">
+            <div class="welcome-card">
+                <h1>👋 Welcome back, <span id="userName">User</span>!</h1>
+                <p>Ready to discover some delicious meals today?</p>
+            </div>
+        </section>
+
+        <!--Quick stats-->
+        <section class="stats-section">
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                    <h3>5</h3>
+                    <p>Meals Planned</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🍽️</div>
+                <div class="stat-content">
+                    <h3>12</h3>
+                    <p>Saved Recipes</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🛒</div>
+                <div class="stat-content">
+                    <h3>8</h3>
+                    <p>Shopping Items</p>
+                </div>
+            </div>
+        </section>
+
+        <!--Quick actions-->
+        <section class="actions-section">
+            <h2>Quick Actions</h2>
+            <div class="action-cards">
+                <div class="action-card">
+                    <div class="action-icon">🔍</div>
+                    <h3>Browse Recipes</h3>
+                    <p>Discover new recipes today</p>
+                    <button type="button" class="action-button">Explore</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">📆</div>
+                    <h3>Plan Your Week</h3>
+                    <p>Create or update your weekly meal schedule</p>
+                    <button type="button" class="action-button">Plan Now</button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">➕</div>
+                    <h3>Add Recipe</h3>
+                    <p>Create your own custom recipe</p>
+                    <button type="button" class="action-button">Create</button>
+                </div>
+            </div>
+        </section>
+
+        <!--This week's meals-->
+        <section class="meals-section">
+            <h2>This Week's Meal Plan</h2>
+            <div class="meals-grid">
+                <div class="meal-card">
+                    <div class="meal-day">Monday</div>
+                    <div class="meal-item">
+                        <span class="meal-type">Breakfast</span>
+                        <span class="meal-name">Pancakes</span>
+                    </div>
+                    <div class="meal-item">
+                        <span class="meal-type">Lunch</span>
+                        <span class="meal-name">Rice & Chicken</span>
+                    </div>
+                    <div class="meal-item">
+                        <span class="meal-type">Dinner</span>
+                        <span class="meal-name">Lasagna</span>
+                    </div>
+                </div>
+                <div class="meal-card">
+                    <div class="meal-day">Tuesday</div>
+                    <div class="meal-item">
+                        <span class="meal-type">Breakfast</span>
+                        <span class="meal-name">Oatmeal Bowl</span>
+                    </div>
+                    <div class="meal-item">
+                        <span class="meal-type">Lunch</span>
+                        <span class="meal-name">Greek Salad</span>
+                    </div>
+                    <div class="meal-item empty">
+                        <span class="meal-type">Dinner</span>
+                        <span class="meal-name">+ Add Meal</span>
+                    </div>
+                </div>
+                <div class="meal-card">
+                    <div class="meal-day">Wednesday</div>
+                    <div class="meal-item empty">
+                        <span class="meal-type">Breakfast</span>
+                        <span class="meal-name">+ Add Meal</span>
+                    </div>
+                    <div class="meal-item empty">
+                        <span class="meal-type">Lunch</span>
+                        <span class="meal-name">+ Add Meal</span>
+                    </div>
+                    <div class="meal-item empty">
+                        <span class="meal-type">Dinner</span>
+                        <span class="meal-name">+ Add Meal</span>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="view-full-plan">View Full Weekly Plan →</button>
+        </section>
+
+        <!--Recent recipes-->
+        <section class="recipes-section">
+            <h2>Your Recent Recipes</h2>
+            <div class="recipes-grid">
+                <div class="recipe-card">
+                    <div class="recipe-image">🥗</div>
+                    <div class="recipe-info">
+                        <h4>Greek Salad</h4>
+                        <div class="recipe-details">
+                            <span>⏱️ 15 min</span>
+                            <span>💰 Low</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="recipe-card">
+                    <div class="recipe-image">🥣</div>
+                    <div class="recipe-info">
+                        <h4>Oatmeal Bowl</h4>
+                        <div class="recipe-details">
+                            <span>⏱️ 10 min</span>
+                            <span>💰 Low</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="recipe-card">
+                    <div class="recipe-image">🍝</div>
+                    <div class="recipe-info">
+                        <h4>Lasagna</h4>
+                        <div class="recipe-details">
+                            <span>⏱️ 75 min</span>
+                            <span>💰 Medium</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+</body>
+
+</html>

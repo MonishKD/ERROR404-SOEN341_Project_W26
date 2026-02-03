@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMajor - Edit Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="home-styles.css">
+    <link rel="stylesheet" href="profile-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    
+    <!--Navigation Bar-->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">🍴</span>
+                <span class="brand-name">MealMajor</span>
+            </div>
+            <div class="nav-links">
+                <a href="home-page.html" class="nav-link">Home</a>
+                <a href="#" class="nav-link">Recipes</a>
+                <a href="#" class="nav-link">Meal Planner</a>
+                <a href="edit-profile.html" class="nav-link active">Profile</a>
+                <a href="login-page.html" class="nav-link logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!--Main content-->
+    <div class="profile-container">
+
+        <!--Page header-->
+        <div class="profile-header">
+            <h1>⚙️ Edit Your Profile</h1>
+            <p>Update your personal information and dietary preferences</p>
+        </div>
+
+        <!--Profile form-->
+        <div class="profile-content">
+
+            <form id="profileForm" class="profile-form">
+
+                <!--Personal info section-->
+                <section class="form-section">
+                    <h2 class="section-title">Personal Information</h2>
+
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                        <small class="error" id="nameError"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                        <small class="error" id="emailError"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                        <small class="error" id="usernameError"></small>
+                    </div>
+                </section>
+
+                <!--Dietary preference section-->
+                <section class="form-section">
+                    <h2 class="section-title">Dietary Preference</h2>
+
+                    <div class="form-group">
+                        <label>Select Your Diet Type</label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="diet" value="vegetarian">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🥗</span>
+                                    <span class="checkbox-label">Vegetarian</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="diet" value="vegan">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🌱</span>
+                                    <span class="checkbox-label">Vegan</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="diet" value="gluten-free">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🌾</span>
+                                    <span class="checkbox-label">Gluten-Free</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="diet" value="dairy-free">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🥛</span>
+                                    <span class="checkbox-label">Dairy-Free</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="diet" value="halal">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🕌</span>
+                                    <span class="checkbox-label">Halal</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="diet" value="high-protein">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🥚</span>
+                                    <span class="checkbox-label">High-Protein</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!--Allergies section-->
+                <section class="form-section">
+                    <h2 class="section-title">Allergies & Restrictions</h2>
+
+                    <div class="form-group">
+                        <label>Select Your Food Allergens</label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-card allergen">
+                                <input type="checkbox" name="allergy" value="peanuts">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🥜</span>
+                                    <span class="checkbox-label">Peanuts</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card allergen">
+                                <input type="checkbox" name="allergy" value="tree-nuts">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🌰</span>
+                                    <span class="checkbox-label">Tree Nuts</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card allergen">
+                                <input type="checkbox" name="allergy" value="dairy">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🥛</span>
+                                    <span class="checkbox-label">Dairy</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card allergen">
+                                <input type="checkbox" name="allergy" value="eggs">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🥚</span>
+                                    <span class="checkbox-label">Eggs</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card allergen">
+                                <input type="checkbox" name="allergy" value="soy">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🫘</span>
+                                    <span class="checkbox-label">Soy</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card allergen">
+                                <input type="checkbox" name="allergy" value="wheat">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🌾</span>
+                                    <span class="checkbox-label">Wheat</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card allergen">
+                                <input type="checkbox" name="allergy" value="fish">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🐟</span>
+                                    <span class="checkbox-label">Fish</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card allergen">
+                                <input type="checkbox" name="allergy" value="shellfish">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🦐</span>
+                                    <span class="checkbox-label">Shellfish</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="otherAllergies">Other Allergies or Restrictions</label>
+                        <textarea id="otherAllergies" name="otherAllergies" rows="3" 
+                            placeholder="List any other allergies or dietary restrictions (e.g., sesame, corn, mustard)"></textarea>
+                    </div>
+                </section>
+
+                <!--Recipe preferences section-->
+                <section class="form-section">
+                    <h2 class="section-title">Additional Preferences</h2>
+
+                    <div class="form-group">
+                        <label for="cookingSkill">Cooking Skill Level</label>
+                        <select id="cookingSkill" name="cookingSkill">
+                            <option value="">Select your skill level</option>
+                            <option value="beginner">Beginner - I'm just starting out</option>
+                            <option value="intermediate">Intermediate - I can follow recipes well</option>
+                            <option value="advanced">Advanced - I can improvise and experiment</option>
+                            <option value="expert">Expert - I'm a confident cook</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mealPrepTime">Preferred Meal Prep Time</label>
+                        <select id="mealPrepTime" name="mealPrepTime">
+                            <option value="">Select prep time preference</option>
+                            <option value="quick">Quick (Under 15 minutes)</option>
+                            <option value="moderate">Moderate (15-30 minutes)</option>
+                            <option value="extended">Extended (30-60 minutes)</option>
+                            <option value="elaborate">Elaborate (Over 60 minutes)</option>
+                            <option value="any">Any duration is fine</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="budgetRange">Budget Range</label>
+                        <select id="budgetRange" name="budgetRange">
+                            <option value="">Select your budget preference</option>
+                            <option value="low">Low - Budget-friendly meals</option>
+                            <option value="medium">Medium - Balanced cost and quality</option>
+                            <option value="high">High - Premium ingredients welcome</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!--Action buttons-->
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="window.location.href='home-page.html'">
+                        Cancel
+                    </button>
+                    <button type="submit" class="cssbuttons-io-button">
+                        <span>
+                            Save Changes
+                            <div class="icon">
+                                <svg height="24" width="24" viewBox="0 0 24 24">
+                                    <path fill="none" d="M0 0h24v24H0z"></path>
+                                    <path fill="currentColor"
+                                        d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </span>
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

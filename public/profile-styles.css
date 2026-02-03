@@ -1,0 +1,187 @@
+/* Profile container*/
+.profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 30px;
+}
+
+/* Profile header*/
+.profile-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.profile-header h1 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 32px;
+}
+
+.profile-header p {
+  color: #666;
+  font-size: 16px;
+}
+
+/* Profile content*/
+.profile-content {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Form sections*/
+.form-section {
+  margin-bottom: 40px;
+  padding-bottom: 30px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+}
+
+.section-title {
+  color: #1b8c4f;
+  font-size: 22px;
+  margin-bottom: 25px;
+}
+
+/* Form inputs*/
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+  font-size: 15px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #0e9c50;
+  box-shadow: 0 0 0 3px rgba(14, 156, 80, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-group select {
+  cursor: pointer;
+  background-color: white;
+}
+
+/* Errors*/
+.error {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+/* Checkbox grid*/
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.checkbox-card {
+  position: relative;
+  cursor: pointer;
+}
+
+.checkbox-card input {
+  position: absolute;
+  opacity: 0;
+}
+
+.checkbox-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 12px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  text-align: center;
+  height: 100%;
+}
+
+.checkbox-card:hover .checkbox-content {
+  background: #f0f9f4;
+  border-color: #9dd4b3;
+}
+
+.checkbox-card input:checked + .checkbox-content {
+  background: #e6f4ec;
+  border-color: #0e9c50;
+  box-shadow: 0 4px 12px rgba(14, 156, 80, 0.15);
+}
+
+/* Allergen cards*/
+.checkbox-card.allergen input:checked + .checkbox-content {
+  background: #fff4e6;
+  border-color: #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+.checkbox-card.allergen:hover .checkbox-content {
+  background: #fffbf0;
+  border-color: #fcd34d;
+}
+
+.checkbox-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.checkbox-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Action buttons*/
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.btn-secondary {
+  padding: 14px 32px;
+  background: white;
+  color: #666;
+  border: 2px solid #e5e7eb;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
