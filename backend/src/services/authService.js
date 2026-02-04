@@ -7,12 +7,12 @@ const bcrypt = require('bcrypt');
 const Database = require('../database/database');
 
 // Login function to authenticate a user
-async function login(userId, password) {
+async function login(userID, password) {
   const db = new Database();
   await db.connect();
 
   try {
-    // userId is actually username
+    // userID is actually username
     const user = await db.findUserByUsername(userId);
     if (!user) {
       throw new Error('User not found');
@@ -30,7 +30,7 @@ async function login(userId, password) {
   }
 }
 // Register function to create a new user
-async function register(userId, password, email) {
+async function register(userID, password, email) {
   const db = new Database();
   await db.connect();
 
@@ -41,13 +41,13 @@ async function register(userId, password, email) {
       throw new Error('Email is already in use by another account!');
     }
     // Check if username is already taken
-    const existingUser = await db.findUserByUsername(userId);
+    const existingUser = await db.findUserByUsername(userID);
     if (existingUser) {
       throw new Error('This username already exists. Please choose a different one.');
     }
     // Hash the password before storing
     const passwordHash = await bcrypt.hash(password, 10);
-    await db.createUser(userId, email, passwordHash);
+    await db.createUser(userID, email, passwordHash);
 
     // Return success message
     return { message: "User registered successfully! Welcome to MealMajor!" };
