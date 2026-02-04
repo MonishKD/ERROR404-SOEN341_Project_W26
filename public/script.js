@@ -1,0 +1,1 @@
+// This is the script for frontend JS (switching pages, button click, etc)
