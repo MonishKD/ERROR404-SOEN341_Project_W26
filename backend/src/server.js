@@ -7,6 +7,8 @@ const path = require("path");
 const { authMiddleware } = require("./middleware/auth");
 const { login, register } = require("./services/authService");
 const { getProfile, updateProfile } = require("./services/profileService");
+// Initialize database schema on server start
+require("./database/init_database");
 
 const app = express();
 

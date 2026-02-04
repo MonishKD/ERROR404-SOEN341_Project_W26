@@ -82,8 +82,6 @@ class Database {
       const query = `
         SELECT * FROM users WHERE username = ?
       `;
-      
-      `;
       this.db.get(query, [userID], (err, row) => {
         if (err) {
           reject(err);
