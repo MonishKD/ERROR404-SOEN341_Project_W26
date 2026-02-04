@@ -77,30 +77,14 @@ class Database {
   }
 
   // Find user by username
-  findUserByUsername(username) {
+  findUserByUsername(userID) {
     return new Promise((resolve, reject) => {
       const query = `
         SELECT * FROM users WHERE username = ?
       `;
       
-      this.db.get(query, [username], (err, row) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(row);
-        }
-      });
-    });
-  }
-
-  // Find user by ID
-  findUserById(id) {
-    return new Promise((resolve, reject) => {
-      const query = `
-        SELECT * FROM users WHERE id = ?
       `;
-      
-      this.db.get(query, [id], (err, row) => {
+      this.db.get(query, [userID], (err, row) => {
         if (err) {
           reject(err);
         } else {

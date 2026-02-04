@@ -3,6 +3,7 @@
 const express = require("express");
 const path = require("path");
 
+// Importing middleware and services
 const { authMiddleware } = require("./middleware/auth");
 const { login, register } = require("./services/authService");
 const { getProfile, updateProfile } = require("./services/profileService");
