@@ -1,0 +1,16 @@
+
+{
+    "name": "mealmajor-backend",
+    "version": "1.0.0",
+    "main": "src/server.js",
+    "type": "commonjs",
+    "scripts": {
+      "start": "node src/server.js",
+      "dev": "node src/server.js"
+    },
+    "dependencies": {
+      "bcrypt": "^5.1.1",
+      "express": "^4.18.2",
+      "sqlite3": "^5.1.6"
+    }
+  }  
