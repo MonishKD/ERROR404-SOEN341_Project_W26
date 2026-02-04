@@ -11,11 +11,29 @@ const app = express();
 
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "../../public")));
+const publicPath = path.join(__dirname, "../../public");
+console.log("Serving static files from:", publicPath);
+app.use(express.static(publicPath));
 
+// --- Page Routes ---
+
+// Root route (defaults to login)
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "..", "public", "login-page.html"));
+  res.sendFile(path.join(publicPath, "login-page.html"));
 });
+
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(publicPath, "login-page.html"));
+});
+
+app.get("/signup", (req, res) => {
+  res.sendFile(path.join(publicPath, "sign-up-page.html"));
+});
+
+// app.get("/", (req, res) => {
+//   res.sendFile(path.join(__dirname, "..", "..", "public", "login-page.html"));
+// });
 
 //login route
 app.post("/api/auth/login", async (req, res) => {
@@ -65,6 +83,8 @@ app.put("/api/profile", authMiddleware, async (req, res) => {
 });
 
 // start server
-app.listen(4000, () =>
-  console.log("Backend running at http://localhost:4000")
-);
+const PORT = 4000;
+app.listen(PORT, () => {
+  console.log(`Backend running at http://localhost:${PORT}`);
+  console.log("Static files served from:", publicPath);
+});
