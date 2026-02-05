@@ -14,6 +14,20 @@ const app = express();
 
 app.use(express.json());
 
+// CORS middleware - allows frontend to call backend API
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Handle preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
+
 // app.use(express.static(path.join(__dirname, "../../public")));
 const publicPath = path.join(__dirname, "../../public");
 console.log("Serving static files from:", publicPath);
