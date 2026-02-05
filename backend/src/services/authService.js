@@ -13,7 +13,7 @@ async function login(userID, password) {
 
   try {
     // userID is actually username
-    const user = await db.findUserByUsername(userId);
+    const user = await db.findUserByUsername(userID);
     if (!user) {
       throw new Error('User not found');
     }
@@ -24,7 +24,8 @@ async function login(userID, password) {
       throw new Error('Invalid password');
     }
     // For demo purposes, returning a dummy token and user info
-    return { token: "demo-token", user: { userID: user.username } };
+    const token = `token_${user.username}_${Date.now()}`;
+    return { token, user: { userID: user.username } };
   } finally {
     await db.close();
   }
