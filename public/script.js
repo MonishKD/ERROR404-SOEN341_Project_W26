@@ -1,20 +1,14 @@
-// This is the script for frontend JS (switching pages, button click, etc)
-
 // script.js
 // Frontend-Backend Integration for MealMajor
 // Handles: Login, Signup, Form Validation, Token Management, Profile Loading
 
-// ============================================================================
-// CONFIGURATION
-// ============================================================================
 
+// CONFIGURATION
 const API_BASE_URL = 'http://localhost:4000/api';
 const TOKEN_KEY = 'mealmajor_token';
 
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
 
+// UTILITY FUNCTIONS
 /**
  * Store authentication token in localStorage
  */
@@ -100,10 +94,8 @@ function setButtonLoading(button, isLoading) {
   }
 }
 
-// ============================================================================
-// VALIDATION FUNCTIONS
-// ============================================================================
 
+// VALIDATION FUNCTIONS
 /**
  * Validate email format
  */
@@ -139,21 +131,19 @@ function validateFullName(name) {
   return { valid: true, message: '' };
 }
 
-// ============================================================================
-// API FUNCTIONS
-// ============================================================================
 
+// API FUNCTIONS
 /**
  * Login user
  */
-async function loginUser(userID, password) {
+async function loginUser(email, password) {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userID, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await response.json();
@@ -254,10 +244,8 @@ async function updateUserProfile(updates) {
   }
 }
 
-// ============================================================================
-// PAGE-SPECIFIC INITIALIZATION
-// ============================================================================
 
+// PAGE-SPECIFIC INITIALIZATION
 /**
  * Initialize login page
  */
@@ -576,9 +564,8 @@ async function loadUserProfileForEdit() {
   }
 }
 
-// ============================================================================
+
 // AUTO-INITIALIZATION ON PAGE LOAD
-// ============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
   // Detect which page we're on and initialize accordingly

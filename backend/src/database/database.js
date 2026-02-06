@@ -61,6 +61,7 @@ class Database {
 
   // Find user by email
   findUserByEmail(email) {
+    email = email.trim().toLowerCase();
     return new Promise((resolve, reject) => {
       const query = `
         SELECT * FROM users WHERE email = ?

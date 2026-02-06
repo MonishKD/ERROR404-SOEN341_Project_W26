@@ -23,6 +23,9 @@ function authMiddleware(req, res, next) {
   // For now, attach token (later attach user info)
   req.token = token;
 
+  // Sprint 1 demo: pretend this token belongs to a demo user
+  req.user = { userId: "demo" }
+  
   // Token exists → allow request to continue to the route
   next();
 }

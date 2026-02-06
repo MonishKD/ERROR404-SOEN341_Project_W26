@@ -1,5 +1,5 @@
 // authService.js
-//This file contains the logic for logging a user in
+//This file contains the logic for logging a user in and registering a new user.
 
 
 // Requiring bcrypt for password hashing and Database for user data management
@@ -7,13 +7,13 @@ const bcrypt = require('bcrypt');
 const Database = require('../database/database');
 
 // Login function to authenticate a user
-async function login(userID, password) {
+async function login(email, password) {
+  email = email.trim().toLowerCase();
   const db = new Database();
   await db.connect();
 
   try {
-    // userID is actually username
-    const user = await db.findUserByUsername(userID);
+    const user = await db.findUserByEmail(email);
     if (!user) {
       throw new Error('User not found');
     }
@@ -25,13 +25,14 @@ async function login(userID, password) {
     }
     // For demo purposes, returning a dummy token and user info
     const token = `token_${user.username}_${Date.now()}`;
-    return { token, user: { userID: user.username } };
+    return { token, user: { userID: user.username, email: user.email } };
   } finally {
     await db.close();
   }
 }
 // Register function to create a new user
 async function register(userID, password, email) {
+  email = email.trim().toLowerCase();
   const db = new Database();
   await db.connect();
 

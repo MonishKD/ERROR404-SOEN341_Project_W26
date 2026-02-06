@@ -7,17 +7,22 @@ function isValidEmail(email) {
   return typeof email === "string" && email.includes("@") && email.includes(".");
 }
 
-async function getProfile(token) {
-  // TODO: DB lookup by token
+function normalizeEmail(email) {
+  return typeof email === "string" ? email.trim().toLowerCase() : email;
+}
 
-  // Temporary profile data for Sprint 1 demo
-  return {
-    userId: "demo",
-    username: "demoUser",
-    email: "demo@example.com",
-    dietPreferences: [],
-    allergies: [],
-  };
+// In-memory demo profile (resets when server restarts)
+let demoProfile = {
+  userId: "demo",
+  username: "demoUser",
+  email: "demo@example.com",
+  dietPreferences: [],
+  allergies: [],
+};
+
+async function getProfile(token) {
+  // token is not used in Sprint 1 demo
+  return demoProfile;
 }
 
 async function updateProfile(token, updates) {
@@ -31,8 +36,11 @@ async function updateProfile(token, updates) {
   }
 
   // Basic validation
-  if (cleanUpdates.email && !isValidEmail(cleanUpdates.email)) {
-    return { ok: false, status: 400, message: "Invalid email format" };
+  if (cleanUpdates.email) {
+    cleanUpdates.email = normalizeEmail(cleanUpdates.email);
+    if (!isValidEmail(cleanUpdates.email)) {
+      return { ok: false, status: 400, message: "Invalid email format" };
+    }
   }
 
   if (cleanUpdates.dietPreferences && !Array.isArray(cleanUpdates.dietPreferences)) {
