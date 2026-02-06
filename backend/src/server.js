@@ -54,17 +54,18 @@ app.get("/signup", (req, res) => {
 
 //login route
 app.post("/api/auth/login", async (req, res) => {
-  const {userID, password} = req.body;
+  const {email, password} = req.body;
 
-  if(!userID || !password) {
-    return res.status(400).json({message: "Missing userID or password."});
+  if(!email || !password) {
+    return res.status(400).json({message: "Missing email or password."});
   }
 
   try{
-    const result = await login(userID, password);
+    const result = await login(email, password);
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({message: "Login failed."});
+    console.error("Login error:", error);
+    res.status(401).json({message: error.message || "Login failed."});
   }
 });
 
@@ -80,7 +81,8 @@ app.post("/api/auth/register", async (req, res) => {
     const result = await register(userID, password, email);
     res.status(201).json(result);
   } catch (error) {
-    res.status(500).json({message: "Registration failed."});
+    console.error("Registration error:", error);
+    res.status(400).json({message: error.message || "Registration failed."});
   }
 });
 
