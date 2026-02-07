@@ -1,30 +1,46 @@
-# SOEN 341 Project: MealMajor
+# MealMajor: Your personalized meal plans, one click at a time
 **Description**
 
-MealMajor is a web app for students to plan meals, track groceries, and propose easy recipes.
-Baseline features:
+MealMajor is a web app for students to plan meals, track groceries, and propose easy recipes. 
 
-1. User Account Management
-User registration and login 
-Profile management (diet preferences, allergies)
+Users can register and login to access their account. They can also manage their profile to change dietary preferences, allergies, personal information, etc.
 
-3. Recipe Management
-Create, edit, and delete recipes. 
-Recipe attributes (ingredients, prep. time, prep. steps, cost, etc.)
-Search recipes
-Filter recipes
-Time, difficulty, cost, dietary tag, etc.
+Users can also create, edit, filter, search, and delete recipes. Each recipe has its attributes: ingredients, preparation time, preparation steps, cost, etc.
 
-5. Weekly Meal Planner
-Create a weekly meal plan
-View meals in a weekly grid
-Assign recipes to:
-Day of the week
-Meal type (breakfast/lunch/dinner/snack)
-Edit or remove meals from the planner
-Prevent duplicates for the same week
+A weekly meal planner is available to them for determine the meals assigned to the days and categories of meals (breakfast, lunch, or dinner).
 
-# Team Members
-Laila, Ishrak, Simran, Monish, Liliana, Shekinah
+******************************************************************
+**Project Information**
 
+This project was built with the following:
 
+- HTML/CSS for the frontend
+- JavaScript/Node.js/Express for the backend
+- SQLite for the database setup
+
+******************************************************************
+
+**Team Members:** 
+- Laila
+- Ishrak
+- Simran
+- Monish
+- Liliana
+- Shekinah
+
+******************************************************************
+
+**Repartition of Roles:**
+
+- Frontend/UI:
+    - Ishrak
+    - Simran
+    - Shekinah
+- Backend:
+    - Liliana
+    - Laila
+    - Monish
+- Database:
+    - Monish
+    - Ishrak
+    - Simran
