@@ -1,0 +1,7 @@
+node_modules/
+backend/node_modules/
+.env
+prisma/migrations/
+*.log
+"backend/node_modules/" 
+"node_modules/" 
