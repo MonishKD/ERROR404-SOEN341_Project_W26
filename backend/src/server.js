@@ -3,12 +3,16 @@
 const express = require("express");
 const path = require("path");
 
+// Import Prisma client for database interactions
+const { prisma } = require("./hello-prisma/prisma");
+
 // Importing middleware and services
 const { authMiddleware } = require("./middleware/auth");
 const { login, register } = require("./services/authService");
 const { getProfile, updateProfile } = require("./services/profileService");
+
 // Initialize database schema on server start
-require("./database/init_database");
+// require("./database/init_database");
 
 const app = express();
 
@@ -101,9 +105,80 @@ app.put("/api/profile", authMiddleware, async (req, res) => {
   res.json({message: "Profile updated successfully"});
 });
 
-// start server
+
+// --- Recipe routes ---//
+// Get all recipes
+app.get("/api/recipes", async (req, res) => {
+  try {
+    const recipes = await prisma.recipes.findMany();
+    res.json(recipes);
+  } catch (error) {
+    console.error("Error fetching recipes:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get recipe by ID
+app.get("/api/recipes/:id", async (req, res) => {
+  try {
+    const recipe = await prisma.recipes.findUnique({
+      where: { id: parseInt(req.params.id) }
+    });
+    if (!recipe) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+    res.json(recipe);
+  } catch (error) {
+    console.error("Error fetching recipe:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// CREATE recipe
+app.post("/api/recipes", async (req, res) => {
+  try {
+    const { name, ingredients, prep_time, prep_steps, cost } = req.body;
+    const newRecipe = await prisma.recipes.create({
+      data: { name, ingredients, prep_time, prep_steps, cost }
+    });
+    res.status(201).json(newRecipe);
+  } catch (error) {
+    console.error("Error creating recipe:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// UPDATE recipe
+app.put("/api/recipes/:id", async (req, res) => {
+  try {
+    const updatedRecipe = await prisma.recipes.update({
+      where: { id: parseInt(req.params.id) },
+      data: req.body
+    });
+    res.json(updatedRecipe);
+  } catch (error) {
+    console.error("Error updating recipe:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE recipe
+app.delete("/api/recipes/:id", async (req, res) => {
+  try {
+    await prisma.recipes.delete({
+      where: { id: parseInt(req.params.id) }
+    });
+    res.json({ message: "Recipe deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting recipe:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Start server
 const PORT = 4000;
 app.listen(PORT, () => {
   console.log(`Backend running at http://localhost:${PORT}`);
   console.log("Static files served from:", publicPath);
+  console.log("Prisma connected: Recipe routes ready at /api/recipes");
 });
