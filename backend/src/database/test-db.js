@@ -1,5 +1,5 @@
 // test-db.js
-const { prisma } = require('./backend/src/hello-prisma/prisma');  // ✅ This works with { prisma } export
+const { prisma } = require('./prisma');
 
 async function testConnection() {
   try {

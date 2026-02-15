@@ -4,12 +4,26 @@ const express = require("express");
 const path = require("path");
 
 // Import Prisma client for database interactions
-const { prisma } = require("./hello-prisma/prisma");
+const { prisma } = require("./database/prisma");
 
 // Importing middleware and services
 const { authMiddleware } = require("./middleware/auth");
 const { login, register } = require("./services/authService");
 const { getProfile, updateProfile } = require("./services/profileService");
+
+function mapDatabaseError(error) {
+  if (!error) return null;
+  if (error.code === "P2021") {
+    return "Database tables are missing. Run `npm run prisma:push` in backend.";
+  }
+  if (error.code === "P1001") {
+    return "Cannot connect to PostgreSQL. Ensure Postgres is running and DATABASE_URL is correct.";
+  }
+  if (typeof error.message === "string" && error.message.includes("Invalid `prisma.")) {
+    return "Database schema is out of sync. Run `npm run prisma:generate` then `npm run prisma:push`.";
+  }
+  return null;
+}
 
 // Initialize database schema on server start
 // require("./database/init_database");
@@ -69,6 +83,10 @@ app.post("/api/auth/login", async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     console.error("Login error:", error);
+    const dbMessage = mapDatabaseError(error);
+    if (dbMessage) {
+      return res.status(500).json({ message: dbMessage });
+    }
     res.status(401).json({message: error.message || "Login failed."});
   }
 });
@@ -86,6 +104,10 @@ app.post("/api/auth/register", async (req, res) => {
     res.status(201).json(result);
   } catch (error) {
     console.error("Registration error:", error);
+    const dbMessage = mapDatabaseError(error);
+    if (dbMessage) {
+      return res.status(500).json({ message: dbMessage });
+    }
     res.status(400).json({message: error.message || "Registration failed."});
   }
 });
