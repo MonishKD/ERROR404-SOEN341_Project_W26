@@ -1,69 +1,19 @@
-// This file is used to initialize the database and create the users table
+// Migrated from Sqllite to Postegres with Prisma ORM
+const { prisma } = require('./prisma');
 
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-
-// Database file path
-const DB_PATH = path.join(__dirname, 'users.db');
-
-// Create and initialize the database
-const db = new sqlite3.Database(DB_PATH, (err) => {
-  if (err) {
-    console.error('Error opening database:', err.message);
-    return;
+// This script tests the database connection and provides instructions for syncing schema changes.
+async function initDatabase() {
+  try {
+    await prisma.$connect();
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('Database connection successful.');
+    console.log('Run `npm run prisma:migrate` or `npm run prisma:push` to sync schema changes.');
+  } catch (error) {
+    console.error('Database initialization failed:', error.message);
+    process.exitCode = 1;
+  } finally {
+    await prisma.$disconnect();
   }
-  console.log('Connected to the SQLite database.');
-});
-
-// Create users table
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `, (err) => {
-    if (err) {
-      console.error('Error creating users table:', err.message);
-    } else {
-      console.log('Users table created successfully.');
-    }
-  });
-
-  // Create index on email for faster lookups
-  db.run(`
-    CREATE INDEX IF NOT EXISTS idx_users_email 
-    ON users(email)
-  `, (err) => {
-    if (err) {
-      console.error('Error creating email index:', err.message);
-    } else {
-      console.log('Email index created successfully.');
-    }
-  });
-
-  // Create index on username {}
-  db.run(`
-    CREATE INDEX IF NOT EXISTS idx_users_username 
-    ON users(username)
-  `, (err) => {
-    if (err) {
-      console.error('Error creating username index:', err.message);
-    } else {
-      console.log('Username index created successfully.');
-    }
-  });
-});
-
-// Close the database connection
-db.close((err) => {
-  if (err) {
-    console.error('Error closing database:', err.message);
-  } else {
-    console.log('Database connection closed.');
-  }
-});
+}
+// Run the initialization script if this file is executed directly
+initDatabase();

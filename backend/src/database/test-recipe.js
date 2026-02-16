@@ -1,5 +1,5 @@
 // test-recipe.js
-const { prisma } = require('./backend/src/hello-prisma/prisma');
+const { prisma } = require('./prisma');
 
 async function testRecipes() {
   try {

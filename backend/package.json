@@ -1,16 +1,25 @@
 
 {
-    "name": "mealmajor-backend",
-    "version": "1.0.0",
-    "main": "src/server.js",
-    "type": "commonjs",
-    "scripts": {
-      "start": "node src/server.js",
-      "dev": "node src/server.js"
-    },
-    "dependencies": {
-      "bcrypt": "^5.1.1",
-      "express": "^4.18.2",
-      "sqlite3": "^5.1.6"
-    }
-  }  
+  "name": "mealmajor-backend",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:push": "prisma db push"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.4.0",
+    "@prisma/client": "^7.4.0",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "prisma": "^7.4.0"
+  }
+}

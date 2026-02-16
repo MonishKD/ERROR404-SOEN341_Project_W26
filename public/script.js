@@ -446,7 +446,7 @@ function initEditProfilePage() {
 
       // Collect form data
       const formData = {
-        username: document.getElementById('username').value.trim(),
+        username: document.getElementById('fullName').value.trim(),
         email: document.getElementById('email').value.trim(),
         dietPreferences: [],
         allergies: [],
@@ -464,7 +464,7 @@ function initEditProfilePage() {
       let hasErrors = false;
 
       if (!formData.username) {
-        showError('usernameError', 'Username is required');
+        showError('nameError', 'Name is required');
         hasErrors = true;
       }
 
@@ -535,10 +535,6 @@ async function loadUserProfileForEdit() {
     if (document.getElementById('email')) {
       document.getElementById('email').value = profile.email || '';
     }
-    if (document.getElementById('username')) {
-      document.getElementById('username').value = profile.username || '';
-    }
-
     // Populate diet preferences
     if (profile.dietPreferences && Array.isArray(profile.dietPreferences)) {
       profile.dietPreferences.forEach(diet => {

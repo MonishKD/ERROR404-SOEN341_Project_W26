@@ -1,95 +1,33 @@
-// Creating as database using SQLite
-// A users file will be created in the same directory on its own
-
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-
-const DB_PATH = path.join(__dirname, 'users.db');
+const { prisma } = require('./prisma');
 
 class Database {
-  constructor() {
-    this.db = null;
+  async connect() {
+    return;
   }
 
-  // Opening database connection and returning a promise arrow function that resolves when connected
-  connect() {
-    return new Promise((resolve, reject) => {
-      this.db = new sqlite3.Database(DB_PATH, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
+  async close() {
+    return;
+  }
+
+  async createUser(username, email, passwordHash) {
+    return prisma.users.create({
+      data: {
+        username,
+        email: email.trim().toLowerCase(),
+        password_hash: passwordHash,
+      },
     });
   }
 
-  // Closes the database connection
-  close() {
-    return new Promise((resolve, reject) => {
-      if (this.db) {
-        this.db.close((err) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      } else {
-        resolve();
-      }
+  async findUserByEmail(email) {
+    return prisma.users.findUnique({
+      where: { email: email.trim().toLowerCase() },
     });
   }
 
-  // Create a new user (templated queries will follow for the rest of the functions)
-  createUser(username, email, passwordHash) {
-    return new Promise((resolve, reject) => {
-      const query = `
-        INSERT INTO users (username, email, password_hash)
-        VALUES (?, ?, ?)
-        `;
-      
-      this.db.run(query, [username, email, passwordHash], function(err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({ id: this.lastID, username, email });
-        }
-      });
-    });
-  }
-
-  // Find user by email
-  findUserByEmail(email) {
-    email = email.trim().toLowerCase();
-    return new Promise((resolve, reject) => {
-      const query = `
-        SELECT * FROM users WHERE email = ?
-      `;
-      
-      this.db.get(query, [email], (err, row) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(row);
-        }
-      });
-    });
-  }
-
-  // Find user by username
-  findUserByUsername(userID) {
-    return new Promise((resolve, reject) => {
-      const query = `
-        SELECT * FROM users WHERE username = ?
-      `;
-      this.db.get(query, [userID], (err, row) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(row);
-        }
-      });
+  async findUserByUsername(userID) {
+    return prisma.users.findUnique({
+      where: { username: userID },
     });
   }
 }
