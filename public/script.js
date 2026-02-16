@@ -284,7 +284,7 @@ function initLoginPage() {
     if (result.success) {
       // Save token
       saveToken(result.data.token);
-      
+
       // Redirect to home page
       window.location.href = 'home-page.html';
     } else {
@@ -307,7 +307,7 @@ function initSignupPage() {
     button.addEventListener('click', () => {
       const targetId = button.dataset.target;
       const input = document.getElementById(targetId);
-      
+
       if (input.type === 'password') {
         input.type = 'text';
         button.textContent = '👁️';
@@ -374,7 +374,7 @@ function initSignupPage() {
     if (result.success) {
       // Show success message
       alert('Registration successful! Please log in.');
-      
+
       // Redirect to login page
       window.location.href = 'login-page.html';
     } else {
@@ -574,22 +574,22 @@ document.addEventListener('DOMContentLoaded', () => {
     case '':
       initLoginPage();
       break;
-    
+
     case 'sign-up-page.html':
     case 'signup':
       initSignupPage();
       break;
-    
+
     case 'home-page.html':
     case 'home':
       initHomePage();
       break;
-    
+
     case 'edit-profile.html':
     case 'profile':
       initEditProfilePage();
       break;
-    
+
     default:
       console.log('Page not recognized for auto-initialization');
   }

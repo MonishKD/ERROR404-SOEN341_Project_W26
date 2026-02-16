@@ -1,5 +1,5 @@
 // test-recipe.js
-const { prisma } = require('./prisma');
+import { prisma } from './prisma.js';
 
 async function testRecipes() {
   try {

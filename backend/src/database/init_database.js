@@ -1,5 +1,6 @@
-// Migrated from Sqllite to Postegres with Prisma ORM
-const { prisma } = require('./prisma');
+// init_database.js
+// Migrated from SQLite to PostgreSQL with Prisma ORM
+import { prisma } from './prisma.js';
 
 // This script tests the database connection and provides instructions for syncing schema changes.
 async function initDatabase() {
@@ -15,5 +16,6 @@ async function initDatabase() {
     await prisma.$disconnect();
   }
 }
+
 // Run the initialization script if this file is executed directly
 initDatabase();

@@ -1,9 +1,18 @@
 // This file sets up the Prisma client to connect to a PostgreSQL database using the PrismaPg adapter.
-const { PrismaClient } = require('@prisma/client');
-const { PrismaPg } = require('@prisma/adapter-pg');
-const { Pool } = require('pg');
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
+
+import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
+const { Pool } = pg;
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+
+console.log('DATABASE_URL loaded:', process.env.DATABASE_URL ? 'Yes' : 'No');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -13,4 +22,4 @@ const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({ adapter });
 
-module.exports = { prisma };
+export { prisma };

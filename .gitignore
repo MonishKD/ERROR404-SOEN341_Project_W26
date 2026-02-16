@@ -1,7 +1,18 @@
+# Dependencies
 node_modules/
 backend/node_modules/
+
+# Environment
 .env
+.env.local
+
+# Prisma migrations
 prisma/migrations/
+backend/src/database/migrations/
+
+# Logs
 *.log
-"backend/node_modules/" 
-"node_modules/" 
+
+# Prisma generated files
+**/.prisma/
+**/node_modules/.prisma/

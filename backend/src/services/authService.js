@@ -1,9 +1,9 @@
+// authService.js
 // This file contains the authentication logic for user login and registration.
-const bcrypt = require('bcrypt');
-const { prisma } = require('../database/prisma');
+import bcrypt from 'bcrypt';
+import { prisma } from '../database/prisma.js';
 
-// 
-async function login(email, password) {
+export async function login(email, password) {
   email = email.trim().toLowerCase();
   const user = await prisma.users.findUnique({
     where: { email },
@@ -22,7 +22,7 @@ async function login(email, password) {
   return { token, user: { userID: user.username, email: user.email } };
 }
 
-async function register(userID, password, email) {
+export async function register(userID, password, email) {
   const username = userID.trim();
   email = email.trim().toLowerCase();
 
@@ -51,5 +51,3 @@ async function register(userID, password, email) {
 
   return { message: 'User registered successfully! Welcome to MealMajor!' };
 }
-
-module.exports = { login, register };
