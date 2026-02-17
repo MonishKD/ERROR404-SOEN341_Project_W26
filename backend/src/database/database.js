@@ -1,4 +1,5 @@
-const { prisma } = require('./prisma');
+// database.js
+import { prisma } from './prisma.js';
 
 class Database {
   async connect() {
@@ -32,4 +33,4 @@ class Database {
   }
 }
 
-module.exports = Database;
+export default Database;

@@ -1,6 +1,7 @@
-const { prisma } = require('../database/prisma');
+// profileService.js
+import { prisma } from '../database/prisma.js';
 
-//Helper function to validate email format
+// Helper function to validate email format
 function isValidEmail(email) {
   // Simple check 
   return typeof email === "string" && email.includes("@") && email.includes(".");
@@ -26,7 +27,7 @@ function parseStoredList(value) {
     .filter(Boolean);
 }
 
-async function getProfile(token) {
+export async function getProfile(token) {
   const username = parseTokenUsername(token);
   if (!username) throw new Error('Invalid token');
 
@@ -43,8 +44,9 @@ async function getProfile(token) {
     allergies: parseStoredList(user.allergies),
   };
 }
+
 // This function updates the user's profile based on the provided token and updates object. 
-async function updateProfile(token, updates) {
+export async function updateProfile(token, updates) {
   const usernameFromToken = parseTokenUsername(token);
   if (!usernameFromToken) {
     return { ok: false, status: 401, message: 'Invalid token' };
@@ -73,7 +75,8 @@ async function updateProfile(token, updates) {
   if (cleanUpdates.allergies && !Array.isArray(cleanUpdates.allergies)) {
     return { ok: false, status: 400, message: "allergies must be an array" };
   }
-// Prepare the data for Prisma update
+
+  // Prepare the data for Prisma update
   const prismaData = {};
   if (cleanUpdates.username !== undefined) prismaData.username = cleanUpdates.username.trim();
   if (cleanUpdates.email !== undefined) prismaData.email = cleanUpdates.email;
@@ -83,6 +86,7 @@ async function updateProfile(token, updates) {
   if (cleanUpdates.allergies !== undefined) {
     prismaData.allergies = cleanUpdates.allergies.join(", ");
   }
+
   // Attempt to update the user's profile in the database
   try {
     await prisma.users.update({
@@ -98,5 +102,3 @@ async function updateProfile(token, updates) {
 
   return { ok: true, message: "Profile updated", updatedFields: Object.keys(cleanUpdates) };
 }
-
-module.exports = { getProfile, updateProfile };
