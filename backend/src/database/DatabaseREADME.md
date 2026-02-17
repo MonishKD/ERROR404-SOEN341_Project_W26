@@ -1,6 +1,6 @@
-Backend database layer now uses Prisma + PostgreSQL.
+### Backend database layer now uses Prisma + PostgreSQL.
 
-Required backend packages:
+**Required backend packages:**
 
 {
   "dependencies": {
@@ -16,8 +16,34 @@ Required backend packages:
   }
 }
 
-Useful commands:
+#### Useful commands (MAC):
 
 - npm run prisma:generate
 - npm run prisma:migrate
 - npm run prisma:push
+
+#### Windows:
+STEPS FOR PRISMA
+
+1. Go on project root
+
+2. Go to backend and reinstall dependencies
+```git bash
+cd backend
+npm install
+```
+
+3. Check if Prisma Client needs to be generated
+``` git bash
+npx prisma generate
+```
+
+4. Run migrations to sync database
+``` git bash
+npx prisma migrate dev --name init
+```
+
+5. Start the server
+``` git bash
+npm start
+```
