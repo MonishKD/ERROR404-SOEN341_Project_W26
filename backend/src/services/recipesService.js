@@ -1,9 +1,9 @@
-// test-recipe.js
-import { prisma } from './prisma.js';
+// recipesService.js
+import { prisma } from '../database/prisma.js';
 
 async function testRecipes() {
   try {
-    // CREATE a recipe
+    // CREATE a recipe Laila's task
     const newRecipe = await prisma.recipes.create({
       data: {
         name: 'Spaghetti',
@@ -20,14 +20,17 @@ async function testRecipes() {
     console.log(`📊 Total recipes in db: ${allRecipes.length}`);
     console.log('Recipes:', allRecipes);
 
-    // UPDATE a recipe
+    // UPDATE a recipe - Liliana's task
     const updatedRecipe = await prisma.recipes.update({
       where: { id: newRecipe.id },
       data: { prep_time: 25 }
     });
     console.log('✅ Updated recipe prep time to:', updatedRecipe.prep_time, 'minutes');
 
-    // 🚫 DELETE section removed - your recipe will stay in the database!
+    // DELETE a recipe - Liliana's task
+    const deletedRecipe = await prisma.recipes.delete({
+      // to do
+    });
 
   } catch (error) {
     console.error('❌ Error:', error.message);
