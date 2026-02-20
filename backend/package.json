@@ -8,7 +8,8 @@
     "dev": "node src/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:push": "prisma db push"
+    "prisma:push": "prisma db push",
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.0",
@@ -19,6 +20,7 @@
     "pg": "^8.13.1"
   },
   "devDependencies": {
+    "jest": "^30.2.0",
     "prisma": "^7.4.0"
   }
 }
