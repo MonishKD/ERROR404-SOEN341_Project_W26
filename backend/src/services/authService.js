@@ -18,12 +18,13 @@ export async function login(email, password) {
     throw new Error('Invalid password');
   }
   // For demo purposes, we return a simple token.
-  const token = `token_${user.username}_${Date.now()}`;
-  return { token, user: { userID: user.username, email: user.email } };
+  const token = `token_${user.id}_${Date.now()}`;
+  return { token, user: { firstName: user.firstName, lastName: user.lastName, email: user.email } };
 }
 
-export async function register(userID, password, email) {
-  const username = userID.trim();
+export async function register(firstName, lastName, password, email) {
+  const firstName = (firstName[0].toUpperCase() + firstName.slice(1).toLowerCase()).trim();
+  const lastName = lastName.trim();
   email = email.trim().toLowerCase();
 
   const existingByEmail = await prisma.users.findUnique({
@@ -33,17 +34,11 @@ export async function register(userID, password, email) {
     throw new Error('Email is already in use by another account!');
   }
 
-  const existingUser = await prisma.users.findUnique({
-    where: { username },
-  });
-  if (existingUser) {
-    throw new Error('This username already exists. Please choose a different one.');
-  }
-
   const passwordHash = await bcrypt.hash(password, 10);
   await prisma.users.create({
     data: {
-      username,
+      firstName: firstName,
+      lastName: lastName,
       email,
       password_hash: passwordHash,
     },

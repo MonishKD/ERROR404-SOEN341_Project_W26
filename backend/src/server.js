@@ -88,14 +88,14 @@ app.post("/api/auth/login", async (req, res) => {
 
 // Sign up route
 app.post("/api/auth/register", async (req, res) => {
-  const { userID, password, email } = req.body;
+  const { firstName, lastName, password, email } = req.body;
 
-  if (!userID || !password || !email) {
-    return res.status(400).json({ message: "Missing userID, password, or email." });
+  if (!firstName || !lastName || !password || !email) {
+    return res.status(400).json({ message: "Missing firstName, lastName, password, or email." });
   }
 
   try {
-    const result = await register(userID, password, email);
+    const result = await register(firstName, lastName, password, email);
     res.status(201).json(result);
   } catch (error) {
     console.error("Registration error:", error);
