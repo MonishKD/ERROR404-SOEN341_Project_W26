@@ -446,16 +446,19 @@ function initEditProfilePage() {
   if (profileForm) {
     profileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('Form submitted!')
       clearAllErrors();
 
       // Collect form data
       const formData = {
-        firstName: document.getElementById('firstName').value.trim(),
-        lastName: document.getElementById('lastName').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        dietPreferences: [],
-        allergies: [],
-      };
+            firstName: document.getElementById('firstName')?.value.trim() || '',
+            lastName: document.getElementById('lastName')?.value.trim() || '',
+            email: document.getElementById('email')?.value.trim() || '',
+            dietPreferences: [],
+            allergies: [],
+        };
+        
+        console.log('Form data collected:', formData); // Debug log
 
       // Get selected diet preferences
       const dietCheckboxes = document.querySelectorAll('input[name="diet"]:checked');
@@ -510,10 +513,16 @@ async function loadUserProfile() {
 
   if (result.success) {
     // Update name display
-    const userNameElement = document.getElementById('userName'); //Name of user
-    if (userNameElement) {
-      userNameElement.textContent = `${result.data.firstName} ${result.data.lastName}` || 'User';
+    const firstNameElement = document.getElementById('firstName'); //Name of user
+    if (firstNameElement) {
+      firstNameElement.textContent = `${result.data.firstName || 'User'}`;
     }
+
+    const fullNameElement = document.getElementById('fullName');
+    if (fullNameElement) {
+      fullNameElement.textContent = `${result.data.firstName} ${result.data.lastName}`;
+    }
+
   } else {
     console.error('Failed to load profile:', result.error);
     // If token is invalid, redirect to login
@@ -528,10 +537,12 @@ async function loadUserProfile() {
  * Load user profile and populate edit form
  */
 async function loadUserProfileForEdit() {
+  console.log('Loading user profile for edit...'); // Debug log
   const result = await getUserProfile();
 
   if (result.success) {
     const profile = result.data;
+    console.log('Profile loaded:', profile); // Debug log
 
     // Populate basic fields
     if (document.getElementById('firstName')) {

@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,7 +12,9 @@ datasource db {
 // Models
 model users {
   id               Int      @id @default(autoincrement())
-  username         String   @unique @db.VarChar(100)
+  firstName        String   @db.VarChar(100)
+  lastName         String   @db.VarChar(100)
+  fullName         String   @db.VarChar(201) // firstName + space + lastName max
   email            String   @unique @db.VarChar(255)
   password_hash    String   @db.VarChar(255)
   age              Int?
@@ -25,6 +24,21 @@ model users {
   allergies        String?  @db.Text
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
+  resetTokens      passwordResetTokens[]
+
+  @@map("users") // Explicitly set table name
+}
+
+model passwordResetTokens {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  token      String   @unique
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  user       users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
 }
 
 model recipes {
@@ -34,4 +48,6 @@ model recipes {
   prep_time   Int?
   prep_steps  String?
   cost        Decimal? @db.Decimal(10, 2)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
 }

@@ -9,7 +9,9 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  /* Changed from height: 100vh to allow scrolling on mobile */
+  padding: 20px;
 }
 
 .page {
@@ -41,6 +43,9 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
+  /* Added for better text wrapping */
+  padding: 0 20px;
 }
 
 .header-icon {
@@ -50,79 +55,127 @@ body {
 
 .overlay h1 {
   margin: 0;
+  font-size: 1.8rem;
+  /* Responsive font size */
 }
 
 .overlay p {
   margin: 6px 0 0;
   opacity: 0.9;
+  font-size: 0.95rem;
 }
 
 /* Body */
 .card-body {
-  padding: 30px;
+  padding: 30px 25px;
 }
 
 .subtitle {
   color: #1b8c4f;
   margin-bottom: 25px;
+  font-weight: 500;
 }
 
 label {
   display: block;
   margin-bottom: 6px;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Name fields container for first/last name side by side */
+.name-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.name-field {
+  flex: 1;
+}
+
+.name-field input {
+  width: 100%;
 }
 
 input[type="text"],
 input[type="password"],
 input[type="email"] {
   width: 100%;
-  padding: 14px;
+  padding: 14px 16px;
   border-radius: 12px;
-  border: 1px solid #ddd;
-  margin-bottom: 18px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 5px;
+  /* Reduced from 18px to allow error messages */
   font-size: 15px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+  outline: none;
+  border-color: #0e9c50;
+  box-shadow: 0 0 0 3px rgba(14, 156, 80, 0.1);
 }
 
 .password-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 5px;
 }
 
 .password-row a {
   font-size: 14px;
   color: #1b8c4f;
   text-decoration: none;
+  font-weight: 500;
+}
+
+.password-row a:hover {
+  text-decoration: underline;
 }
 
 .remember {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 20px;
+  margin: 15px 0 20px;
+}
+
+.remember input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #0e9c50;
+  /* Green checkbox */
 }
 
 .create {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 25px;
   color: #666;
+  font-size: 0.95rem;
 }
 
 .create a {
-  color: #12b35d;
+  color: #0e9c50;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 600;
 }
 
+.create a:hover {
+  text-decoration: underline;
+}
 
-/* Template for button animation from cssbuttons.io */
+/* Button animation from cssbuttons.io */
 .cssbuttons-io-button {
   display: block;
-  margin: 20px auto 0 auto;
-  padding: 0.6rem 1.5rem;
-  font-size: 15px;
-  font-weight: 700;
+  margin: 25px auto 0 auto;
+  padding: 0.8rem 2rem;
+  font-size: 16px;
+  font-weight: 600;
   border-radius: 50px;
   background: #0e9c50;
   color: ghostwhite;
@@ -131,16 +184,30 @@ input[type="email"] {
   overflow: hidden;
   border: none;
   width: fit-content;
+  transition: transform 0.2s;
+}
+
+.cssbuttons-io-button:hover {
+  transform: translateY(-2px);
+}
+
+.cssbuttons-io-button:active {
+  transform: translateY(0);
+}
+
+.cssbuttons-io-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .cssbuttons-io-button span {
   position: relative;
   z-index: 10;
   transition: color 0.4s;
-
-  display: inline-flex;      /* Makes text and icon sit in a row */
-  align-items: center;       /* Vertically centers icon with text */
-  gap: 8px;                 /* Space between text and icon */
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .cssbuttons-io-button:hover span {
@@ -170,46 +237,86 @@ input[type="email"] {
   transform: translate3d(100%, 0, 0);
 }
 
-
 /* Error text */
 .error {
   color: #dc2626;
-  font-size: 13px;
+  font-size: 12px;
+  margin: 0 0 12px 0;
+  display: none;
+  font-weight: 500;
+}
+
+.error:not(:empty) {
   display: block;
-  margin-top: -10px;
-  margin-bottom: 14px;
 }
 
 /* Password wrapper */
 .password-wrapper {
   position: relative;
+  margin-bottom: 5px;
+}
+
+.password-wrapper input {
+  padding-right: 45px;
+  /* Space for toggle button */
+  margin-bottom: 0;
 }
 
 .toggle-password {
   position: absolute;
-  right: 10px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
+  padding: 5px;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.toggle-password:hover {
+  color: #0e9c50;
 }
 
 /* Strength meter */
 .strength-bar {
   width: 100%;
-  height: 6px;
+  height: 4px;
   background: #e5e7eb;
-  border-radius: 6px;
-  margin-top: 6px;
-  margin-bottom: 10px;
+  border-radius: 4px;
+  margin: 5px 0 15px;
   overflow: hidden;
 }
 
 #strengthFill {
   height: 100%;
   width: 0%;
-  background: red;
-  transition: 0.3s;
+  background: #dc2626;
+  transition: width 0.3s, background-color 0.3s;
+}
+
+/* Hint text */
+.hint {
+  display: block;
+  color: #666;
+  font-size: 12px;
+  margin: -5px 0 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .card-body {
+    padding: 25px 20px;
+  }
+
+  .name-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .overlay h1 {
+    font-size: 1.5rem;
+  }
 }
