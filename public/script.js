@@ -161,14 +161,14 @@ async function loginUser(email, password) {
 /**
  * Register new user
  */
-async function registerUser(userID, email, password) {
+async function registerUser(firstName, lastName, email, password) {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userID, email, password }),
+      body: JSON.stringify({ firstName, lastName, email, password }),
     });
 
     const data = await response.json();
@@ -276,7 +276,7 @@ function initLoginPage() {
     const submitButton = loginForm.querySelector('button[type="submit"]');
     setButtonLoading(submitButton, true);
 
-    // Attempt login (using email as userID for now)
+    // Attempt login
     const result = await loginUser(email, password);
 
     setButtonLoading(submitButton, false);
@@ -324,17 +324,23 @@ function initSignupPage() {
     clearAllErrors();
 
     // Get form values
-    const fullName = document.getElementById('fullname').value.trim();
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm_password').value;
 
     let hasErrors = false;
 
-    // Validate full name
-    const nameValidation = validateFullName(fullName);
-    if (!nameValidation.valid) {
-      showError('nameError', nameValidation.message);
+    // Validate first name
+    if (!firstName) {
+      showError('firstNameError', 'First name is required');
+      hasErrors = true;
+    }
+
+    // Validate last name
+    if (!lastName) {
+      showError('lastNameError', 'Last name is required');
       hasErrors = true;
     }
 
@@ -366,8 +372,8 @@ function initSignupPage() {
     const submitButton = signupForm.querySelector('button[type="submit"]');
     setButtonLoading(submitButton, true);
 
-    // Attempt registration (using fullName as userID for now)
-    const result = await registerUser(fullName, email, password);
+    // Attempt registration
+    const result = await registerUser(firstName, lastName, email, password);
 
     setButtonLoading(submitButton, false);
 
@@ -381,8 +387,6 @@ function initSignupPage() {
       // Show error
       if (result.error.includes('Email')) {
         showError('emailError', result.error);
-      } else if (result.error.includes('username')) {
-        showError('nameError', result.error);
       } else {
         alert(result.error || 'Registration failed. Please try again.');
       }
@@ -446,7 +450,8 @@ function initEditProfilePage() {
 
       // Collect form data
       const formData = {
-        username: document.getElementById('fullName').value.trim(),
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
         email: document.getElementById('email').value.trim(),
         dietPreferences: [],
         allergies: [],
@@ -463,7 +468,7 @@ function initEditProfilePage() {
       // Validate
       let hasErrors = false;
 
-      if (!formData.username) {
+      if (!formData.firstName || !formData.lastName) {
         showError('nameError', 'Name is required');
         hasErrors = true;
       }
@@ -504,10 +509,10 @@ async function loadUserProfile() {
   const result = await getUserProfile();
 
   if (result.success) {
-    // Update username display
-    const userNameElement = document.getElementById('userName');
+    // Update name display
+    const userNameElement = document.getElementById('userName'); //Name of user
     if (userNameElement) {
-      userNameElement.textContent = result.data.username || 'User';
+      userNameElement.textContent = `${result.data.firstName} ${result.data.lastName}` || 'User';
     }
   } else {
     console.error('Failed to load profile:', result.error);
@@ -529,8 +534,11 @@ async function loadUserProfileForEdit() {
     const profile = result.data;
 
     // Populate basic fields
-    if (document.getElementById('fullName')) {
-      document.getElementById('fullName').value = profile.username || '';
+    if (document.getElementById('firstName')) {
+      document.getElementById('firstName').value = profile.firstName || '';
+    }
+    if (document.getElementById('lastName')) {
+      document.getElementById('lastName').value = profile.lastName || '';
     }
     if (document.getElementById('email')) {
       document.getElementById('email').value = profile.email || '';

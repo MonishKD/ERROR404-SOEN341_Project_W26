@@ -11,7 +11,7 @@ function normalizeEmail(email) {
   return typeof email === "string" ? email.trim().toLowerCase() : email;
 }
 
-function parseTokenUsername(token) {
+function parseTokenID(token) {
   if (typeof token !== 'string' || !token.startsWith('token_')) return null;
   const rest = token.slice('token_'.length);
   const lastUnderscore = rest.lastIndexOf('_');
@@ -28,17 +28,17 @@ function parseStoredList(value) {
 }
 
 export async function getProfile(token) {
-  const username = parseTokenUsername(token);
-  if (!username) throw new Error('Invalid token');
+  const id = parseTokenID(token);
+  if (!id) throw new Error('Invalid token');
 
   const user = await prisma.users.findUnique({
-    where: { username },
+    where: { id: parseInt(id) },
   });
   if (!user) throw new Error('User not found');
 
   return {
-    userId: String(user.id),
-    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     dietPreferences: parseStoredList(user.diet_preferences),
     allergies: parseStoredList(user.allergies),
@@ -47,12 +47,12 @@ export async function getProfile(token) {
 
 // This function updates the user's profile based on the provided token and updates object. 
 export async function updateProfile(token, updates) {
-  const usernameFromToken = parseTokenUsername(token);
-  if (!usernameFromToken) {
+  const id = parseTokenID(token);
+  if (!id) {
     return { ok: false, status: 401, message: 'Invalid token' };
   }
 
-  const allowed = ["username", "email", "dietPreferences", "allergies"];
+  const allowed = ["firstName", "lastName", "email", "dietPreferences", "allergies"];
   const cleanUpdates = {};
 
   // Copy only allowed fields from the request into cleanUpdates
@@ -78,7 +78,8 @@ export async function updateProfile(token, updates) {
 
   // Prepare the data for Prisma update
   const prismaData = {};
-  if (cleanUpdates.username !== undefined) prismaData.username = cleanUpdates.username.trim();
+  if (cleanUpdates.firstName !== undefined) prismaData.first_name = cleanUpdates.firstName.trim();
+  if (cleanUpdates.lastName !== undefined) prismaData.last_name = cleanUpdates.lastName.trim();
   if (cleanUpdates.email !== undefined) prismaData.email = cleanUpdates.email;
   if (cleanUpdates.dietPreferences !== undefined) {
     prismaData.diet_preferences = cleanUpdates.dietPreferences.join(", ");
@@ -90,12 +91,12 @@ export async function updateProfile(token, updates) {
   // Attempt to update the user's profile in the database
   try {
     await prisma.users.update({
-      where: { username: usernameFromToken },
+      where: { id: parseInt(id) },
       data: prismaData,
     });
   } catch (error) {
     if (error.code === 'P2002') {
-      return { ok: false, status: 409, message: 'Username or email already in use' };
+      return { ok: false, status: 409, message: 'User already in use' };
     }
     throw error;
   }
