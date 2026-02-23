@@ -9,6 +9,7 @@ import { prisma } from "./database/prisma.js";
 
 // Importing middleware and services
 import { authMiddleware } from "./middleware/auth.js";
+import { checkRecipeOwner } from "./middleware/auth.js";
 import { login, register } from "./services/authService.js";
 import { getProfile, updateProfile } from "./services/profileService.js";
 
@@ -166,13 +167,10 @@ app.post("/api/recipes", async (req, res) => {
 });
 
 // UPDATE recipe
-app.put("/api/recipes/:id", async (req, res) => {
+app.put("/api/recipes/:id", checkRecipeOwner, async (req, res) => {
   try {
-    const updatedRecipe = await prisma.recipes.update({
-      where: { id: parseInt(req.params.id) },
-      data: req.body
-    });
-    res.json(updatedRecipe);
+    const result = await updateRecipe(parseInt(req.params.id), req.body);
+    res.json(result);
   } catch (error) {
     console.error("Error updating recipe:", error);
     res.status(500).json({ error: error.message });
@@ -180,11 +178,9 @@ app.put("/api/recipes/:id", async (req, res) => {
 });
 
 // DELETE recipe
-app.delete("/api/recipes/:id", async (req, res) => {
+app.delete("/api/recipes/:id", checkRecipeOwner, async (req, res) => {
   try {
-    await prisma.recipes.delete({
-      where: { id: parseInt(req.params.id) }
-    });
+    const result = await deleteRecipe(parseInt(req.params.id));
     res.json({ message: "Recipe deleted successfully" });
   } catch (error) {
     console.error("Error deleting recipe:", error);

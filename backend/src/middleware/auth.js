@@ -1,5 +1,6 @@
 // authMiddleware.js
 // Purpose: allow access only to logged-in users by verifying a token (Sprint 1 simple version)
+import jwt from "jsonwebtoken";
 
 export function authMiddleware(req, res, next) {
   // Read the Authorization header from the request
@@ -12,20 +13,33 @@ export function authMiddleware(req, res, next) {
   // Extract the token (remove "Bearer " from the header)
   const token = header.slice("Bearer ".length).trim();
 
-  // TODO (Sprint 2): replace with real token lookup (DB) once ready
-  // Example: const user = await findUserByToken(token);
+  try {
+    // Decode token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  // If token is empty, block access
-  if (!token) {
+    // Attach user info from token
+    req.user = { userId: decoded.userId };
+    next();
+  } catch (err) {
     return res.status(401).json({ message: "Invalid token" });
   }
-
-  // For now, attach token (later attach user info)
-  req.token = token;
-
-  // Sprint 1 demo: pretend this token belongs to a demo user
-  req.user = { userId: "demo" }
-  
-  // Token exists → allow request to continue to the route
-  next();
 }
+
+export async function checkRecipeOwner(req, res, next){
+  const recipeOwnerId = req.params.id;
+  const userId = req.user.userId; // from authMiddleware
+
+  const recipe = await prisma.recipes.findUnique({
+    where: { id: parseInt(recipeOwnerId) },
+  });
+
+  if (!recipe) {
+    return res.status(404).json({ message: "Recipe not found" });
+  }
+
+  if (recipe.userId !== userId) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  next();
+};
