@@ -26,23 +26,26 @@ export async function login(email, password) {
 }
 
 export async function register(firstName, lastName, password, email) {
-  const firstName = (firstName[0].toUpperCase() + firstName.slice(1).toLowerCase()).trim();
-  const lastName = lastName.trim();
-  email = email.trim().toLowerCase();
+  const processedFirstName = (firstName[0].toUpperCase() + firstName.slice(1).toLowerCase()).trim();
+  const processedLastName = lastName.trim();
+  const processedEmail = email.trim().toLowerCase();
+  const fullName = `${processedFirstName} ${processedLastName}`.trim();
 
   const existingByEmail = await prisma.users.findUnique({
-    where: { email },
+    where: { email: processedEmail },
   });
   if (existingByEmail) {
     throw new Error('Email is already in use by another account!');
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
+
   await prisma.users.create({
     data: {
-      firstName: firstName,
-      lastName: lastName,
-      email,
+      firstName: processedFirstName,
+      lastName: processedLastName,
+      fullName: fullName,
+      email: processedEmail,
       password_hash: passwordHash,
     },
   });

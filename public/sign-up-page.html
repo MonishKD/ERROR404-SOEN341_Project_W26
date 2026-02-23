@@ -32,11 +32,17 @@
 
                 <form id="signupform" novalidate>
 
-                    <!-- Full Name -->
-                    <label for="fullname">Full Name</label>
-                    <input id="fullname" name="fullname" type="text" placeholder="Enter your full name"
-                        autocomplete="name" required>
-                    <small class="error" id="nameError"></small>
+                    <!-- First Name -->
+                    <label for="firstName">First Name</label>
+                    <input id="firstName" name="firstName" type="text" placeholder="Enter your first name"
+                        autocomplete="given-name" required>
+                    <small class="error" id="firstNameError"></small>
+
+                    <!-- Last Name -->
+                    <label for="lastName">Last Name</label>
+                    <input id="lastName" name="lastName" type="text" placeholder="Enter your last name"
+                        autocomplete="family-name" required>
+                    <small class="error" id="lastNameError"></small>
 
                     <!-- Email -->
                     <label for="email">Email Address</label>
@@ -52,14 +58,6 @@
                             autocomplete="new-password" required>
                         <button type="button" class="toggle-password" data-target="password">👁</button>
                     </div>
-
-                    <!-- <div class="strength-bar">
-                        <div id="strengthFill"></div>
-                    </div> -->
-
-                    <!-- <small class="hint">
-                        Must be at least 8 characters, including a number and special character.
-                    </small> -->
                     <small class="error" id="passwordError"></small>
 
                     <!-- Confirm Password -->
@@ -70,7 +68,6 @@
                             placeholder="Confirm your password" autocomplete="new-password" required>
                         <button type="button" class="toggle-password" data-target="confirm_password">👁</button>
                     </div>
-
                     <small class="error" id="confirmError"></small>
 
                     <!-- Button -->
@@ -91,7 +88,7 @@
                 </form>
 
                 <p class="create">
-                    Already have an account? <a href="login">Log in</a> <!-- Go to login-page -->
+                    Already have an account? <a href="login-page.html">Log in</a>
                 </p>
 
             </div>
