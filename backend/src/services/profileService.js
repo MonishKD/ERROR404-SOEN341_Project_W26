@@ -78,12 +78,36 @@ export async function updateProfile(token, updates) {
 
   // Prepare the data for Prisma update
   const prismaData = {};
-  if (cleanUpdates.firstName !== undefined) prismaData.first_name = cleanUpdates.firstName.trim();
-  if (cleanUpdates.lastName !== undefined) prismaData.last_name = cleanUpdates.lastName.trim();
-  if (cleanUpdates.email !== undefined) prismaData.email = cleanUpdates.email;
+  
+  if (cleanUpdates.firstName !== undefined) {
+    prismaData.firstName = cleanUpdates.firstName.trim();
+  }
+  
+  if (cleanUpdates.lastName !== undefined) {
+    prismaData.lastName = cleanUpdates.lastName.trim();
+  }
+  
+  // Update fullName if either first or last name changed
+  if (cleanUpdates.firstName !== undefined || cleanUpdates.lastName !== undefined) {
+    // Get current user data to know the other name field
+    const user = await prisma.users.findUnique({
+      where: { id: parseInt(id) },
+      select: { firstName: true, lastName: true }
+    });
+    
+    const newFirstName = cleanUpdates.firstName !== undefined ? cleanUpdates.firstName.trim() : user.firstName;
+    const newLastName = cleanUpdates.lastName !== undefined ? cleanUpdates.lastName.trim() : user.lastName;
+    prismaData.fullName = `${newFirstName} ${newLastName}`.trim();
+  }
+  
+  if (cleanUpdates.email !== undefined) {
+    prismaData.email = cleanUpdates.email;
+  }
+  
   if (cleanUpdates.dietPreferences !== undefined) {
     prismaData.diet_preferences = cleanUpdates.dietPreferences.join(", ");
   }
+  
   if (cleanUpdates.allergies !== undefined) {
     prismaData.allergies = cleanUpdates.allergies.join(", ");
   }
@@ -95,10 +119,11 @@ export async function updateProfile(token, updates) {
       data: prismaData,
     });
   } catch (error) {
+    console.error('Update error:', error);
     if (error.code === 'P2002') {
-      return { ok: false, status: 409, message: 'User already in use' };
+      return { ok: false, status: 409, message: 'Email already in use' };
     }
-    throw error;
+    return { ok: false, status: 500, message: error.message };
   }
 
   return { ok: true, message: "Profile updated", updatedFields: Object.keys(cleanUpdates) };

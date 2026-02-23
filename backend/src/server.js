@@ -17,15 +17,32 @@ const __dirname = path.dirname(__filename);
 
 function mapDatabaseError(error) {
   if (!error) return null;
+  
+  // Full error
+  console.log('Full error object:', JSON.stringify(error, null, 2));
+  
+  // Table doesn't exist error
   if (error.code === "P2021") {
     return "Database tables are missing. Run `npm run prisma:push` in backend.";
   }
+  
+  // Connection error
   if (error.code === "P1001") {
     return "Cannot connect to PostgreSQL. Ensure Postgres is running and DATABASE_URL is correct.";
   }
-  if (typeof error.message === "string" && error.message.includes("Invalid `prisma.")) {
+  
+  // Schema mismatch
+  if (
+    error.code === "P2016" || // Query interpretation error
+    error.message?.includes("Invalid") ||
+    error.message?.includes("does not exist") ||
+    error.message?.includes("relation") ||
+    error.message?.includes("column") ||
+    error.message?.includes("prisma")
+  ) {
     return "Database schema is out of sync. Run `npm run prisma:generate` then `npm run prisma:push`.";
   }
+  
   return null;
 }
 
@@ -123,7 +140,8 @@ app.put("/api/profile", authMiddleware, async (req, res) => {
 });
 
 
-// --- Recipe routes ---//
+/*** Recipe routes ***/
+
 // Get all recipes
 app.get("/api/recipes", async (req, res) => {
   try {
@@ -192,6 +210,70 @@ app.delete("/api/recipes/:id", async (req, res) => {
   }
 });
 
+
+/*** Password reset routes ***/
+
+import { requestPasswordReset, validateResetToken, resetPassword } from './services/passwordResetService.js';
+
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const result = await requestPasswordReset(email);
+    res.json(result);
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'An error occurred' });
+  }
+});
+
+// Validate reset token
+app.get('/api/auth/validate-reset-token', async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({ valid: false, message: 'Token is required' });
+  }
+
+  try {
+    const result = await validateResetToken(token);
+    res.json(result);
+  } catch (error) {
+    console.error('Token validation error:', error);
+    res.status(500).json({ valid: false, message: 'An error occurred' });
+  }
+});
+
+// Reset password
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({ message: 'Token and password are required' });
+  }
+
+  // Validate password strength
+  if (password.length < 8) {
+    return res.status(400).json({ message: 'Password must be at least 8 characters' });
+  }
+
+  try {
+    const result = await resetPassword(token, password);
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'An error occurred' });
+  }
+});
+
 // Start server
 const PORT = 4000;
 app.listen(PORT, () => {
@@ -199,3 +281,4 @@ app.listen(PORT, () => {
   console.log("Static files served from:", publicPath);
   console.log("Prisma connected: Recipe routes ready at /api/recipes");
 });
+

@@ -3,17 +3,23 @@ import { prisma } from './prisma.js';
 
 class Database {
   async connect() {
-    return;
+    // Test the connection
+    await prisma.$connect();
+    console.log('Database connected successfully');
   }
 
   async close() {
-    return;
+    await prisma.$disconnect();
+    console.log('Database disconnected');
   }
 
-  async createUser(username, email, passwordHash) {
+  async createUser(firstName, lastName, email, passwordHash) {
+    const fullName = `${firstName} ${lastName}`.trim();
     return prisma.users.create({
       data: {
-        username,
+        firstName,
+        lastName,
+        fullName,
         email: email.trim().toLowerCase(),
         password_hash: passwordHash,
       },
@@ -26,9 +32,19 @@ class Database {
     });
   }
 
-  async findUserByUsername(userID) {
-    return prisma.users.findUnique({
-      where: { username: userID },
+  async findUserByFullname(fullName) {
+    return prisma.users.findFirst({
+      where: { fullName: fullName.trim() },
+    });
+  }
+
+  async updateUserProfile(userId, data) {
+    return prisma.users.update({
+      where: { id: userId },
+      data: {
+        ...data,
+        updated_at: new Date(),
+      },
     });
   }
 }
