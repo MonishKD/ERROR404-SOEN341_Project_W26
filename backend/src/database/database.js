@@ -10,10 +10,9 @@ class Database {
     return;
   }
 
-  async createUser(username, email, passwordHash) {
+  async createUser(email, passwordHash) {
     return prisma.users.create({
       data: {
-        username,
         email: email.trim().toLowerCase(),
         password_hash: passwordHash,
       },
@@ -26,11 +25,6 @@ class Database {
     });
   }
 
-  async findUserByUsername(userID) {
-    return prisma.users.findUnique({
-      where: { username: userID },
-    });
-  }
 }
 
 export default Database;
