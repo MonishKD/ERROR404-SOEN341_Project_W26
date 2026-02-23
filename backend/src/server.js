@@ -127,13 +127,13 @@ app.post("/api/auth/register", async (req, res) => {
 
 // View profile
 app.get("/api/profile", authMiddleware, async (req, res) => {
-  const profile = await getProfile(req.token);
+  const profile = await getProfile(req.user.userId);
   res.json(profile);
 });
 
 // Update profile
 app.put("/api/profile", authMiddleware, async (req, res) => {
-  const result = await updateProfile(req.token, req.body);
+  const result = await updateProfile(req.user.userId, req.body);
   if (!result.ok) {
     return res.status(result.status).json({ message: result.message });
   }
