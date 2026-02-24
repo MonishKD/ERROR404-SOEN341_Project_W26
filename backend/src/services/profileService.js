@@ -1,5 +1,6 @@
 // profileService.js
 import { prisma } from '../database/prisma.js';
+import jwt from 'jsonwebtoken';
 
 // Helper function to validate email format
 function isValidEmail(email) {
@@ -11,14 +12,6 @@ function normalizeEmail(email) {
   return typeof email === "string" ? email.trim().toLowerCase() : email;
 }
 
-function parseTokenID(token) {
-  if (typeof token !== 'string' || !token.startsWith('token_')) return null;
-  const rest = token.slice('token_'.length);
-  const lastUnderscore = rest.lastIndexOf('_');
-  if (lastUnderscore <= 0) return null;
-  return rest.slice(0, lastUnderscore);
-}
-
 function parseStoredList(value) {
   if (!value || typeof value !== 'string') return [];
   return value
@@ -27,13 +20,12 @@ function parseStoredList(value) {
     .filter(Boolean);
 }
 
-export async function getProfile(token) {
-  const id = parseTokenID(token);
-  if (!id) throw new Error('Invalid token');
+export async function getProfile(userId) {
 
   const user = await prisma.users.findUnique({
-    where: { id: parseInt(id) },
+    where: { id: parseInt(userId) },
   });
+
   if (!user) throw new Error('User not found');
 
   return {
@@ -46,12 +38,8 @@ export async function getProfile(token) {
 }
 
 // This function updates the user's profile based on the provided token and updates object. 
-export async function updateProfile(token, updates) {
-  const id = parseTokenID(token);
-  if (!id) {
-    return { ok: false, status: 401, message: 'Invalid token' };
-  }
-
+export async function updateProfile(userId, updates) {
+ 
   const allowed = ["firstName", "lastName", "email", "dietPreferences", "allergies"];
   const cleanUpdates = {};
 
@@ -91,7 +79,7 @@ export async function updateProfile(token, updates) {
   if (cleanUpdates.firstName !== undefined || cleanUpdates.lastName !== undefined) {
     // Get current user data to know the other name field
     const user = await prisma.users.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(userId) },
       select: { firstName: true, lastName: true }
     });
     
@@ -115,7 +103,7 @@ export async function updateProfile(token, updates) {
   // Attempt to update the user's profile in the database
   try {
     await prisma.users.update({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(userId) },
       data: prismaData,
     });
   } catch (error) {
