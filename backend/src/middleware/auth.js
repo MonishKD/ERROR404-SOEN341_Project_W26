@@ -1,6 +1,7 @@
 // authMiddleware.js
 // Purpose: allow access only to logged-in users by verifying a token (Sprint 1 simple version)
 import jwt from "jsonwebtoken";
+import { prisma } from "../database/prisma.js";
 
 export function authMiddleware(req, res, next) {
   // Read the Authorization header from the request
