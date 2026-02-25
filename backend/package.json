@@ -6,10 +6,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node src/server.js",
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "prisma generate --schema=src/database/schema.prisma",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
-    "test": "NODE_ENV=test node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.0",
@@ -17,10 +17,12 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3",
     "nodemailer": "^8.0.1",
     "pg": "^8.13.1"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "jest": "^30.2.0",
     "prisma": "^7.4.0",
     "supertest": "^7.2.2"

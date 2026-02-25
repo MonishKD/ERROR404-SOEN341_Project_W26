@@ -1,22 +1,22 @@
 /* Override login page style*/
-body{
-    display: block !important;
-    justify-content: normal !important;
-    align-items: normal !important;
-    height:auto !important;
-    margin:0;
-    padding:0;
-    background: linear-gradient(90deg, #e6f4ec, #d7efe4);
+body {
+  display: block !important;
+  justify-content: normal !important;
+  align-items: normal !important;
+  height: auto !important;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(90deg, #e6f4ec, #d7efe4);
 }
 
 /* Navigation bar*/
-.navbar{
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    width: 100%
+.navbar {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%
 }
 
 .nav-container {
@@ -82,10 +82,10 @@ body{
 }
 
 /* Main container*/
-.profile-container{
-    max-width: 1200px;
-    margin:0 auto;
-    padding: 40px 30px;
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 30px;
 }
 
 /* Welcome card*/
@@ -106,6 +106,270 @@ body{
 .welcome-card p {
   margin: 0;
   font-size: 18px;
+}
+
+/* Profile Completion Prompt */
+.profile-prompt {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+  animation: slideIn 0.5s ease-out;
+}
+
+.profile-prompt.hidden {
+  display: none;
+}
+
+.prompt-content {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 2px #0e9c50 inset;
+  padding: 25px;
+  max-width: 350px;
+  position: relative;
+}
+
+.prompt-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.3s;
+}
+
+.prompt-close:hover {
+  color: #333;
+}
+
+.prompt-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 10px;
+  animation: bounce 2s infinite;
+}
+
+.prompt-content h3 {
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 20px;
+  text-align: center;
+}
+
+.prompt-content p {
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.metrics-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.metric-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.metric-input-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.input-icon {
+  font-size: 18px;
+}
+
+.metric-input-group input {
+  padding: 12px;
+  border: 2px solid #e6f4ec;
+  border-radius: 12px;
+  font-size: 15px;
+  transition: all 0.3s;
+}
+
+.metric-input-group input:focus {
+  outline: none;
+  border-color: #0e9c50;
+  box-shadow: 0 0 0 3px rgba(14, 156, 80, 0.1);
+}
+
+.metric-input-group input.error {
+  border-color: #dc2626;
+  animation: shake 0.3s;
+}
+
+.save-metrics-btn {
+  background: linear-gradient(135deg, #0e9c50, #12b35d);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+
+.save-metrics-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(14, 156, 80, 0.3);
+}
+
+.save-metrics-btn .btn-icon {
+  transition: transform 0.3s;
+}
+
+.save-metrics-btn:hover .btn-icon {
+  transform: translateX(5px);
+}
+
+.prompt-skip {
+  text-align: center;
+  margin: 15px 0 0 0;
+  font-size: 13px;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.prompt-skip:hover {
+  color: #666;
+}
+
+/* Success Toast */
+.toast-notification {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  animation: slideUp 0.5s ease-out;
+}
+
+.toast-notification.hidden {
+  display: none;
+}
+
+.toast-content {
+  background: #0e9c50;
+  color: white;
+  padding: 15px 30px;
+  border-radius: 50px;
+  box-shadow: 0 10px 30px rgba(14, 156, 80, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.toast-icon {
+  font-size: 20px;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 100px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Progress Bar (optional) */
+.profile-progress {
+  background: #f0f0f0;
+  height: 6px;
+  border-radius: 3px;
+  margin: 15px 0;
+  overflow: hidden;
+}
+
+.profile-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #0e9c50, #12b35d);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+  width: 0%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-prompt {
+    bottom: 20px;
+    right: 20px;
+    left: 20px;
+  }
+
+  .prompt-content {
+    max-width: 100%;
+  }
+
+  .toast-content {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
 }
 
 /* Shared card styles*/

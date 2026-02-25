@@ -1,5 +1,6 @@
 import { jest } from "@jest/globals";
 import request from "supertest";
+import { checkRecipeOwner } from "../src/middleware/auth.js";
 
 /**
  * Login Acceptance Test (AT)
@@ -49,6 +50,7 @@ jest.unstable_mockModule("../src/services/profileService.js", () => ({
 // Mock auth middleware (also imported by server)
 jest.unstable_mockModule("../src/middleware/auth.js", () => ({
   authMiddleware: (req, res, next) => next(),
+  checkRecipeOwner: (req, res, next) => next(),
 }));
 
 // Now import the app AFTER mocks
