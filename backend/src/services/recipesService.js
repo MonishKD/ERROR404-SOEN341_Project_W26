@@ -18,19 +18,7 @@ async function testRecipes() {
     // READ all recipes
     const allRecipes = await prisma.recipes.findMany();
     console.log(`📊 Total recipes in db: ${allRecipes.length}`);
-    console.log('Recipes:', allRecipes);
-
-    // UPDATE a recipe - Liliana's task
-    const updatedRecipe = await prisma.recipes.update({
-      where: { id: newRecipe.id },
-      data: { prep_time: 25 }
-    });
-    console.log('✅ Updated recipe prep time to:', updatedRecipe.prep_time, 'minutes');
-
-    // DELETE a recipe - Liliana's task
-    const deletedRecipe = await prisma.recipes.delete({
-      // to do
-    });
+    console.log('Recipes:', allRecipes);    
 
   } catch (error) {
     console.error('❌ Error:', error.message);
@@ -39,4 +27,31 @@ async function testRecipes() {
   }
 }
 
-testRecipes();
+export async function updateRecipe(recipeId, updateData) {
+
+  const findRecipe = await prisma.recipes.findUnique({
+    where: { id: recipeId },
+  });
+  if (!findRecipe) {
+    throw new Error('Recipe not found');
+  }
+  const updatedRecipe = await prisma.recipes.update({
+    where: { id: recipeId },
+    data: updateData
+  });
+
+  return updatedRecipe;
+}
+
+export async function deleteRecipe(recipeId) {
+
+  const findRecipe = await prisma.recipes.findUnique({
+    where: { id: recipeId },
+  });
+  if (!findRecipe) {
+    throw new Error('Recipe not found');
+  }
+  await prisma.recipes.delete({
+    where: { id: recipeId }
+  });
+}

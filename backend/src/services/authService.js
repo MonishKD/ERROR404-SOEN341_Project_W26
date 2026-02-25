@@ -1,6 +1,7 @@
 // authService.js
 // This file contains the authentication logic for user login and registration.
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { prisma } from '../database/prisma.js';
 
 export async function login(email, password) {
@@ -17,8 +18,10 @@ export async function login(email, password) {
   if (!passwordMatch) {
     throw new Error('Invalid password');
   }
-  // For demo purposes, we return a simple token.
-  const token = `token_${user.id}_${Date.now()}`;
+  
+  // Create JWT token
+  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
   return { token, user: { firstName: user.firstName, lastName: user.lastName, email: user.email } };
 }
 
