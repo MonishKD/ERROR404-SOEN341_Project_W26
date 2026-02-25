@@ -171,6 +171,7 @@
 }
 
 .btn-secondary {
+  display: inline-block;
   padding: 14px 32px;
   background: white;
   color: #666;
@@ -179,6 +180,7 @@
   font-weight: 600;
   cursor: pointer;
   font-size: 15px;
+  text-decoration: none;
 }
 
 .btn-secondary:hover {
