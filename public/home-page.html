@@ -16,13 +16,13 @@
     <!--Navigation bar-->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-brand">
+            <a href="home-page.html" class="nav-brand">
                 <span class="brand-icon">🍴</span>
                 <span class="brand-name">MealMajor</span>
-            </div>
+            </a>
             <div class="nav-links">
                 <a href="home-page.html" class="nav-link active">Home</a>
-                <a href="#" class="nav-link">Recipes</a>
+                <a href="recipes.html" class="nav-link">Recipes</a>
                 <a href="#" class="nav-link">Meal Planner</a>
                 <a href="edit-profile.html" class="nav-link">Profile</a>
                 <a href="login-page.html" class="nav-link logout">Logout</a>
@@ -104,13 +104,6 @@
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">🍽️</div>
-                <div class="stat-content">
-                    <h3>12</h3>
-                    <p>Saved Recipes</p>
-                </div>
-            </div>
-            <div class="stat-card">
                 <div class="stat-icon">🛒</div>
                 <div class="stat-content">
                     <h3>8</h3>
@@ -127,7 +120,7 @@
                     <div class="action-icon">🔍</div>
                     <h3>Browse Recipes</h3>
                     <p>Discover new recipes today</p>
-                    <button type="button" class="action-button">Explore</button>
+                    <a href="recipes.html#search" class="action-button">Explore</a>
                 </div>
                 <div class="action-card">
                     <div class="action-icon">📆</div>
@@ -139,7 +132,7 @@
                     <div class="action-icon">➕</div>
                     <h3>Add Recipe</h3>
                     <p>Create your own custom recipe</p>
-                    <button type="button" class="action-button">Create</button>
+                    <a href="recipes.html" class="action-button">Create</a>
                 </div>
             </div>
         </section>
@@ -197,11 +190,11 @@
             <button type="button" class="view-full-plan">View Full Weekly Plan →</button>
         </section>
 
-        <!--Recent recipes-->
+        <!--Suggested recipes-->
         <section class="recipes-section">
-            <h2>Your Recent Recipes</h2>
+            <h2>Suggested Recipes For You</h2>
             <div class="recipes-grid">
-                <div class="recipe-card">
+                <a href="recipes.html" class="recipe-card">
                     <div class="recipe-image">🥗</div>
                     <div class="recipe-info">
                         <h4>Greek Salad</h4>
@@ -210,8 +203,8 @@
                             <span>💰 Low</span>
                         </div>
                     </div>
-                </div>
-                <div class="recipe-card">
+                </a>
+                <a href="recipes.html" class="recipe-card">
                     <div class="recipe-image">🥣</div>
                     <div class="recipe-info">
                         <h4>Oatmeal Bowl</h4>
@@ -220,8 +213,8 @@
                             <span>💰 Low</span>
                         </div>
                     </div>
-                </div>
-                <div class="recipe-card">
+                </a>
+                <a href="recipes.html" class="recipe-card">
                     <div class="recipe-image">🍝</div>
                     <div class="recipe-info">
                         <h4>Lasagna</h4>
@@ -230,8 +223,9 @@
                             <span>💰 Medium</span>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
+            <a href="recipes.html" class="view-full-plan">View All Recipes →</a>
         </section>
 
     </div>
