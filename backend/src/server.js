@@ -17,7 +17,7 @@ import { getProfile, updateProfile } from "./services/profileService.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // Load .env from project root
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 function mapDatabaseError(error) {
   if (!error) return null;

@@ -33,7 +33,7 @@ export async function checkRecipeOwner(req, res, next){
 
   const recipe = await prisma.recipes.findUnique({
     where: { id: parseInt(recipeId) },
-    select: { userId: true }
+    select: { ownerId: true }
   });
 
   if (!recipe) {
