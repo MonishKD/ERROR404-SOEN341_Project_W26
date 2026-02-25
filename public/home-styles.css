@@ -35,6 +35,13 @@ body{
   font-size: 20px;
   font-weight: 600;
   color: #1b8c4f;
+  text-decoration: none;
+  transition: filter 0.25s, transform 0.25s
+}
+
+.nav-brand:hover {
+  filter: brightness(0.70);
+  transform: scale(0.96);
 }
 
 .brand-icon {
@@ -182,6 +189,7 @@ h2 {
 }
 
 .action-button {
+  display: inline-block;
   background: #0e9c50;
   color: white;
   border: none;
@@ -190,6 +198,7 @@ h2 {
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s;
+  text-decoration: none;
 }
 
 .action-button:hover {
@@ -257,6 +266,8 @@ h2 {
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s;
+  text-decoration: none;
+  width: fit-content;
 }
 
 .view-full-plan:hover {
@@ -271,6 +282,8 @@ h2 {
   align-items: center;
   gap: 20px;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .recipe-image {

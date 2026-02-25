@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMajor - Edit Recipe</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="home-styles.css">
+    <link rel="stylesheet" href="profile-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="script.js"></script>
+</head>
+
+<body>
+
+    <!--Navigation bar-->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="home-page.html" class="nav-brand">
+                <span class="brand-icon">🍴</span>
+                <span class="brand-name">MealMajor</span>
+            </a>
+            <div class="nav-links">
+                <a href="home-page.html" class="nav-link">Home</a>
+                <a href="recipes.html" class="nav-link active">Recipes</a>
+                <a href="#" class="nav-link">Meal Planner</a>
+                <a href="edit-profile.html" class="nav-link">Profile</a>
+                <a href="login-page.html" class="nav-link logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+
+        <!--Page header-->
+        <div class="profile-header">
+            <h1>✏️ Edit Recipe</h1>
+            <p>Update your recipe details below</p>
+        </div>
+
+        <div class="profile-content">
+
+            <!--Backend must pre-fill all inputs/textareas/selects with the existing recipe data-->
+            <form id="editRecipeForm" class="profile-form">
+
+                <!--Basic info-->
+                <section class="form-section">
+                    <h2 class="section-title">Basic Info</h2>
+
+                    <div class="form-group">
+                        <label for="recipeName">Recipe Name</label>
+                        <input type="text" id="recipeName" name="recipeName" placeholder="e.g. Spicy Chicken Stir Fry" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prepTime">Prep Time (minutes)</label>
+                        <input type="number" id="prepTime" name="prepTime" placeholder="e.g. 30" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="difficulty">Difficulty</label>
+                        <select id="difficulty" name="difficulty">
+                            <option value="">Select difficulty</option>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cost">Cost</label>
+                        <select id="cost" name="cost">
+                            <option value="">Select cost range</option>
+                            <option value="low">💰 Low</option>
+                            <option value="medium">💰💰 Medium</option>
+                            <option value="high">💰💰💰 High</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!--Dietary tags-->
+                <section class="form-section">
+                    <h2 class="section-title">Dietary Tags</h2>
+                    <div class="form-group">
+                        <label>Select all that apply</label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="dietary" value="gluten-free">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🌾</span>
+                                    <span class="checkbox-label">Gluten-Free</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="dietary" value="dairy-free">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🥛</span>
+                                    <span class="checkbox-label">Dairy-Free</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="dietary" value="nut-free">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🥜</span>
+                                    <span class="checkbox-label">Nut-Free</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="dietary" value="vegan">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🌱</span>
+                                    <span class="checkbox-label">Vegan</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="dietary" value="vegetarian">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🥗</span>
+                                    <span class="checkbox-label">Vegetarian</span>
+                                </span>
+                            </label>
+                            <label class="checkbox-card">
+                                <input type="checkbox" name="dietary" value="halal">
+                                <span class="checkbox-content">
+                                    <span class="checkbox-icon">🕌</span>
+                                    <span class="checkbox-label">Halal</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!--Ingredients-->
+                <section class="form-section">
+                    <h2 class="section-title">Ingredients</h2>
+                    <div class="form-group">
+                        <label for="ingredients">List your ingredients</label>
+                        <textarea id="ingredients" name="ingredients" rows="5"
+                            placeholder="e.g. 2 chicken breasts&#10;1 tbsp olive oil&#10;3 cloves garlic&#10;Salt and pepper to taste" required></textarea>
+                    </div>
+                </section>
+
+                <!--Steps-->
+                <section class="form-section">
+                    <h2 class="section-title">Preparation Steps</h2>
+                    <div class="form-group">
+                        <label for="steps">Write your steps in order</label>
+                        <textarea id="steps" name="steps" rows="8"
+                            placeholder="e.g. Step 1: Heat oil in a pan over medium heat&#10;Step 2: Season chicken with salt and pepper&#10;Step 3: Cook chicken 5-6 min per side" required></textarea>
+                    </div>
+                </section>
+
+                <!--Action buttons-->
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="window.location.href='recipes.html'">Cancel</button>
+                    <button type="submit" class="cssbuttons-io-button">
+                        <span>
+                            Save Changes
+                            <div class="icon">
+                                <svg height="24" width="24" viewBox="0 0 24 24">
+                                    <path fill="none" d="M0 0h24v24H0z"></path>
+                                    <path fill="currentColor"
+                                        d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+</body>
+</html>
