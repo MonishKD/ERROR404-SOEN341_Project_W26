@@ -38,7 +38,6 @@ function mapDatabaseError(error) {
   // Schema mismatch
   if (
     error.code === "P2016" || // Query interpretation error
-    error.message?.includes("Invalid") ||
     error.message?.includes("does not exist") ||
     error.message?.includes("relation") ||
     error.message?.includes("column") ||
@@ -363,8 +362,9 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
 // Start server
 const PORT = 4000;
+
+if (process.env.NODE_ENV !== "test") {
 app.listen(PORT, () => {
   console.log(`App running at http://localhost:${PORT}`);
   console.log("Static files served from:", publicPath);
   console.log("Prisma connected: Recipe routes ready at /api/recipes");
-});
