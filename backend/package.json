@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node src/server.js",
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "prisma generate --schema=src/database/schema.prisma",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "test": "NODE_ENV=test node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
