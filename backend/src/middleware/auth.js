@@ -27,20 +27,27 @@ export function authMiddleware(req, res, next) {
 }
 
 export async function checkRecipeOwner(req, res, next){
-  const recipeOwnerId = req.params.id;
+  try {
+  const recipeId = req.params.id;
   const userId = req.user.userId; // from authMiddleware
 
   const recipe = await prisma.recipes.findUnique({
-    where: { id: parseInt(recipeOwnerId) },
+    where: { id: parseInt(recipeId) },
+    select: { userId: true }
   });
 
   if (!recipe) {
     return res.status(404).json({ message: "Recipe not found" });
   }
 
-  if (recipe.userId !== userId) {
-    return res.status(403).json({ message: "Not authorized" });
+  if (recipe.ownerId !== userId) {
+    return res.status(403).json({ message: "You don't have permission to modify this recipe" });
   }
 
+  req.recipe = recipe; // attach recipe info if needed in the route handler
   next();
+} catch (err) {
+    console.error("Error checking recipe owner:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
 };

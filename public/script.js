@@ -213,6 +213,229 @@ async function getUserProfile() {
   }
 }
 
+// Add these new functions to your script.js
+
+// Check profile completion status
+async function checkProfileCompletion() {
+  console.log('🔍 CHECK_PROFILE_COMPLETION STARTED at:', new Date().toISOString());
+
+  const token = getToken();
+  console.log('Token exists:', !!token);
+
+  const prompt = document.getElementById('profilePrompt');
+  console.log('Prompt element found:', !!prompt);
+  console.log('Prompt current classes:', prompt ? prompt.className : 'N/A');
+
+  if (!token) {
+    console.log('❌ No token, cannot check profile');
+    return;
+  }
+
+  if (!prompt) {
+    console.error('❌ CRITICAL: Profile prompt element not found in DOM!');
+    return;
+  }
+
+  try {
+    console.log('📡 Fetching from:', `${API_BASE_URL}/profile/completion-status`);
+
+    const response = await fetch(`${API_BASE_URL}/profile/completion-status`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('📡 Response status:', response.status);
+    console.log('📡 Response OK:', response.ok);
+
+    const data = await response.json();
+    console.log('📡 Response data:', data);
+
+    if (response.ok && !data.isComplete) {
+      console.log('❌ Profile incomplete. Missing fields:', data.missingFields);
+      console.log('⏰ Scheduling prompt to show in 2 seconds...');
+
+      // Clear any existing timeout
+      if (window.promptTimeout) {
+        clearTimeout(window.promptTimeout);
+      }
+
+      window.promptTimeout = setTimeout(() => {
+        console.log('⏰ EXECUTING SHOW PROMPT NOW');
+        showProfilePrompt(data.missingFields);
+      }, 2000);
+    } else if (response.ok && data.isComplete) {
+      console.log('✅ Profile is complete!');
+      // Make sure prompt is hidden if profile is complete
+      prompt.classList.add('hidden');
+    } else {
+      console.log('❌ Unexpected response:', data);
+    }
+  } catch (error) {
+    console.error('❌ Error in checkProfileCompletion:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+  }
+}
+
+// Show profile prompt
+function showProfilePrompt(missingFields) {
+  const prompt = document.getElementById('profilePrompt');
+  if (prompt) {
+    prompt.classList.remove('hidden');
+
+    // Customize message based on missing fields
+    const message = document.querySelector('.prompt-content p');
+    if (message && missingFields.length > 0) {
+      const fieldNames = missingFields.map(f => {
+        switch (f) {
+          case 'age': return 'age';
+          case 'weight': return 'weight';
+          case 'height': return 'height';
+          default: return f;
+        }
+      }).join(', ');
+
+      message.textContent = `We notice you haven't entered your personal information yet. Help us personalize your experience!`;
+    }
+  }
+}
+
+// Close prompt
+function closePrompt() {
+  const prompt = document.getElementById('profilePrompt');
+  if (prompt) {
+    prompt.classList.add('hidden');
+  }
+}
+
+// Show success toast
+function showSuccessToast(message) {
+  const toast = document.getElementById('successToast');
+  const toastMessage = document.querySelector('.toast-message');
+
+  if (toast && toastMessage) {
+    toastMessage.textContent = message || 'Profile updated successfully!';
+    toast.classList.remove('hidden');
+
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 3000);
+  }
+}
+
+// Save health metrics
+async function saveHealthMetrics(event) {
+  event.preventDefault();
+
+  const age = document.getElementById('promptAge').value;
+  const weight = document.getElementById('promptWeight').value;
+  const height = document.getElementById('promptHeight').value;
+
+  // Remove error classes
+  document.querySelectorAll('.metric-input-group input').forEach(input => {
+    input.classList.remove('error');
+  });
+
+  // Validate inputs
+  let hasError = false;
+
+  if (!age || age < 1 || age > 120) {
+    document.getElementById('promptAge').classList.add('error');
+    hasError = true;
+  }
+
+  if (!weight || weight < 1 || weight > 300) {
+    document.getElementById('promptWeight').classList.add('error');
+    hasError = true;
+  }
+
+  if (!height || height < 50 || height > 250) {
+    document.getElementById('promptHeight').classList.add('error');
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  try {
+    const token = getToken();
+    const response = await fetch(`${API_BASE_URL}/profile/health-metrics`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        age: parseInt(age),
+        weight: parseFloat(weight),
+        height: parseFloat(height)
+      })
+    });
+
+    if (response.ok) {
+      closePrompt();
+      showSuccessToast('Great! Your profile is now complete! 🎉');
+
+      // Update UI to show completion
+      const welcomeCard = document.querySelector('.welcome-card p');
+      if (welcomeCard) {
+        welcomeCard.innerHTML = 'Your profile is complete! Enjoy personalized recommendations. ✨';
+      }
+    } else {
+      const error = await response.json();
+      alert('Error: ' + error.message);
+    }
+  } catch (error) {
+    console.error('Error saving health metrics:', error);
+    alert('Failed to save. Please try again.');
+  }
+}
+
+// Update initHomePage function
+function initHomePage() {
+  console.log('🏠 INIT_HOME_PAGE CALLED at:', new Date().toISOString());
+  console.log('Current URL:', window.location.href);
+  console.log('Document readyState:', document.readyState);
+
+  // Check if prompt exists
+  const prompt = document.getElementById('profilePrompt');
+  console.log('Prompt element exists at init:', !!prompt);
+
+  // Check authentication
+  if (!isAuthenticated()) {
+    window.location.href = 'login-page.html';
+    return;
+  }
+
+  // Load user profile and display name
+  loadUserProfile();
+
+  // Check profile completion
+  checkProfileCompletion();
+
+  // Setup logout functionality
+  const logoutLink = document.querySelector('.nav-link.logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearToken();
+      window.location.href = 'login-page.html';
+    });
+  }
+
+  // Add form submit handler
+  const metricsForm = document.getElementById('healthMetricsForm');
+  if (metricsForm) {
+    metricsForm.addEventListener('submit', saveHealthMetrics);
+  }
+}
+
 /**
  * Update user profile
  */
@@ -397,26 +620,26 @@ function initSignupPage() {
 /**
  * Initialize home page
  */
-function initHomePage() {
-  // Check authentication
-  if (!isAuthenticated()) {
-    window.location.href = 'login-page.html';
-    return;
-  }
+// function initHomePage() {
+//   // Check authentication
+//   if (!isAuthenticated()) {
+//     window.location.href = 'login-page.html';
+//     return;
+//   }
 
-  // Load user profile and display name
-  loadUserProfile();
+//   // Load user profile and display name
+//   loadUserProfile();
 
-  // Setup logout functionality
-  const logoutLink = document.querySelector('.nav-link.logout');
-  if (logoutLink) {
-    logoutLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      clearToken();
-      window.location.href = 'login-page.html';
-    });
-  }
-}
+//   // Setup logout functionality
+//   const logoutLink = document.querySelector('.nav-link.logout');
+//   if (logoutLink) {
+//     logoutLink.addEventListener('click', (e) => {
+//       e.preventDefault();
+//       clearToken();
+//       window.location.href = 'login-page.html';
+//     });
+//   }
+// }
 
 /**
  * Initialize edit profile page
@@ -451,14 +674,20 @@ function initEditProfilePage() {
 
       // Collect form data
       const formData = {
-            firstName: document.getElementById('firstName')?.value.trim() || '',
-            lastName: document.getElementById('lastName')?.value.trim() || '',
-            email: document.getElementById('email')?.value.trim() || '',
-            dietPreferences: [],
-            allergies: [],
-        };
-        
-        console.log('Form data collected:', formData); // Debug log
+        firstName: document.getElementById('firstName')?.value.trim() || '',
+        lastName: document.getElementById('lastName')?.value.trim() || '',
+        email: document.getElementById('email')?.value.trim() || '',
+        age: document.getElementById('editAge')?.value ? parseInt(document.getElementById('editAge').value) : null,
+        weight: document.getElementById('editWeight')?.value ? parseFloat(document.getElementById('editWeight').value) : null,
+        height: document.getElementById('editHeight')?.value ? parseFloat(document.getElementById('editHeight').value) : null,
+        dietPreferences: [],
+        allergies: [],
+        cookingSkill: document.getElementById('cookingSkill')?.value || '',
+        mealPrepTime: document.getElementById('mealPrepTime')?.value || '',
+        budgetRange: document.getElementById('budgetRange')?.value || '',
+      };
+
+      console.log('Form data collected:', formData); // Debug log
 
       // Get selected diet preferences
       const dietCheckboxes = document.querySelectorAll('input[name="diet"]:checked');
@@ -537,7 +766,6 @@ async function loadUserProfile() {
  * Load user profile and populate edit form
  */
 async function loadUserProfileForEdit() {
-  console.log('Loading user profile for edit...'); // Debug log
   const result = await getUserProfile();
 
   if (result.success) {
@@ -554,6 +782,18 @@ async function loadUserProfileForEdit() {
     if (document.getElementById('email')) {
       document.getElementById('email').value = profile.email || '';
     }
+
+    // Populate health metrics
+    if (document.getElementById('editAge')) {
+      document.getElementById('editAge').value = profile.age || '';
+    }
+    if (document.getElementById('editWeight')) {
+      document.getElementById('editWeight').value = profile.weight || '';
+    }
+    if (document.getElementById('editHeight')) {
+      document.getElementById('editHeight').value = profile.height || '';
+    }
+
     // Populate diet preferences
     if (profile.dietPreferences && Array.isArray(profile.dietPreferences)) {
       profile.dietPreferences.forEach(diet => {
@@ -569,6 +809,21 @@ async function loadUserProfileForEdit() {
         if (checkbox) checkbox.checked = true;
       });
     }
+
+    // Populate cooking skill
+    if (document.getElementById('cookingSkill')) {
+      document.getElementById('cookingSkill').value = profile.cookingSkill || '';
+    }
+    // Populate meal prep time
+    if (document.getElementById('mealPrepTime')) {
+      document.getElementById('mealPrepTime').value = profile.mealPrepTime || '';
+    }
+
+    // Populate budget range
+    if (document.getElementById('budgetRange')) {
+      document.getElementById('budgetRange').value = profile.budgetRange || '';
+    }
+
   } else {
     console.error('Failed to load profile:', result.error);
     // If token is invalid, redirect to login
@@ -586,6 +841,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Detect which page we're on and initialize accordingly
   const path = window.location.pathname;
   const page = path.substring(path.lastIndexOf('/') + 1);
+
+  console.log('Current page:', page);
+  console.log('Full path:', path);
 
   switch (page) {
     case 'login-page.html':

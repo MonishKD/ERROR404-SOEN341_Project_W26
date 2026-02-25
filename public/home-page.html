@@ -41,6 +41,59 @@
             </div>
         </section>
 
+        <!-- Profile Completion Prompt -->
+        <div id="profilePrompt" class="profile-prompt hidden">
+            <div class="prompt-content">
+                <button class="prompt-close" onclick="closePrompt()">×</button>
+                <div class="prompt-icon">🎉</div>
+                <h3>Complete Your Profile!</h3>
+                <p>Help us personalize your meal recommendations by sharing a few details.</p>
+
+                <form id="healthMetricsForm" class="metrics-form">
+                    <div class="metric-input-group">
+                        <label for="promptAge">
+                            <span class="input-icon">🎂</span>
+                            Age
+                        </label>
+                        <input type="number" id="promptAge" name="age" placeholder="Enter your age" min="1" max="120">
+                    </div>
+
+                    <div class="metric-input-group">
+                        <label for="promptWeight">
+                            <span class="input-icon">⚖️</span>
+                            Weight (kg)
+                        </label>
+                        <input type="number" id="promptWeight" name="weight" placeholder="Enter your weight" min="1"
+                            max="300" step="0.1">
+                    </div>
+
+                    <div class="metric-input-group">
+                        <label for="promptHeight">
+                            <span class="input-icon">📏</span>
+                            Height (cm)
+                        </label>
+                        <input type="number" id="promptHeight" name="height" placeholder="Enter your height" min="50"
+                            max="250" step="0.1">
+                    </div>
+
+                    <button type="submit" class="save-metrics-btn">
+                        <span>Save & Continue</span>
+                        <span class="btn-icon">→</span>
+                    </button>
+                </form>
+
+                <p class="prompt-skip" onclick="closePrompt()">Skip for now</p>
+            </div>
+        </div>
+
+        <!-- Success Toast Notification -->
+        <div id="successToast" class="toast-notification hidden">
+            <div class="toast-content">
+                <span class="toast-icon">✅</span>
+                <span class="toast-message">Profile updated successfully!</span>
+            </div>
+        </div>
+
         <!--Quick stats-->
         <section class="stats-section">
             <div class="stat-card">

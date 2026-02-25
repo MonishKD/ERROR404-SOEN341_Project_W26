@@ -1,5 +1,6 @@
 // server.js
 // Main server file to set up Express app, routes, and middleware
+import dotenv from 'dotenv';
 import express from "express";
 import path from "path";
 import { fileURLToPath } from 'url';
@@ -15,23 +16,25 @@ import { getProfile, updateProfile } from "./services/profileService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+// Load .env from project root
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 function mapDatabaseError(error) {
   if (!error) return null;
-  
+
   // Full error
   console.log('Full error object:', JSON.stringify(error, null, 2));
-  
+
   // Table doesn't exist error
   if (error.code === "P2021") {
     return "Database tables are missing. Run `npm run prisma:push` in backend.";
   }
-  
+
   // Connection error
   if (error.code === "P1001") {
     return "Cannot connect to PostgreSQL. Ensure Postgres is running and DATABASE_URL is correct.";
   }
-  
+
   // Schema mismatch
   if (
     error.code === "P2016" || // Query interpretation error
@@ -43,7 +46,7 @@ function mapDatabaseError(error) {
   ) {
     return "Database schema is out of sync. Run `npm run prisma:generate` then `npm run prisma:push`.";
   }
-  
+
   return null;
 }
 
@@ -65,10 +68,9 @@ app.use((req, res, next) => {
 });
 
 const publicPath = path.join(__dirname, "../../public");
-console.log("Serving static files from:", publicPath);
 app.use(express.static(publicPath));
 
-// --- Page Routes ---
+/*** Page Routes ***/
 
 // Root route (defaults to login)
 app.get("/", (req, res) => {
@@ -140,13 +142,88 @@ app.put("/api/profile", authMiddleware, async (req, res) => {
   res.json({ message: "Profile updated successfully" });
 });
 
+// Check if profile is complete (age, weight, height)
+app.get('/api/profile/completion-status', authMiddleware, async (req, res) => {
+  try {
+    const user = await prisma.users.findUnique({
+      where: { id: parseInt(req.user.userId) },
+      select: { age: true, weight: true, height: true }
+    });
+
+    const missingFields = [];
+    if (!user.age) missingFields.push('age');
+    if (!user.weight) missingFields.push('weight');
+    if (!user.height) missingFields.push('height');
+
+    res.json({
+      isComplete: missingFields.length === 0,
+      missingFields
+    });
+  } catch (error) {
+    console.error('Error checking profile completion:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update health metrics
+app.put('/api/profile/health-metrics', authMiddleware, async (req, res) => {
+  try {
+    const { age, weight, height } = req.body;
+
+    // Validate inputs
+    if (age && (age < 1 || age > 120)) {
+      return res.status(400).json({ message: 'Invalid age value' });
+    }
+
+    if (weight && (weight < 1 || weight > 300)) {
+      return res.status(400).json({ message: 'Invalid weight value' });
+    }
+
+    if (height && (height < 50 || height > 250)) {
+      return res.status(400).json({ message: 'Invalid height value' });
+    }
+
+    const updatedUser = await prisma.users.update({
+      where: { id: parseInt(req.user.userId) },
+      data: {
+        age: age ? parseInt(age) : null,
+        weight: weight ? parseFloat(weight) : null,
+        height: height ? parseFloat(height) : null
+      }
+    });
+
+    res.json({
+      message: 'Health metrics updated successfully',
+      user: {
+        age: updatedUser.age,
+        weight: updatedUser.weight,
+        height: updatedUser.height
+      }
+    });
+  } catch (error) {
+    console.error('Error updating health metrics:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 /*** Recipe routes ***/
 
-// Get all recipes
-app.get("/api/recipes", async (req, res) => {
+// Get all recipes with owner info
+app.get("/api/recipes", authMiddleware, async (req, res) => {
   try {
-    const recipes = await prisma.recipes.findMany();
+    const recipes = await prisma.recipes.findMany({
+      include: {
+        owner: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        }
+      }
+    });
+
     res.json(recipes);
   } catch (error) {
     console.error("Error fetching recipes:", error);
@@ -154,12 +231,22 @@ app.get("/api/recipes", async (req, res) => {
   }
 });
 
-// Get recipe by ID
+// Get recipe by ID with owner info
 app.get("/api/recipes/:id", async (req, res) => {
   try {
     const recipe = await prisma.recipes.findUnique({
-      where: { id: parseInt(req.params.id) }
+      where: { id: parseInt(req.params.id) },
+      include: {
+        owner: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        }
+      }
     });
+    
     if (!recipe) {
       return res.status(404).json({ error: "Recipe not found" });
     }
@@ -170,13 +257,17 @@ app.get("/api/recipes/:id", async (req, res) => {
   }
 });
 
-// CREATE recipe
-app.post("/api/recipes", async (req, res) => {
+// CREATE recipe with ownerId
+app.post("/api/recipes", authMiddleware, async (req, res) => {
   try {
     const { name, ingredients, prep_time, prep_steps, cost } = req.body;
+    const ownerId = req.user.userId; // Get ownerId from authenticated user
+
     const newRecipe = await prisma.recipes.create({
-      data: { name, ingredients, prep_time, prep_steps, cost }
+      data: { name, ingredients, prep_time, prep_steps, cost, ownerId },
+      include: { owner: { select: { firstName: true, lastName: true, email: true } } }
     });
+
     res.status(201).json(newRecipe);
   } catch (error) {
     console.error("Error creating recipe:", error);
@@ -273,8 +364,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
 // Start server
 const PORT = 4000;
 app.listen(PORT, () => {
-  console.log(`Backend running at http://localhost:${PORT}`);
+  console.log(`App running at http://localhost:${PORT}`);
   console.log("Static files served from:", publicPath);
   console.log("Prisma connected: Recipe routes ready at /api/recipes");
 });
-
