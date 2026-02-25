@@ -359,3 +359,51 @@
     color: white;
 }
 
+/*buttons edit and delete for My recipes cards only*/
+.recipe-card-actions{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/*edit button*/
+.btn-edit-recipe {
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: 2px solid #3b82f6;
+    background: white;
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-edit-recipe:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+/*delete button*/
+.btn-delete-recipe {
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: 2px solid #dc2626;
+    background: white;
+    color: #dc2626;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-delete-recipe:hover {
+    background: #dc2626;
+    color: white;
+}
+
