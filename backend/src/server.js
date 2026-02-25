@@ -245,7 +245,7 @@ app.get("/api/recipes/:id", async (req, res) => {
         }
       }
     });
-    
+
     if (!recipe) {
       return res.status(404).json({ error: "Recipe not found" });
     }
@@ -364,7 +364,9 @@ app.post('/api/auth/reset-password', async (req, res) => {
 const PORT = 4000;
 
 if (process.env.NODE_ENV !== "test") {
-app.listen(PORT, () => {
-  console.log(`App running at http://localhost:${PORT}`);
-  console.log("Static files served from:", publicPath);
-  console.log("Prisma connected: Recipe routes ready at /api/recipes");
+  app.listen(PORT, () => {
+    console.log(`App running at http://localhost:${PORT}`);
+    console.log("Static files served from:", publicPath);
+    console.log("Prisma connected: Recipe routes ready at /api/recipes");
+  });
+}
