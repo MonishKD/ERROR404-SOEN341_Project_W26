@@ -695,7 +695,11 @@ function initEditProfilePage() {
 
       // Get selected allergies
       const allergyCheckboxes = document.querySelectorAll('input[name="allergy"]:checked');
+      const extraAllergyText = document.getElementById('otherAllergies')?.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
       allergyCheckboxes.forEach(cb => formData.allergies.push(cb.value));
+      if (extraAllergyText) {
+        extraAllergyText.forEach(element => formData.allergies.push(element));
+      }
 
       // Validate
       let hasErrors = false;
@@ -804,10 +808,23 @@ async function loadUserProfileForEdit() {
 
     // Populate allergies
     if (profile.allergies && Array.isArray(profile.allergies)) {
+      const customAllergies = [];
       profile.allergies.forEach(allergy => {
         const checkbox = document.querySelector(`input[name="allergy"][value="${allergy}"]`);
-        if (checkbox) checkbox.checked = true;
+        if (checkbox) {
+          checkbox.checked = true;
+        } else {
+          customAllergies.push(allergy);
+        }
       });
+      //extra allergies that are not predefined
+      if(customAllergies.length > 0) {
+        const otherAllergiesArea = document.getElementById('otherAllergies');
+        if (otherAllergiesArea) {
+          otherAllergiesArea.value = customAllergies.join(', ');
+        }
+      }
+
     }
 
     // Populate cooking skill
