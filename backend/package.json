@@ -9,7 +9,7 @@
     "prisma:generate": "prisma generate --schema=src/database/schema.prisma",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
-    "test": "NODE_ENV=test node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.0",
@@ -22,6 +22,7 @@
     "pg": "^8.13.1"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "jest": "^30.2.0",
     "prisma": "^7.4.0",
     "supertest": "^7.2.2"

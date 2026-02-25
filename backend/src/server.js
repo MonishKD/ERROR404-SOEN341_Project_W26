@@ -361,6 +361,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
 });
 
 // Start server
+export default app;
 const PORT = 4000;
 
 if (process.env.NODE_ENV !== "test") {
