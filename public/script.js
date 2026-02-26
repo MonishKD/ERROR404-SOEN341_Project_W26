@@ -437,6 +437,193 @@ function initHomePage() {
 }
 
 /**
+ * Filter recipes based on preferences setup in edit profile
+ */
+async function suggestedRecipes() {
+  // get preferences
+  const cookingSkill = document.getElementById('cookingSkill')?.value || '';
+  const mealPrepTime = document.getElementById('mealPrepTime')?.value || '';
+  const budgetRange = document.getElementById('budgetRange')?.value || '';
+  const dietCheckboxes = document.querySelectorAll('input[name="diet"]:checked');
+  const allergyCheckboxes = document.querySelectorAll('input[name="allergy"]:checked');
+  const extraAllergyText = document.getElementById('otherAllergies')?.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  // combine allergies
+  const userAllergies = [...Array.from(allergyCheckboxes).map(cb => cb.value),...extraAllergyText];
+
+  const recipes = await get(`${API_BASE_URL}/recipes`);
+
+  // Remove recipes that have allergies the user has
+  const safeRecipes = recipes.filter(recipe => {
+    return !recipe.allergies.some(a => userAllergies.includes(a)); // allergies not in database
+  });
+
+  const filteredRecipes = safeRecipes.map(recipe => {
+    let matches = 0;
+
+    // Filter by cooking skill
+    if (cookingSkill == "beginner" && recipe.difficulty == "Easy") matches++; // difficulty not in database
+    if (cookingSkill == "intermediate" && recipe.difficulty == "Medium") matches++;
+    if (cookingSkill == "advanced" && recipe.difficulty == "Hard") matches++;
+    if (cookingSkill == "expert" && recipe.difficulty == "Hard") matches++;
+
+    // Filter by meal prep time
+    if (mealPrepTime == "quick" && recipe.prep_time <= 15) matches++;
+    if (mealPrepTime == "moderate" && recipe.prep_time > 15 && recipe.prep_time <= 30) matches++;
+    if (mealPrepTime == "extended" && recipe.prep_time > 30 && recipe.prep_time <= 60) matches++;
+    if (mealPrepTime == "elaborate" && recipe.prep_time > 60) matches++;
+    if (mealPrepTime == "any") matches++;
+    // Filter by budget
+    if (budgetRange) {
+      if (budgetRange === "low" && recipe.cost <= 10) matches++;
+      if (budgetRange === "medium" && recipe.cost > 10 && recipe.cost <= 20) matches++;
+      if (budgetRange === "high" && recipe.cost > 20) matches++;
+    }
+    // Filter by diet
+    if (recipe.diet && dietCheckboxes.length > 0) {
+      const dietMatch = Array.from(dietCheckboxes).some(cb => cb.value === recipe.diet); // diet not in database
+      if (dietMatch) matches++;
+    }
+
+    return { ...recipe, matches };
+  });
+
+  // Sort recipes by the number of matches
+  filteredRecipes.sort((a, b) => b.matches - a.matches);
+
+  displaySuggestedRecipes(filteredRecipes.slice(0, 4)); // return top 4 suggestions
+}
+
+// Add event listeners to filter checkboxes
+const filterCheckboxes = document.querySelectorAll(
+  '.filter-bar input[type="checkbox"]'
+);
+
+filterCheckboxes.forEach(cb => {
+  cb.addEventListener('change', () => {
+    filterRecipes();
+  });
+});
+
+async function filterRecipes() {
+  const timeCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(1) input[type="checkbox"]');
+  const difficultyCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(2) input[type="checkbox"]');
+  const costCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(3) input[type="checkbox"]');
+  const dietaryCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(4) input[type="checkbox"]');
+
+  const recipes = await get(`${API_BASE_URL}/recipes`);
+
+  const filteredRecipes = recipes.filter(recipe => {
+    // Filter by time
+    if (timeCheckboxes.some(cb => cb.checked)) {
+    const matchesTime = 
+      (timeCheckboxes[0].checked && recipe.prep_time < 15) ||      // Quick
+      (timeCheckboxes[1].checked && recipe.prep_time >= 15 && recipe.prep_time < 30) || // Medium
+      (timeCheckboxes[2].checked && recipe.prep_time >= 30 && recipe.prep_time < 60) || // Long
+      (timeCheckboxes[3].checked && recipe.prep_time >= 60);       // Very long
+    
+      if (!matchesTime) return false;
+    }
+    // Filter by difficulty
+    if (difficultyCheckboxes.some(cb => cb.checked)) {
+      const matchesDifficulty =  // difficulty not in database
+        (difficultyCheckboxes[0].checked && recipe.difficulty === 'Easy') ||
+        (difficultyCheckboxes[1].checked && recipe.difficulty === 'Medium') ||
+        (difficultyCheckboxes[2].checked && recipe.difficulty === 'Hard');
+
+      if (!matchesDifficulty) return false;
+    }
+
+    // Filter by cost
+    if (costCheckboxes.some(cb => cb.checked)) {
+      const matchesCost = 
+        (costCheckboxes[0].checked && recipe.cost <= 10) || // low
+        (costCheckboxes[1].checked && recipe.cost > 10 && recipe.cost <= 20) || // medium
+        (costCheckboxes[2].checked && recipe.cost > 20); // high
+
+      if (!matchesCost) return false;
+    }
+
+    // Filter by dietary preferences
+    if (dietaryCheckboxes.some(cb => cb.checked)) {
+      const matchesDietary =  // diet not in database
+        (dietaryCheckboxes[0].checked && recipe.diet === 'Gluten-Free') ||
+        (dietaryCheckboxes[1].checked && recipe.diet === 'Dairy-Free') ||
+        (dietaryCheckboxes[2].checked && recipe.diet === 'Nut-Free') ||
+        (dietaryCheckboxes[3].checked && recipe.diet === 'Vegan') ||
+        (dietaryCheckboxes[4].checked && recipe.diet === 'Vegetarian') ||
+        (dietaryCheckboxes[5].checked && recipe.diet === 'Halal');
+
+      if (!matchesDietary) return false;
+    }
+
+    return true;
+  });
+
+  displayRecipes(filteredRecipes); // to do
+}
+
+
+// Function to display recipes dynamically
+function displaySuggestedRecipes(recipes) {
+  const grid = document.querySelector('.recipes-grid');
+
+  // Clear previous content
+  grid.innerHTML = '';
+
+  recipes.forEach(recipe => {
+    // Link to recipe
+    const card = document.createElement('a');
+    card.href = 'recipes.html';  // need to modify ?
+    card.classList.add('recipe-card');
+
+    // emoji placeholder for recipe image
+    const imageDiv = document.createElement('div');
+    imageDiv.classList.add('recipe-image');
+    imageDiv.textContent = '🍽️';
+
+    // create recipe info container
+    const infoDiv = document.createElement('div');
+    infoDiv.classList.add('recipe-info');
+
+    // title
+    const title = document.createElement('h4');
+    title.textContent = recipe.name;
+
+    // recipe details container
+    const detailsDiv = document.createElement('div');
+    detailsDiv.classList.add('recipe-details');
+
+    // time
+    const timeSpan = document.createElement('span');
+    timeSpan.textContent = `⏱️ ${recipe.prep_time} min`;
+
+    // cost
+    const costSpan = document.createElement('span');
+    let costLabel = '';
+    if (recipe.cost <= 10) costLabel = '💰 Low';
+    else if (recipe.cost <= 20) costLabel = '💰💰 Medium';
+    else costLabel = '💰💰💰 High';
+    costSpan.textContent = costLabel;
+
+    // add time and cost to details
+    detailsDiv.appendChild(timeSpan);
+    detailsDiv.appendChild(costSpan);
+
+    // add title and details to info
+    infoDiv.appendChild(title);
+    infoDiv.appendChild(detailsDiv);
+
+    // add image and info to card
+    card.appendChild(imageDiv);
+    card.appendChild(infoDiv);
+
+    // add card to grid
+    grid.appendChild(card);
+  });
+}
+
+
+/**
  * Update user profile
  */
 async function updateUserProfile(updates) {
@@ -824,7 +1011,6 @@ async function loadUserProfileForEdit() {
           otherAllergiesArea.value = customAllergies.join(', ');
         }
       }
-
     }
 
     // Populate cooking skill
