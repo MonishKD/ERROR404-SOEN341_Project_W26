@@ -491,74 +491,125 @@ async function suggestedRecipes() {
 
   displaySuggestedRecipes(filteredRecipes.slice(0, 4)); // return top 4 suggestions
 }
+// Helper function to parse recipe card data
+function parseRecipeCard(card) {
+  const title = card.querySelector('.recipe-card-title')?.textContent?.trim().toLowerCase() || '';
+  const timeText = card.querySelector('.recipe-card-meta span')?.textContent || '';
+  // Extract number from time text (e.g., "30 min" -> 30)
+  const timeMatch = timeText.match(/\d+/);
+  const prepTime = timeMatch ? parseInt(timeMatch[0], 10) : 0;
 
-// Add event listeners to filter checkboxes
-const filterCheckboxes = document.querySelectorAll(
-  '.filter-bar input[type="checkbox"]'
-);
+// Determine difficulty based on tags
+  let difficulty = '';
+  if (card.querySelector('.tag-easy')) difficulty = 'easy';
+  else if (card.querySelector('.tag-medium')) difficulty = 'medium';
+  else if (card.querySelector('.tag-hard')) difficulty = 'hard';
+// Determine cost based on tags
+  let cost = '';
+  const costText = card.querySelector('.tag-cost')?.textContent?.toLowerCase() || '';
+  if (costText.includes('high')) cost = 'high';
+  else if (costText.includes('medium')) cost = 'medium';
+  else if (costText.includes('low')) cost = 'low';
 
-filterCheckboxes.forEach(cb => {
-  cb.addEventListener('change', () => {
-    filterRecipes();
+  // Extract dietary information from the second span in the meta section (if it exists)
+  const dietaryText = card.querySelectorAll('.recipe-card-meta span')[1]?.textContent?.toLowerCase() || '';
+
+  // Return an object with all the extracted information
+  return { title, prepTime, difficulty, cost, dietaryText };
+}
+// Helper function to check if a recipe matches the selected time filters
+function matchesTimeFilter(prepTime, selectedTimeFilters) {
+  if (selectedTimeFilters.length === 0) return true;
+
+// Check if prep time matches any of the selected time filters (15 min, 15-30 min, 30-60 min, 60+ min)
+  return selectedTimeFilters.some((timeFilter) => {
+    if (timeFilter === 'under-15') return prepTime < 15;
+    if (timeFilter === '15-30') return prepTime >= 15 && prepTime < 30;
+    if (timeFilter === '30-60') return prepTime >= 30 && prepTime < 60;
+    if (timeFilter === '60plus') return prepTime >= 60;
+    return false;
   });
-});
+}
+// Main function to apply all filters to the recipe cards
+function applyRecipeFilters() {
+  const cards = Array.from(document.querySelectorAll('#generalRecipesGrid .recipe-card-full'));
+  if (cards.length === 0) return;
+// Used arrow functions and map to simplify code for getting selected filters
+// This creates arrays of selected values for each filter category (time, difficulty, cost, dietary) by querying the checked checkboxes and mapping them to their values
+  const selectedTimeFilters = Array.from(document.querySelectorAll('input[name="time"]:checked')).map((input) => input.value);
+  const selectedDifficultyFilters = Array.from(document.querySelectorAll('input[name="difficulty"]:checked')).map((input) => input.value);
+  const selectedCostFilters = Array.from(document.querySelectorAll('input[name="cost"]:checked')).map((input) => input.value);
+  const selectedDietaryFilters = Array.from(document.querySelectorAll('input[name="dietary"]:checked')).map((input) => input.value);
+  const searchText = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
 
-async function filterRecipes() {
-  const timeCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(1) input[type="checkbox"]');
-  const difficultyCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(2) input[type="checkbox"]');
-  const costCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(3) input[type="checkbox"]');
-  const dietaryCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(4) input[type="checkbox"]');
+  let visibleCount = 0;
+// Iterate through each recipe card, parse its data, and check if it matches the search text and selected filters. The matchesTimeFilter function is used to check if the recipe's prep time matches any of the selected time filters. The card is shown or hidden based on whether it matches all criteria, and a count of visible cards is maintained to update the status message and show/hide the "no results" message accordingly.
+  cards.forEach((card) => {
+    const recipe = parseRecipeCard(card);
+    const matchesSearch = !searchText || recipe.title.includes(searchText);
+    const matchesTime = matchesTimeFilter(recipe.prepTime, selectedTimeFilters);
+    const matchesDifficulty = selectedDifficultyFilters.length === 0 || selectedDifficultyFilters.includes(recipe.difficulty);
+    const matchesCost = selectedCostFilters.length === 0 || selectedCostFilters.includes(recipe.cost);
+    const matchesDietary = selectedDietaryFilters.length === 0 || selectedDietaryFilters.some((dietFilter) => recipe.dietaryText.includes(dietFilter));
 
-  const recipes = await get(`${API_BASE_URL}/recipes`);
+    const matches = matchesSearch && matchesTime && matchesDifficulty && matchesCost && matchesDietary;
+    card.style.display = matches ? '' : 'none';
+    if (matches) visibleCount += 1;
+  });
+// Update status message with the count of visible recipes and show/hide the "no results" message based on whether any recipes are visible after filtering.
+  const statusElement = document.getElementById('filterStatus');
+  if (statusElement) {
+    statusElement.textContent = `${visibleCount} recipe${visibleCount === 1 ? '' : 's'} shown`;
+  }
 
-  const filteredRecipes = recipes.filter(recipe => {
-    // Filter by time
-    if (timeCheckboxes.some(cb => cb.checked)) {
-    const matchesTime = 
-      (timeCheckboxes[0].checked && recipe.prep_time < 15) ||      // Quick
-      (timeCheckboxes[1].checked && recipe.prep_time >= 15 && recipe.prep_time < 30) || // Medium
-      (timeCheckboxes[2].checked && recipe.prep_time >= 30 && recipe.prep_time < 60) || // Long
-      (timeCheckboxes[3].checked && recipe.prep_time >= 60);       // Very long
-    
-      if (!matchesTime) return false;
-    }
-    // Filter by difficulty
-    if (difficultyCheckboxes.some(cb => cb.checked)) {
-      const matchesDifficulty =  // difficulty not in database
-        (difficultyCheckboxes[0].checked && recipe.difficulty === 'Easy') ||
-        (difficultyCheckboxes[1].checked && recipe.difficulty === 'Medium') ||
-        (difficultyCheckboxes[2].checked && recipe.difficulty === 'Hard');
+  const noResultsMessage = document.getElementById('noRecipesMessage');
+  if (noResultsMessage) {
+    noResultsMessage.hidden = visibleCount !== 0;
+  }
+}
+// Initialization function for recipes page
+function initRecipesPage() {
+  if (!isAuthenticated()) {
+    window.location.href = 'login-page.html';
+    return;
+  }
 
-      if (!matchesDifficulty) return false;
-    }
-
-    // Filter by cost
-    if (costCheckboxes.some(cb => cb.checked)) {
-      const matchesCost = 
-        (costCheckboxes[0].checked && recipe.cost <= 10) || // low
-        (costCheckboxes[1].checked && recipe.cost > 10 && recipe.cost <= 20) || // medium
-        (costCheckboxes[2].checked && recipe.cost > 20); // high
-
-      if (!matchesCost) return false;
-    }
-
-    // Filter by dietary preferences
-    if (dietaryCheckboxes.some(cb => cb.checked)) {
-      const matchesDietary =  // diet not in database
-        (dietaryCheckboxes[0].checked && recipe.diet === 'Gluten-Free') ||
-        (dietaryCheckboxes[1].checked && recipe.diet === 'Dairy-Free') ||
-        (dietaryCheckboxes[2].checked && recipe.diet === 'Nut-Free') ||
-        (dietaryCheckboxes[3].checked && recipe.diet === 'Vegan') ||
-        (dietaryCheckboxes[4].checked && recipe.diet === 'Vegetarian') ||
-        (dietaryCheckboxes[5].checked && recipe.diet === 'Halal');
-
-      if (!matchesDietary) return false;
-    }
-
-    return true;
+  const logoutLink = document.querySelector('.nav-link.logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearToken();
+      window.location.href = 'login-page.html';
+    });
+  }
+// Add event listeners to filter checkboxes and search input to call applyRecipeFilters whenever a filter is changed or search text is entered. This ensures that the recipe list updates in real-time as the user interacts with the filters and search bar.
+  const filterInputs = document.querySelectorAll('.filter-bar input[type="checkbox"]');
+  filterInputs.forEach((input) => {
+    input.addEventListener('change', applyRecipeFilters);
   });
 
-  displayRecipes(filteredRecipes); // to do
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', applyRecipeFilters);
+  }
+
+  const searchButton = document.querySelector('.search-btn');
+  if (searchButton) {
+    searchButton.addEventListener('click', applyRecipeFilters);
+  }
+// Clear filters button and added event listener to reset all filters and search input, then reapply filters to show all recipes.
+  const clearFiltersButton = document.getElementById('clearFiltersBtn');
+  if (clearFiltersButton) {
+    clearFiltersButton.addEventListener('click', () => {
+      document.querySelectorAll('.filter-bar input[type="checkbox"]').forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+      if (searchInput) searchInput.value = '';
+      applyRecipeFilters();
+    });
+  }
+
+  applyRecipeFilters();
 }
 
 
@@ -1067,6 +1118,11 @@ document.addEventListener('DOMContentLoaded', () => {
     case 'edit-profile.html':
     case 'profile':
       initEditProfilePage();
+      break;
+
+    case 'recipes.html':
+    case 'recipes':
+      initRecipesPage();
       break;
 
     default:
