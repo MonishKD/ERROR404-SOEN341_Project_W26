@@ -440,15 +440,14 @@ function initHomePage() {
  * Filter recipes based on preferences setup in edit profile
  */
 async function suggestedRecipes() {
-  // get preferences
-  const cookingSkill = document.getElementById('cookingSkill')?.value || '';
-  const mealPrepTime = document.getElementById('mealPrepTime')?.value || '';
-  const budgetRange = document.getElementById('budgetRange')?.value || '';
-  const dietCheckboxes = document.querySelectorAll('input[name="diet"]:checked');
-  const allergyCheckboxes = document.querySelectorAll('input[name="allergy"]:checked');
-  const extraAllergyText = document.getElementById('otherAllergies')?.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
-  // combine allergies
-  const userAllergies = [...Array.from(allergyCheckboxes).map(cb => cb.value),...extraAllergyText];
+  // get preferences from user profile
+  const user = await get(`${API_BASE_URL}/api/profile`);
+
+  const cookingSkill = user.cookingSkill;
+  const mealPrepTime = user.mealPrepTime;
+  const budgetRange = user.budgetRange;
+  const userAllergies = user.allergies;
+  const userDiets = user.dietPreferences;
 
   const recipes = await get(`${API_BASE_URL}/recipes`);
 
@@ -479,8 +478,8 @@ async function suggestedRecipes() {
       if (budgetRange === "high" && recipe.cost > 20) matches++;
     }
     // Filter by diet
-    if (recipe.diet && dietCheckboxes.length > 0) {
-      const dietMatch = Array.from(dietCheckboxes).some(cb => cb.value === recipe.diet); // diet not in database
+    if (recipe.diet && userDiets.length > 0) {
+      const dietMatch = userDiets.includes(recipe.diet); // diet not in database
       if (dietMatch) matches++;
     }
 
