@@ -867,7 +867,340 @@ document.addEventListener('DOMContentLoaded', () => {
       initEditProfilePage();
       break;
 
+    case 'recipes.html':
+      initRecipesPage();
+      break;
+
     default:
       console.log('Page not recognized for auto-initialization');
   }
 });
+
+// Fetch recipes from backend with optional search query
+async function fetchRecipes(query = "") {
+  const token = getToken();
+  if (!token) {
+    window.location.href = "login-page.html";
+    return [];
+  }
+
+  // Build URL with optional search query
+  const url = new URL(`${API_BASE_URL}/recipes`);
+  if (query.trim()) {
+    url.searchParams.set("q", query.trim());
+  }
+
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (res.status === 401) {
+    clearToken();
+    window.location.href = "login-page.html";
+    return [];
+  }
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || "Failed to load recipes");
+  }
+
+  return await res.json();
+}
+function getDifficulty(prepTime) {
+  if (prepTime <= 15) return { label: "Easy", class: "easy" };
+  if (prepTime <= 45) return { label: "Medium", class: "medium" };
+  return { label: "Hard", class: "hard" };
+}
+
+function getCostLevel(cost) {
+  const c = Number(cost);
+  if (cost < 6) return "💰 Low";
+  if (cost <= 15) return "💰💰 Medium";
+  return "💰💰💰 High";
+}
+
+function formatDietary(recipe) {
+  const text = (recipe.ingredients + " " + recipe.prep_steps).toLowerCase();
+
+  let tags = [];
+  if (text.includes("vegan")) tags.push("🌱 Vegan");
+  if (text.includes("vegetarian")) tags.push("🥗 Vegetarian");
+  if (text.includes("gluten-free")) tags.push("🌾 Gluten-Free");
+  if (text.includes("dairy-free")) tags.push("🥛 Dairy-Free");
+  if (text.includes("halal")) tags.push("🕌 Halal");
+
+  return tags.length ? `<span>${tags.join(" • ")}</span>` : "";
+} 
+
+
+//Render recipes into the page
+f// Render "My Recipes" using the SAME card layout as General Recipes
+function renderRecipes(recipes) {
+  const grid = document.getElementById("myRecipesGrid");
+  const empty = document.getElementById("myRecipesEmpty");
+  if (!grid) return;
+
+  grid.innerHTML = "";
+
+  if (!recipes || recipes.length === 0) {
+    if (empty) empty.style.display = "flex";
+    return;
+  }
+  if (empty) empty.style.display = "none";
+
+  recipes.forEach(r => {
+    const difficulty = getDifficulty(r.prep_time);   // you already have this
+    const costLevel = getCostLevel(r.cost);          // you already have this
+    const tagsHtml = buildTagsHtml(difficulty, costLevel);
+    const metaDietaryHtml = formatDietaryText(r);    // new helper below
+
+    const details = document.createElement("details");
+    details.className = "recipe-card-full";
+
+    details.innerHTML = `
+      <summary class="recipe-card-top">
+        <div class="recipe-card-emoji">${pickEmoji(r.name, r.ingredients)}</div>
+
+        <div class="recipe-card-summary">
+          <div class="recipe-card-tags">
+            ${tagsHtml}
+          </div>
+
+          <h3 class="recipe-card-title">${escapeHtml(r.name)}</h3>
+
+          <div class="recipe-card-meta">
+            <span>⏱️ ${r.prep_time} min</span>
+            ${metaDietaryHtml ? `<span>${metaDietaryHtml}</span>` : ""}
+          </div>
+        </div>
+
+        <span class="recipe-card-chevron">▼</span>
+      </summary>
+
+      <div class="recipe-card-details">
+        <div class="recipe-card-ingredients">
+          <strong>Ingredients:</strong> ${escapeHtml(r.ingredients || "—")}
+        </div>
+
+        <div class="recipe-card-steps">
+          <strong>Steps:</strong>
+          ${renderSteps(r.prep_steps)}
+        </div>
+
+        <div class="recipe-card-actions">
+          <a class="btn-edit-recipe" href="edit-recipe.html?id=${encodeURIComponent(r.id)}">✏️ Edit</a>
+          <button class="btn-delete-recipe" data-id="${r.id}">🗑️ Delete</button>
+        </div>
+      </div>
+    `;
+
+    grid.appendChild(details);
+  });
+
+  // Hook delete buttons (if you already have delete logic, call it here instead)
+  grid.querySelectorAll(".btn-delete-recipe").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const id = btn.getAttribute("data-id");
+      if (!id) return;
+
+      const ok = confirm("Delete this recipe?");
+      if (!ok) return;
+
+      // TODO: replace with your real delete endpoint call
+      // await deleteRecipe(id);
+
+      // For now remove from DOM instantly:
+      btn.closest("details")?.remove();
+    });
+  });
+}
+
+/* ---------------- Helpers ---------------- */
+
+function buildTagsHtml(difficulty, costLevel) {
+  // difficulty is like { label: "Easy", class: "tag-easy" } OR you can adapt this mapping
+  // costLevel might be "Low"/"Medium"/"High" from your existing function
+  const diffClass = difficultyTagClass(difficulty.label);
+  const costText = costToEmoji(costLevel);
+
+  return `
+    <span class="tag ${diffClass}">${escapeHtml(difficulty.label)}</span>
+    <span class="tag tag-cost">${escapeHtml(costText)}</span>
+  `;
+}
+
+function difficultyTagClass(label) {
+  const v = (label || "").toLowerCase();
+  if (v.includes("easy")) return "tag-easy";
+  if (v.includes("hard")) return "tag-hard";
+  return "tag-medium";
+}
+
+function costToEmoji(costLevel) {
+  const v = (costLevel || "").toLowerCase();
+  if (v.includes("low")) return "💰 Low";
+  if (v.includes("high")) return "💰💰💰 High";
+  return "💰💰 Medium";
+}
+
+function formatDietaryText(r) {
+  // Pull dietary keywords from ingredients/steps since you don't have a column yet
+  const text = `${r.ingredients || ""} ${r.prep_steps || ""}`.toLowerCase();
+
+  const tags = [];
+  if (text.includes("gluten-free")) tags.push("🌾 Gluten-Free");
+  if (text.includes("dairy-free")) tags.push("🥛 Dairy-Free");
+  if (text.includes("nut-free")) tags.push("🥜 Nut-Free");
+  if (text.includes("vegan")) tags.push("🌱 Vegan");
+  if (text.includes("vegetarian")) tags.push("🥗 Vegetarian");
+  if (text.includes("halal")) tags.push("🕌 Halal");
+
+  return tags.join(" · ");
+}
+
+function renderSteps(prepSteps) {
+  if (!prepSteps) return "<p>—</p>";
+
+  // If steps are separated by newline OR ; OR .
+  const parts = prepSteps
+    .split(/\n|;|\.\s+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  if (parts.length <= 1) {
+    return `<p>${escapeHtml(prepSteps)}</p>`;
+  }
+
+  return `
+    <ol>
+      ${parts.map(s => `<li>${escapeHtml(s)}</li>`).join("")}
+    </ol>
+  `;
+}
+
+function pickEmoji(name = "", ingredients = "") {
+  const t = `${name} ${ingredients}`.toLowerCase();
+
+  if (t.includes("wrap")) return "🌯";
+  if (t.includes("pasta")) return "🍝";
+  if (t.includes("rice")) return "🍚";
+  if (t.includes("shrimp")) return "🍤";
+  if (t.includes("salmon")) return "🐟";
+  if (t.includes("chili")) return "🌶️";
+  if (t.includes("shawarma")) return "🥙";
+  if (t.includes("bowl")) return "🍲";
+  if (t.includes("dessert")) return "🍰";
+  if (t.includes("smoothie")) return "🥤";
+
+  if (t.includes("salad")) return "🥗";
+  if (t.includes("chicken")) return "🍗";
+  if (t.includes("oat")) return "🥣";
+  if (t.includes("pancake")) return "🥞";
+  if (t.includes("banana")) return "🍌";
+  if (t.includes("beef")) return "🥩";
+  if (t.includes("stew")) return "🍲";
+
+  return "🍽️";
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// Initialize recipes page with search functionality + filters
+async function initRecipesPage() {
+  const input = document.getElementById("searchInput");
+  const button = document.getElementById("searchBtn");
+
+  // get selected filters from checkboxes
+  const getSelectedFilters = () => {
+    const selected = (name) =>
+      Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(
+        (el) => el.value
+      );
+
+    return {
+      time: selected("time"),
+      difficulty: selected("difficulty"),
+      cost: selected("cost"),
+      dietary: selected("dietary"),
+    };
+  };
+
+   // loadRecipes  supports query + filters
+  const loadRecipes = async (query = "") => {
+    try {
+      const token = getToken();
+      if (!token) {
+        window.location.href = "login-page.html";
+        return;
+      }
+
+      const { time, difficulty, cost, dietary } = getSelectedFilters();
+
+      const params = new URLSearchParams();
+      if (query.trim()) params.set("q", query.trim());
+
+      // If your backend expects SINGLE value per filter, use the first selected:
+      if (time[0]) params.set("time", time[0]);
+      if (difficulty[0]) params.set("difficulty", difficulty[0]);
+      if (cost[0]) params.set("cost", cost[0]);
+      if (dietary[0]) params.set("dietary", dietary[0]);
+
+      const res = await fetch(`${API_BASE_URL}/recipes?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.status === 401) {
+        clearToken();
+        window.location.href = "login-page.html";
+        return;
+      }
+
+      if (!res.ok) throw new Error("Failed to load recipes");
+
+      const recipes = await res.json();
+      renderRecipes(recipes);
+    } catch (e) {
+      console.error(e);
+      alert(e.message || "Could not load recipes. Check backend is running.");
+    }
+  };
+
+  // Load all recipes initially
+  await loadRecipes("");
+
+  // Search button click
+  if (button && input) {
+    button.addEventListener("click", () => {
+      loadRecipes(input.value);
+    });
+
+    // Press Enter to search
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        loadRecipes(input.value);
+      }
+    });
+  }
+  // whenever any filter checkbox changes, reload recipes
+  const filterInputs = document.querySelectorAll(
+      'input[name="time"], input[name="difficulty"], input[name="cost"], input[name="dietary"]'
+    );
+
+    filterInputs.forEach((el) => {
+      el.addEventListener("change", () => {
+        loadRecipes(input?.value || "");
+      });
+    });
+}
+
