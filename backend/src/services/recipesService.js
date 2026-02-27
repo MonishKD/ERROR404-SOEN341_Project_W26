@@ -1,32 +1,49 @@
 // recipesService.js
 import { prisma } from '../database/prisma.js';
 
-async function testRecipes() {
+// Create a new recipe
+export async function createRecipe(recipeData) {
   try {
-    // CREATE a recipe Laila's task
     const newRecipe = await prisma.recipes.create({
-      data: {
-        name: 'Spaghetti',
-        ingredients: 'Pasta, eggs, cheese, black pepper',
-        prep_time: 20,
-        prep_steps: '1. Boil pasta\n2. Mix eggs and cheese\n3. Combine',
-        cost: 12.50
-      }
+      data: recipeData,
+      include: { owner: { select: { firstName: true, lastName: true, email: true } } }
     });
-    console.log('✅ Created recipe:', newRecipe.name, '(ID:', newRecipe.id, ')');
-
-    // READ all recipes
-    const allRecipes = await prisma.recipes.findMany();
-    console.log(`📊 Total recipes in db: ${allRecipes.length}`);
-    console.log('Recipes:', allRecipes);
-
+    return newRecipe;
   } catch (error) {
-    console.error('❌ Error:', error.message);
-  } finally {
-    await prisma.$disconnect();
+    console.error('Error creating recipe:', error);
+    throw error; // re-throw to be handled by route handler
   }
 }
 
+// Get all recipes
+export async function getAllRecipes() {
+  try {
+    const recipes = await prisma.recipes.findMany({
+      include: { owner: { select: { firstName: true, lastName: true, email: true } } }
+    });
+    return recipes;
+  } catch (error) {
+    console.error('Error fetching recipes:', error);
+    throw error; // re-throw to be handled by route handler
+  }
+}
+
+// Get a recipe by ID
+export async function getRecipeById(recipeId) {
+  try {
+    const recipe = await prisma.recipes.findUnique({
+      where: { id: recipeId },
+      include: { owner: { select: { firstName: true, lastName: true, email: true } } }
+    });
+    return recipe;
+  }
+  catch (error) {
+    console.error('Error fetching recipe by ID:', error);
+    throw error; // re-throw to be handled by route handler
+  }
+}
+
+// Update a recipe by ID
 export async function updateRecipe(recipeId, updateData) {
   try {
     const findRecipe = await prisma.recipes.findUnique({
@@ -50,12 +67,13 @@ export async function updateRecipe(recipeId, updateData) {
   }
 }
 
+// Delete a recipe by ID
 export async function deleteRecipe(recipeId) {
   try {
     const findRecipe = await prisma.recipes.findUnique({
       where: { id: recipeId },
     });
-    
+
     if (!findRecipe) {
       throw new Error('Recipe not found');
     }

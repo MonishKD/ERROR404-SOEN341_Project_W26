@@ -4,7 +4,7 @@
 
 
 // CONFIGURATION
-const API_BASE_URL = 'http://localhost:4000/api';
+const API_BASE_URL = 'http://localhost:4001/api';
 const TOKEN_KEY = 'mealmajor_token';
 
 
@@ -446,21 +446,33 @@ async function suggestedRecipes() {
   const cookingSkill = user.cookingSkill;
   const mealPrepTime = user.mealPrepTime;
   const budgetRange = user.budgetRange;
-  const userAllergies = user.allergies;
+  const userAllergies = user.allergies || [];  // User's allergens
   const userDiets = user.dietPreferences;
 
   const recipes = await get(`${API_BASE_URL}/recipes`);
 
   // Remove recipes that have allergies the user has
   const safeRecipes = recipes.filter(recipe => {
-    return !recipe.allergies.some(a => userAllergies.includes(a)); // allergies not in database
+    // If user has no allergies, all recipes are safe
+    if (!userAllergies || userAllergies.length === 0) return true;
+
+    // If recipe has no allergens listed, consider it safe
+    if (!recipe.allergens || recipe.allergens.length === 0) return true;
+
+    // Check if recipe contains any allergen the user is allergic to
+    const hasAllergen = userAllergies.some(allergy =>
+      recipe.allergens.includes(allergy)
+    );
+
+    // Return true if recipe is safe (NO matching allergens)
+    return !hasAllergen;
   });
 
   const filteredRecipes = safeRecipes.map(recipe => {
     let matches = 0;
 
     // Filter by cooking skill
-    if (cookingSkill == "beginner" && recipe.difficulty == "Easy") matches++; // difficulty not in database
+    if (cookingSkill == "beginner" && recipe.difficulty == "Easy") matches++;
     if (cookingSkill == "intermediate" && recipe.difficulty == "Medium") matches++;
     if (cookingSkill == "advanced" && recipe.difficulty == "Hard") matches++;
     if (cookingSkill == "expert" && recipe.difficulty == "Hard") matches++;
@@ -471,15 +483,19 @@ async function suggestedRecipes() {
     if (mealPrepTime == "extended" && recipe.prep_time > 30 && recipe.prep_time <= 60) matches++;
     if (mealPrepTime == "elaborate" && recipe.prep_time > 60) matches++;
     if (mealPrepTime == "any") matches++;
+
     // Filter by budget
     if (budgetRange) {
-      if (budgetRange === "low" && recipe.cost <= 10) matches++;
-      if (budgetRange === "medium" && recipe.cost > 10 && recipe.cost <= 20) matches++;
-      if (budgetRange === "high" && recipe.cost > 20) matches++;
+      if (budgetRange === "low" && recipe.cost === 'Low') matches++;
+      if (budgetRange === "medium" && recipe.cost === 'Medium') matches++;
+      if (budgetRange === "high" && recipe.cost === 'High') matches++;
     }
+
     // Filter by diet
-    if (recipe.diet && userDiets.length > 0) {
-      const dietMatch = userDiets.includes(recipe.diet); // diet not in database
+    if (recipe.dietary_tags && userDiets.length > 0) {
+      const dietMatch = userDiets.some(diet =>
+        recipe.dietary_tags.includes(diet)
+      );
       if (dietMatch) matches++;
     }
 
@@ -529,89 +545,92 @@ function matchesTimeFilter(prepTime, selectedTimeFilters) {
     if (timeFilter === '60plus') return prepTime >= 60;
     return false;
   });
-}
-// Main function to apply all filters to the recipe cards
-function applyRecipeFilters() {
-  const cards = Array.from(document.querySelectorAll('#generalRecipesGrid .recipe-card-full'));
-  if (cards.length === 0) return;
-// Used arrow functions and map to simplify code for getting selected filters
-// This creates arrays of selected values for each filter category (time, difficulty, cost, dietary) by querying the checked checkboxes and mapping them to their values
-  const selectedTimeFilters = Array.from(document.querySelectorAll('input[name="time"]:checked')).map((input) => input.value);
-  const selectedDifficultyFilters = Array.from(document.querySelectorAll('input[name="difficulty"]:checked')).map((input) => input.value);
-  const selectedCostFilters = Array.from(document.querySelectorAll('input[name="cost"]:checked')).map((input) => input.value);
-  const selectedDietaryFilters = Array.from(document.querySelectorAll('input[name="dietary"]:checked')).map((input) => input.value);
-  const searchText = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+});
 
-  let visibleCount = 0;
-// Iterate through each recipe card, parse its data, and check if it matches the search text and selected filters. The matchesTimeFilter function is used to check if the recipe's prep time matches any of the selected time filters. The card is shown or hidden based on whether it matches all criteria, and a count of visible cards is maintained to update the status message and show/hide the "no results" message accordingly.
-  cards.forEach((card) => {
-    const recipe = parseRecipeCard(card);
-    const matchesSearch = !searchText || recipe.title.includes(searchText);
-    const matchesTime = matchesTimeFilter(recipe.prepTime, selectedTimeFilters);
-    const matchesDifficulty = selectedDifficultyFilters.length === 0 || selectedDifficultyFilters.includes(recipe.difficulty);
-    const matchesCost = selectedCostFilters.length === 0 || selectedCostFilters.includes(recipe.cost);
-    const matchesDietary = selectedDietaryFilters.length === 0 || selectedDietaryFilters.some((dietFilter) => recipe.dietaryText.includes(dietFilter));
+async function filterRecipes() {
+  const timeCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(1) input[type="checkbox"]');
+  const difficultyCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(2) input[type="checkbox"]');
+  const costCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(3) input[type="checkbox"]');
+  const dietaryCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(4) input[type="checkbox"]');
+  const allergenCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(5) input[type="checkbox"]');
 
-    const matches = matchesSearch && matchesTime && matchesDifficulty && matchesCost && matchesDietary;
-    card.style.display = matches ? '' : 'none';
-    if (matches) visibleCount += 1;
-  });
-// Update status message with the count of visible recipes and show/hide the "no results" message based on whether any recipes are visible after filtering.
-  const statusElement = document.getElementById('filterStatus');
-  if (statusElement) {
-    statusElement.textContent = `${visibleCount} recipe${visibleCount === 1 ? '' : 's'} shown`;
-  }
+  const recipes = await get(`${API_BASE_URL}/recipes`);
 
-  const noResultsMessage = document.getElementById('noRecipesMessage');
-  if (noResultsMessage) {
-    noResultsMessage.hidden = visibleCount !== 0;
-  }
-}
-// Initialization function for recipes page
-function initRecipesPage() {
-  if (!isAuthenticated()) {
-    window.location.href = 'login-page.html';
-    return;
-  }
-
-  const logoutLink = document.querySelector('.nav-link.logout');
-  if (logoutLink) {
-    logoutLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      clearToken();
-      window.location.href = 'login-page.html';
+  const excludedAllergens = [];
+  if (allergenCheckboxes.length > 0) {
+    allergenCheckboxes.forEach(cb => {
+      if (cb.checked) {
+        // Map checkbox values to database values
+        const val = cb.value;
+        if (val === 'peanuts') excludedAllergens.push('Peanuts');
+        else if (val === 'tree-nuts') excludedAllergens.push('Tree Nuts');
+        else if (val === 'dairy') excludedAllergens.push('Dairy');
+        else if (val === 'eggs') excludedAllergens.push('Eggs');
+        else if (val === 'soy') excludedAllergens.push('Soy');
+        else if (val === 'wheat') excludedAllergens.push('Wheat');
+        else if (val === 'fish') excludedAllergens.push('Fish');
+        else if (val === 'shellfish') excludedAllergens.push('Shellfish');
+      }
     });
-  }
-// Add event listeners to filter checkboxes and search input to call applyRecipeFilters whenever a filter is changed or search text is entered. This ensures that the recipe list updates in real-time as the user interacts with the filters and search bar.
-  const filterInputs = document.querySelectorAll('.filter-bar input[type="checkbox"]');
-  filterInputs.forEach((input) => {
-    input.addEventListener('change', applyRecipeFilters);
-  });
 
-  const searchInput = document.getElementById('searchInput');
-  if (searchInput) {
-    searchInput.addEventListener('input', applyRecipeFilters);
-  }
+    const filteredRecipes = recipes.filter(recipe => {
+      // Filter by time
+      if (timeCheckboxes.some(cb => cb.checked)) {
+        const matchesTime =
+          (timeCheckboxes[0].checked && recipe.prep_time < 15) ||      // Quick
+          (timeCheckboxes[1].checked && recipe.prep_time >= 15 && recipe.prep_time < 30) || // Medium
+          (timeCheckboxes[2].checked && recipe.prep_time >= 30 && recipe.prep_time < 60) || // Long
+          (timeCheckboxes[3].checked && recipe.prep_time >= 60);       // Very long
 
-  const searchButton = document.querySelector('.search-btn');
-  if (searchButton) {
-    searchButton.addEventListener('click', applyRecipeFilters);
-  }
-// Clear filters button and added event listener to reset all filters and search input, then reapply filters to show all recipes.
-  const clearFiltersButton = document.getElementById('clearFiltersBtn');
-  if (clearFiltersButton) {
-    clearFiltersButton.addEventListener('click', () => {
-      document.querySelectorAll('.filter-bar input[type="checkbox"]').forEach((checkbox) => {
-        checkbox.checked = false;
-      });
-      if (searchInput) searchInput.value = '';
-      applyRecipeFilters();
+        if (!matchesTime) return false;
+      }
+      // Filter by difficulty
+      if (difficultyCheckboxes.some(cb => cb.checked)) {
+        const matchesDifficulty =  // difficulty not in database
+          (difficultyCheckboxes[0].checked && recipe.difficulty === 'Easy') ||
+          (difficultyCheckboxes[1].checked && recipe.difficulty === 'Medium') ||
+          (difficultyCheckboxes[2].checked && recipe.difficulty === 'Hard');
+
+        if (!matchesDifficulty) return false;
+      }
+
+      // Filter by cost
+      if (costCheckboxes.some(cb => cb.checked)) {
+        const matchesCost =
+          (costCheckboxes[0].checked && recipe.cost === 'Low') || // low
+          (costCheckboxes[1].checked && recipe.cost === 'Medium') || // medium
+          (costCheckboxes[2].checked && recipe.cost === 'High'); // high
+
+        if (!matchesCost) return false;
+      }
+
+      // Filter by dietary preferences
+      if (dietaryCheckboxes.some(cb => cb.checked)) {
+        const matchesDietary =  // diet not in database
+          (dietaryCheckboxes[0].checked && recipe.diet === 'Gluten-Free') ||
+          (dietaryCheckboxes[1].checked && recipe.diet === 'Dairy-Free') ||
+          (dietaryCheckboxes[2].checked && recipe.diet === 'Nut-Free') ||
+          (dietaryCheckboxes[3].checked && recipe.diet === 'Vegan') ||
+          (dietaryCheckboxes[4].checked && recipe.diet === 'Vegetarian') ||
+          (dietaryCheckboxes[5].checked && recipe.diet === 'Halal');
+
+        if (!matchesDietary) return false;
+
+        // Filter by allergens
+        if (excludedAllergens.length > 0 && recipe.allergens && recipe.allergens.length > 0) {
+          const hasExcludedAllergen = excludedAllergens.some(allergen =>
+            recipe.allergens.includes(allergen)
+          );
+          if (hasExcludedAllergen) return false;
+        }
+      }
+
+      return true;
     });
+
+    displayRecipes(filteredRecipes); // to do
   }
-
-  applyRecipeFilters();
 }
-
 
 // Function to display recipes dynamically
 function displaySuggestedRecipes(recipes) {
@@ -623,8 +642,22 @@ function displaySuggestedRecipes(recipes) {
   recipes.forEach(recipe => {
     // Link to recipe
     const card = document.createElement('a');
-    card.href = 'recipes.html';  // need to modify ?
+    card.href = `recipe-detail.html?id=${recipe.id}`;
     card.classList.add('recipe-card');
+
+    if (recipe.allergens && recipe.allergens.length > 0) {
+      card.setAttribute('data-allergens', recipe.allergens.join(','));
+      // Add small warning indicator
+      const warningBadge = document.createElement('span');
+      warningBadge.classList.add('allergen-badge');
+      warningBadge.title = `Contains: ${recipe.allergens.join(', ')}`;
+      warningBadge.textContent = '⚠️';
+      warningBadge.style.position = 'absolute';
+      warningBadge.style.top = '5px';
+      warningBadge.style.right = '5px';
+      card.style.position = 'relative';
+      card.appendChild(warningBadge);
+    }
 
     // emoji placeholder for recipe image
     const imageDiv = document.createElement('div');
@@ -650,14 +683,28 @@ function displaySuggestedRecipes(recipes) {
     // cost
     const costSpan = document.createElement('span');
     let costLabel = '';
-    if (recipe.cost <= 10) costLabel = '💰 Low';
-    else if (recipe.cost <= 20) costLabel = '💰💰 Medium';
-    else costLabel = '💰💰💰 High';
+    if (recipe.cost === 'Low') costLabel = '💰 Low';
+    else if (recipe.cost === 'Medium') costLabel = '💰💰 Medium';
+    else if (recipe.cost === 'High') costLabel = '💰💰💰 High';
     costSpan.textContent = costLabel;
+
+    // difficulty
+    const difficultySpan = document.createElement('span');
+    let difficultyLabel = '';
+    if (recipe.difficulty === 'Easy') difficultyLabel = '🌱 Easy';
+    else if (recipe.difficulty === 'Medium') difficultyLabel = '📊 Medium';
+    else if (recipe.difficulty === 'Hard') difficultyLabel = '🔥 Hard';
+
+    if (recipe.difficulty) {
+      difficultySpan.textContent = difficultyLabel;
+    }
 
     // add time and cost to details
     detailsDiv.appendChild(timeSpan);
     detailsDiv.appendChild(costSpan);
+    if (recipe.difficulty) {
+      detailsDiv.appendChild(difficultySpan);
+    }
 
     // add title and details to info
     infoDiv.appendChild(title);
@@ -854,29 +901,6 @@ function initSignupPage() {
   });
 }
 
-/**
- * Initialize home page
- */
-// function initHomePage() {
-//   // Check authentication
-//   if (!isAuthenticated()) {
-//     window.location.href = 'login-page.html';
-//     return;
-//   }
-
-//   // Load user profile and display name
-//   loadUserProfile();
-
-//   // Setup logout functionality
-//   const logoutLink = document.querySelector('.nav-link.logout');
-//   if (logoutLink) {
-//     logoutLink.addEventListener('click', (e) => {
-//       e.preventDefault();
-//       clearToken();
-//       window.location.href = 'login-page.html';
-//     });
-//   }
-// }
 
 /**
  * Initialize edit profile page
@@ -975,6 +999,8 @@ function initEditProfilePage() {
   }
 }
 
+
+
 /**
  * Load user profile and display on home page
  */
@@ -1001,6 +1027,282 @@ async function loadUserProfile() {
       window.location.href = 'login-page.html';
     }
   }
+}
+
+/**
+* Initialize recipes page 
+*/
+function initRecipesPage() {
+  console.log('🍽️ INIT_RECIPES_PAGE CALLED');
+
+  // Check authentication
+  if (!isAuthenticated()) {
+    window.location.href = 'login-page.html';
+    return;
+  }
+
+  // Load recipes
+  loadMyRecipes();
+  loadGeneralRecipes();
+
+  // Setup logout functionality
+  const logoutLink = document.querySelector('.nav-link.logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearToken();
+      window.location.href = 'login-page.html';
+    });
+  }
+
+  // Setup search functionality
+  const searchBtn = document.querySelector('.search-btn');
+  const searchInput = document.getElementById('searchInput');
+
+  if (searchBtn && searchInput) {
+    searchBtn.addEventListener('click', () => {
+      const searchTerm = searchInput.value.toLowerCase();
+      filterRecipesBySearch(searchTerm);
+    });
+
+    searchInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        const searchTerm = searchInput.value.toLowerCase();
+        filterRecipesBySearch(searchTerm);
+      }
+    });
+  }
+
+  // Setup filter checkboxes
+  const filterCheckboxes = document.querySelectorAll('.filter-bar input[type="checkbox"]');
+  filterCheckboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      filterRecipes();
+    });
+  });
+}
+
+/**
+ * Fetch recipes from the API
+ */
+async function fetchRecipes(ownerId = null) {
+  try {
+    let url = `${API_BASE_URL}/recipes`;
+    if (ownerId) {
+      url += `?ownerId=${ownerId}`;
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch recipes');
+    }
+
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error fetching recipes:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Load My Recipes
+ */
+async function loadMyRecipes() {
+  console.log('Loading My Recipes...');
+
+  const myRecipesGrid = document.getElementById('myRecipesGrid');
+  const emptyState = document.getElementById('myRecipesEmpty');
+
+  if (!myRecipesGrid) return;
+
+  try {
+    // Get current user profile to get their ID
+    const profileResult = await getUserProfile();
+
+    if (!profileResult.success) {
+      console.error('Failed to get user profile:', profileResult.error);
+      return;
+    }
+
+    const ownerId = profileResult.data.id;
+
+    // Fetch recipes owned by this user
+    const result = await fetchRecipes(ownerId);
+
+    if (result.success) {
+      const recipes = result.data;
+      console.log('My Recipes fetched:', recipes.length);
+
+      if (recipes.length === 0) {
+        // Show empty state
+        if (emptyState) emptyState.style.display = 'flex';
+        myRecipesGrid.innerHTML = '';
+      } else {
+        // Hide empty state
+        if (emptyState) emptyState.style.display = 'none';
+
+        // Display recipes
+        myRecipesGrid.innerHTML = '';
+        recipes.forEach(recipe => {
+          const card = createRecipeCard(recipe, true);
+          myRecipesGrid.appendChild(card);
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error in loadMyRecipes:', error);
+  }
+}
+
+/**
+ * Create recipe card element
+ */
+function createRecipeCard(recipe, isMyRecipe = false) {
+  const details = document.createElement('details');
+  details.className = 'recipe-card-full';
+
+  // Determine difficulty class
+  let difficultyClass = 'tag-easy';
+  if (recipe.difficulty === 'Medium') difficultyClass = 'tag-medium';
+  if (recipe.difficulty === 'Hard') difficultyClass = 'tag-hard';
+
+  // Cost display
+  let costDisplay = '💰 Low';
+  if (recipe.cost === 'Medium') costDisplay = '💰💰 Medium';
+  if (recipe.cost === 'High') costDisplay = '💰💰💰 High';
+
+  // Dietary tags display
+  const dietaryDisplay = recipe.dietary_tags && recipe.dietary_tags.length > 0
+    ? recipe.dietary_tags.join(' · ')
+    : '';
+
+  // Summary
+  const summary = document.createElement('summary');
+  summary.className = 'recipe-card-top';
+  summary.innerHTML = `
+    <div class="recipe-card-emoji">🍽️</div>
+    <div class="recipe-card-summary">
+      <div class="recipe-card-tags">
+        <span class="tag ${difficultyClass}">${recipe.difficulty || 'Easy'}</span>
+        <span class="tag tag-cost">${costDisplay}</span>
+      </div>
+      <h3 class="recipe-card-title">${recipe.name}</h3>
+      <div class="recipe-card-meta">
+        <span>⏱️ ${recipe.prep_time} min</span>
+        <span>${dietaryDisplay}</span>
+      </div>
+    </div>
+    <span class="recipe-card-chevron">▼</span>
+  `;
+
+  // Details content
+  const detailsDiv = document.createElement('div');
+  detailsDiv.className = 'recipe-card-details';
+
+  // Format steps as list items
+  const steps = recipe.prep_steps.split('.').filter(step => step.trim());
+  const stepsList = steps.map(step => `<li>${step.trim()}</li>`).join('');
+
+  // Action buttons based on recipe ownership
+  let actionButtons = '';
+  if (isMyRecipe) {
+    actionButtons = `
+      <div class="recipe-card-actions">
+        <button class="btn-edit-recipe" onclick="editRecipe(${recipe.id})">Edit</button>
+        <button class="btn-delete-recipe" onclick="deleteRecipe(${recipe.id})">Delete</button>
+      </div>
+    `;
+  } else {
+    actionButtons = `
+      <button class="btn-save-recipe" onclick="saveRecipe(${recipe.id})">+ Save to My Recipes</button>
+    `;
+  }
+
+  detailsDiv.innerHTML = `
+    <div class="recipe-card-ingredients">
+      <strong>Ingredients:</strong> ${recipe.ingredients}
+    </div>
+    <div class="recipe-card-steps">
+      <strong>Steps:</strong>
+      <ol>
+        ${stepsList}
+      </ol>
+    </div>
+    ${actionButtons}
+  `;
+
+  details.appendChild(summary);
+  details.appendChild(detailsDiv);
+
+  return details;
+}
+
+/**
+ * Initialize recipes page
+ */
+function initRecipesPage() {
+  console.log('🍽️ INIT_RECIPES_PAGE CALLED');
+
+  // Check authentication
+  if (!isAuthenticated()) {
+    window.location.href = 'login-page.html';
+    return;
+  }
+
+  // Load recipes
+  loadMyRecipes();
+  loadGeneralRecipes();
+
+  // Setup logout functionality
+  const logoutLink = document.querySelector('.nav-link.logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearToken();
+      window.location.href = 'login-page.html';
+    });
+  }
+}
+
+// placeholder functions for edit/delete/save
+async function editRecipe(id) {
+  console.log('Edit recipe:', id);
+  window.location.href = `edit-recipe.html?id=${id}`;
+}
+
+async function deleteRecipe(id) {
+  if (confirm('Are you sure you want to delete this recipe?')) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+      });
+
+      if (response.ok) {
+        // Reload recipes
+        loadMyRecipes();
+      } else {
+        alert('Failed to delete recipe');
+      }
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
+      alert('Error deleting recipe');
+    }
+  }
+}
+
+async function saveRecipe(id) {
+  console.log('Save recipe:', id);
+  // Implement save to my recipes functionality
+  alert('Save recipe functionality to be implemented');
 }
 
 /**
@@ -1055,7 +1357,7 @@ async function loadUserProfileForEdit() {
         }
       });
       //extra allergies that are not predefined
-      if(customAllergies.length > 0) {
+      if (customAllergies.length > 0) {
         const otherAllergiesArea = document.getElementById('otherAllergies');
         if (otherAllergiesArea) {
           otherAllergiesArea.value = customAllergies.join(', ');
@@ -1123,337 +1425,8 @@ document.addEventListener('DOMContentLoaded', () => {
     case 'recipes.html':
       initRecipesPage();
       break;
-
+    // add case recipes page
     default:
       console.log('Page not recognized for auto-initialization');
   }
 });
-
-// Fetch recipes from backend with optional search query
-async function fetchRecipes(query = "") {
-  const token = getToken();
-  if (!token) {
-    window.location.href = "login-page.html";
-    return [];
-  }
-
-  // Build URL with optional search query
-  const url = new URL(`${API_BASE_URL}/recipes`);
-  if (query.trim()) {
-    url.searchParams.set("q", query.trim());
-  }
-
-  const res = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  if (res.status === 401) {
-    clearToken();
-    window.location.href = "login-page.html";
-    return [];
-  }
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.message || "Failed to load recipes");
-  }
-
-  return await res.json();
-}
-function getDifficulty(prepTime) {
-  if (prepTime <= 15) return { label: "Easy", class: "easy" };
-  if (prepTime <= 45) return { label: "Medium", class: "medium" };
-  return { label: "Hard", class: "hard" };
-}
-
-function getCostLevel(cost) {
-  const c = Number(cost);
-  if (cost < 6) return "💰 Low";
-  if (cost <= 15) return "💰💰 Medium";
-  return "💰💰💰 High";
-}
-
-function formatDietary(recipe) {
-  const text = (recipe.ingredients + " " + recipe.prep_steps).toLowerCase();
-
-  let tags = [];
-  if (text.includes("vegan")) tags.push("🌱 Vegan");
-  if (text.includes("vegetarian")) tags.push("🥗 Vegetarian");
-  if (text.includes("gluten-free")) tags.push("🌾 Gluten-Free");
-  if (text.includes("dairy-free")) tags.push("🥛 Dairy-Free");
-  if (text.includes("halal")) tags.push("🕌 Halal");
-
-  return tags.length ? `<span>${tags.join(" • ")}</span>` : "";
-} 
-
-
-//Render recipes into the page
-f// Render "My Recipes" using the SAME card layout as General Recipes
-function renderRecipes(recipes) {
-  const grid = document.getElementById("myRecipesGrid");
-  const empty = document.getElementById("myRecipesEmpty");
-  if (!grid) return;
-
-  grid.innerHTML = "";
-
-  if (!recipes || recipes.length === 0) {
-    if (empty) empty.style.display = "flex";
-    return;
-  }
-  if (empty) empty.style.display = "none";
-
-  recipes.forEach(r => {
-    const difficulty = getDifficulty(r.prep_time);   // you already have this
-    const costLevel = getCostLevel(r.cost);          // you already have this
-    const tagsHtml = buildTagsHtml(difficulty, costLevel);
-    const metaDietaryHtml = formatDietaryText(r);    // new helper below
-
-    const details = document.createElement("details");
-    details.className = "recipe-card-full";
-
-    details.innerHTML = `
-      <summary class="recipe-card-top">
-        <div class="recipe-card-emoji">${pickEmoji(r.name, r.ingredients)}</div>
-
-        <div class="recipe-card-summary">
-          <div class="recipe-card-tags">
-            ${tagsHtml}
-          </div>
-
-          <h3 class="recipe-card-title">${escapeHtml(r.name)}</h3>
-
-          <div class="recipe-card-meta">
-            <span>⏱️ ${r.prep_time} min</span>
-            ${metaDietaryHtml ? `<span>${metaDietaryHtml}</span>` : ""}
-          </div>
-        </div>
-
-        <span class="recipe-card-chevron">▼</span>
-      </summary>
-
-      <div class="recipe-card-details">
-        <div class="recipe-card-ingredients">
-          <strong>Ingredients:</strong> ${escapeHtml(r.ingredients || "—")}
-        </div>
-
-        <div class="recipe-card-steps">
-          <strong>Steps:</strong>
-          ${renderSteps(r.prep_steps)}
-        </div>
-
-        <div class="recipe-card-actions">
-          <a class="btn-edit-recipe" href="edit-recipe.html?id=${encodeURIComponent(r.id)}">✏️ Edit</a>
-          <button class="btn-delete-recipe" data-id="${r.id}">🗑️ Delete</button>
-        </div>
-      </div>
-    `;
-
-    grid.appendChild(details);
-  });
-
-  // Hook delete buttons (if you already have delete logic, call it here instead)
-  grid.querySelectorAll(".btn-delete-recipe").forEach(btn => {
-    btn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const id = btn.getAttribute("data-id");
-      if (!id) return;
-
-      const ok = confirm("Delete this recipe?");
-      if (!ok) return;
-
-      // TODO: replace with your real delete endpoint call
-      // await deleteRecipe(id);
-
-      // For now remove from DOM instantly:
-      btn.closest("details")?.remove();
-    });
-  });
-}
-
-/* ---------------- Helpers ---------------- */
-
-function buildTagsHtml(difficulty, costLevel) {
-  // difficulty is like { label: "Easy", class: "tag-easy" } OR you can adapt this mapping
-  // costLevel might be "Low"/"Medium"/"High" from your existing function
-  const diffClass = difficultyTagClass(difficulty.label);
-  const costText = costToEmoji(costLevel);
-
-  return `
-    <span class="tag ${diffClass}">${escapeHtml(difficulty.label)}</span>
-    <span class="tag tag-cost">${escapeHtml(costText)}</span>
-  `;
-}
-
-function difficultyTagClass(label) {
-  const v = (label || "").toLowerCase();
-  if (v.includes("easy")) return "tag-easy";
-  if (v.includes("hard")) return "tag-hard";
-  return "tag-medium";
-}
-
-function costToEmoji(costLevel) {
-  const v = (costLevel || "").toLowerCase();
-  if (v.includes("low")) return "💰 Low";
-  if (v.includes("high")) return "💰💰💰 High";
-  return "💰💰 Medium";
-}
-
-function formatDietaryText(r) {
-  // Pull dietary keywords from ingredients/steps since you don't have a column yet
-  const text = `${r.ingredients || ""} ${r.prep_steps || ""}`.toLowerCase();
-
-  const tags = [];
-  if (text.includes("gluten-free")) tags.push("🌾 Gluten-Free");
-  if (text.includes("dairy-free")) tags.push("🥛 Dairy-Free");
-  if (text.includes("nut-free")) tags.push("🥜 Nut-Free");
-  if (text.includes("vegan")) tags.push("🌱 Vegan");
-  if (text.includes("vegetarian")) tags.push("🥗 Vegetarian");
-  if (text.includes("halal")) tags.push("🕌 Halal");
-
-  return tags.join(" · ");
-}
-
-function renderSteps(prepSteps) {
-  if (!prepSteps) return "<p>—</p>";
-
-  // If steps are separated by newline OR ; OR .
-  const parts = prepSteps
-    .split(/\n|;|\.\s+/)
-    .map(s => s.trim())
-    .filter(Boolean);
-
-  if (parts.length <= 1) {
-    return `<p>${escapeHtml(prepSteps)}</p>`;
-  }
-
-  return `
-    <ol>
-      ${parts.map(s => `<li>${escapeHtml(s)}</li>`).join("")}
-    </ol>
-  `;
-}
-
-function pickEmoji(name = "", ingredients = "") {
-  const t = `${name} ${ingredients}`.toLowerCase();
-
-  if (t.includes("wrap")) return "🌯";
-  if (t.includes("pasta")) return "🍝";
-  if (t.includes("rice")) return "🍚";
-  if (t.includes("shrimp")) return "🍤";
-  if (t.includes("salmon")) return "🐟";
-  if (t.includes("chili")) return "🌶️";
-  if (t.includes("shawarma")) return "🥙";
-  if (t.includes("bowl")) return "🍲";
-  if (t.includes("dessert")) return "🍰";
-  if (t.includes("smoothie")) return "🥤";
-
-  if (t.includes("salad")) return "🥗";
-  if (t.includes("chicken")) return "🍗";
-  if (t.includes("oat")) return "🥣";
-  if (t.includes("pancake")) return "🥞";
-  if (t.includes("banana")) return "🍌";
-  if (t.includes("beef")) return "🥩";
-  if (t.includes("stew")) return "🍲";
-
-  return "🍽️";
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-// Initialize recipes page with search functionality + filters
-async function initRecipesPage() {
-  const input = document.getElementById("searchInput");
-  const button = document.getElementById("searchBtn");
-
-  // get selected filters from checkboxes
-  const getSelectedFilters = () => {
-    const selected = (name) =>
-      Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(
-        (el) => el.value
-      );
-
-    return {
-      time: selected("time"),
-      difficulty: selected("difficulty"),
-      cost: selected("cost"),
-      dietary: selected("dietary"),
-    };
-  };
-
-   // loadRecipes  supports query + filters
-  const loadRecipes = async (query = "") => {
-    try {
-      const token = getToken();
-      if (!token) {
-        window.location.href = "login-page.html";
-        return;
-      }
-
-      const { time, difficulty, cost, dietary } = getSelectedFilters();
-
-      const params = new URLSearchParams();
-      if (query.trim()) params.set("q", query.trim());
-
-      // If your backend expects SINGLE value per filter, use the first selected:
-      if (time[0]) params.set("time", time[0]);
-      if (difficulty[0]) params.set("difficulty", difficulty[0]);
-      if (cost[0]) params.set("cost", cost[0]);
-      if (dietary[0]) params.set("dietary", dietary[0]);
-
-      const res = await fetch(`${API_BASE_URL}/recipes?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.status === 401) {
-        clearToken();
-        window.location.href = "login-page.html";
-        return;
-      }
-
-      if (!res.ok) throw new Error("Failed to load recipes");
-
-      const recipes = await res.json();
-      renderRecipes(recipes);
-    } catch (e) {
-      console.error(e);
-      alert(e.message || "Could not load recipes. Check backend is running.");
-    }
-  };
-
-  // Load all recipes initially
-  await loadRecipes("");
-
-  // Search button click
-  if (button && input) {
-    button.addEventListener("click", () => {
-      loadRecipes(input.value);
-    });
-
-    // Press Enter to search
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        loadRecipes(input.value);
-      }
-    });
-  }
-  // whenever any filter checkbox changes, reload recipes
-  const filterInputs = document.querySelectorAll(
-      'input[name="time"], input[name="difficulty"], input[name="cost"], input[name="dietary"]'
-    );
-
-    filterInputs.forEach((el) => {
-      el.addEventListener("change", () => {
-        loadRecipes(input?.value || "");
-      });
-    });
-}
-

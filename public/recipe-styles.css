@@ -146,7 +146,7 @@
     font-weight: 600;
     color: #666;
     min-width: 95px;
-    padding-top: 10px; 
+    padding-top: 10px;
 }
 
 .filter-toggles {
@@ -157,9 +157,9 @@
 }
 
 .filter-card .checkbox-content {
-    flex-direction: row;        
-    padding: 10px 18px;         
-    border-radius: 25px;        
+    flex-direction: row;
+    padding: 10px 18px;
+    border-radius: 25px;
     gap: 6px;
 }
 
@@ -282,8 +282,13 @@
 }
 
 /* Remove default browser ▶ triangle*/
-.recipe-card-top::-webkit-details-marker { display: none; }
-.recipe-card-top::marker { display: none; }
+.recipe-card-top::-webkit-details-marker {
+    display: none;
+}
+
+.recipe-card-top::marker {
+    display: none;
+}
 
 /* Chevron arrow rotates when card is open */
 .recipe-card-chevron {
@@ -324,10 +329,25 @@
     font-weight: 600;
 }
 
-.tag-easy   { background: #dcfce7; color: #16a34a; }
-.tag-medium { background: #fef9c3; color: #a16207; }
-.tag-hard   { background: #fee2e2; color: #dc2626; }
-.tag-cost   { background: #f3f4f6; color: #555;    }
+.tag-easy {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.tag-medium {
+    background: #fef9c3;
+    color: #a16207;
+}
+
+.tag-hard {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.tag-cost {
+    background: #f3f4f6;
+    color: #555;
+}
 
 .recipe-card-title {
     margin: 0;
@@ -399,7 +419,7 @@
 }
 
 /*buttons edit and delete for My recipes cards only*/
-.recipe-card-actions{
+.recipe-card-actions {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
@@ -446,8 +466,32 @@
     color: white;
 }
 
-.no-recipes-message {
-    margin-top: 16px;
-    color: #666;
-    font-weight: 500;
+.allergen-filter .checkbox-content {
+    padding: 10px 18px;
+    border-radius: 25px;
+    gap: 6px;
+}
+
+.allergen-filter .checkbox-label {
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.allergen-filter .checkbox-icon {
+    font-size: 13px;
+}
+
+.allergen-filter .checkbox-content {
+    padding: 8px 16px;
+    border-radius: 25px;
+    gap: 6px;
+}
+
+.allergen-filter .checkbox-label {
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.allergen-filter .checkbox-icon {
+    font-size: 13px;
 }
