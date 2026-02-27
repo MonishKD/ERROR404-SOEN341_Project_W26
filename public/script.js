@@ -507,15 +507,43 @@ async function suggestedRecipes() {
 
   displaySuggestedRecipes(filteredRecipes.slice(0, 4)); // return top 4 suggestions
 }
+// Helper function to parse recipe card data
+function parseRecipeCard(card) {
+  const title = card.querySelector('.recipe-card-title')?.textContent?.trim().toLowerCase() || '';
+  const timeText = card.querySelector('.recipe-card-meta span')?.textContent || '';
+  // Extract number from time text (e.g., "30 min" -> 30)
+  const timeMatch = timeText.match(/\d+/);
+  const prepTime = timeMatch ? parseInt(timeMatch[0], 10) : 0;
 
-// Add event listeners to filter checkboxes
-const filterCheckboxes = document.querySelectorAll(
-  '.filter-bar input[type="checkbox"]'
-);
+// Determine difficulty based on tags
+  let difficulty = '';
+  if (card.querySelector('.tag-easy')) difficulty = 'easy';
+  else if (card.querySelector('.tag-medium')) difficulty = 'medium';
+  else if (card.querySelector('.tag-hard')) difficulty = 'hard';
+// Determine cost based on tags
+  let cost = '';
+  const costText = card.querySelector('.tag-cost')?.textContent?.toLowerCase() || '';
+  if (costText.includes('high')) cost = 'high';
+  else if (costText.includes('medium')) cost = 'medium';
+  else if (costText.includes('low')) cost = 'low';
 
-filterCheckboxes.forEach(cb => {
-  cb.addEventListener('change', () => {
-    filterRecipes();
+  // Extract dietary information from the second span in the meta section (if it exists)
+  const dietaryText = card.querySelectorAll('.recipe-card-meta span')[1]?.textContent?.toLowerCase() || '';
+
+  // Return an object with all the extracted information
+  return { title, prepTime, difficulty, cost, dietaryText };
+}
+// Helper function to check if a recipe matches the selected time filters
+function matchesTimeFilter(prepTime, selectedTimeFilters) {
+  if (selectedTimeFilters.length === 0) return true;
+
+// Check if prep time matches any of the selected time filters (15 min, 15-30 min, 30-60 min, 60+ min)
+  return selectedTimeFilters.some((timeFilter) => {
+    if (timeFilter === 'under-15') return prepTime < 15;
+    if (timeFilter === '15-30') return prepTime >= 15 && prepTime < 30;
+    if (timeFilter === '30-60') return prepTime >= 30 && prepTime < 60;
+    if (timeFilter === '60plus') return prepTime >= 60;
+    return false;
   });
 });
 
@@ -542,7 +570,6 @@ async function filterRecipes() {
         else if (val === 'wheat') excludedAllergens.push('Wheat');
         else if (val === 'fish') excludedAllergens.push('Fish');
         else if (val === 'shellfish') excludedAllergens.push('Shellfish');
-        else if (val === 'sesame') excludedAllergens.push('Sesame');
       }
     });
 
