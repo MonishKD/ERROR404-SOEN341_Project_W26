@@ -95,6 +95,45 @@
     font-size: 15px;
 }
 
+.filter-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-tools {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-status {
+    color: #666;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.clear-filters-btn {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #334155;
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+
+.clear-filters-btn:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
 .filter-group {
     display: flex;
     align-items: flex-start;
@@ -407,3 +446,8 @@
     color: white;
 }
 
+.no-recipes-message {
+    margin-top: 16px;
+    color: #666;
+    font-weight: 500;
+}

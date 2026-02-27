@@ -52,7 +52,13 @@
 
         <!--Filter bar-->
         <div class="filter-bar">
-            <span class="filter-label">Filter by:</span>
+            <div class="filter-actions">
+                <span class="filter-label">Filter by:</span>
+                <div class="filter-tools">
+                    <span id="filterStatus" class="filter-status">Showing all recipes</span>
+                    <button type="button" id="clearFiltersBtn" class="clear-filters-btn">Clear filters</button>
+                </div>
+            </div>
 
             <!--Time-->
             <div class="filter-group">
@@ -206,7 +212,7 @@
                 <p class="section-subtitle">Click any card to see full details</p>
             </div>
 
-            <div class="recipe-cards-grid">
+            <div class="recipe-cards-grid" id="generalRecipesGrid">
 
                 <!--Card 1: overnight oats-->
                 <details class="recipe-card-full">
@@ -419,6 +425,7 @@
                 </details>
 
             </div>
+            <p id="noRecipesMessage" class="no-recipes-message" hidden>No recipes match the selected filters.</p>
         </section>
 
     </div>
