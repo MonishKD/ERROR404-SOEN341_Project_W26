@@ -45,18 +45,21 @@ model passwordResetTokens {
 }
 
 model recipes {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(255)
-  ingredients String?
-  prep_time   Int?
-  prep_steps  String?
-  cost        Decimal? @db.Decimal(10, 2)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now()) @updatedAt
-  ownerId     Int
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(255)
+  ingredients  String?
+  prep_time    Int?
+  prep_steps   String?
+  cost         String?   // "Low", "Medium", "High"
+  difficulty   String?   // "Easy", "Medium", "Hard"
+  dietary_tags String[]
+  allergens    String[]
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+  ownerId      Int         
   
   // Relationship: A recipe belongs to a user
-  owner       users   @relation(fields: [ownerId], references:[id])
+  owner        users   @relation(fields: [ownerId], references:[id])
   
   @@map("recipes")
 }

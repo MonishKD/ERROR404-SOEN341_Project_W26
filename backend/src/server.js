@@ -13,9 +13,17 @@ import { authMiddleware } from "./middleware/auth.js";
 import { checkRecipeOwner } from "./middleware/auth.js";
 import { login, register } from "./services/authService.js";
 import { getProfile, updateProfile } from "./services/profileService.js";
+import {
+  createRecipe,
+  getAllRecipes,
+  getRecipeById,
+  updateRecipe,
+  deleteRecipe
+} from "./services/recipesService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 // Load .env from project root
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
@@ -226,7 +234,8 @@ app.get("/api/recipes", authMiddleware, async (req, res) => {
     const timeVals = normalize(req.query.time);       // under-15, 15-30, 30-60, 60plus
     const costVals = normalize(req.query.cost);       // low, medium, high
     const dietaryVals = normalize(req.query.dietary); // gluten-free, vegan, etc.
-    const difficultyVals = normalize(req.query.difficulty); // ignored for now
+    const difficultyVals = normalize(req.query.difficulty); // Easy, Medium, Hard
+    const allergyVals = normalize(req.query.allergies); // nut-free, dairy-free, etc.
 
     const AND = [];
 
@@ -255,49 +264,64 @@ app.get("/api/recipes", authMiddleware, async (req, res) => {
       if (timeOR.length) AND.push({ OR: timeOR });
     }
 
-    // Cost filter thresholds (adjust with team if needed)
+    // Cost filter
     if (costVals.length) {
       const costOR = [];
       for (const cost of costVals) {
-        if (cost === "low") costOR.push({ cost: { lt: 6 } });
-        else if (cost === "medium") costOR.push({ cost: { gte: 6, lte: 15 } });
-        else if (cost === "high") costOR.push({ cost: { gt: 15 } });
+        if (cost === "low") costOR.push({ cost: "Low" });
+        else if (cost === "medium") costOR.push({ cost: "Medium" });
+        else if (cost === "high") costOR.push({ cost: "High" });
       }
       if (costOR.length) AND.push({ OR: costOR });
     }
 
-    // Dietary keyword match (no dietary column)
+    // Dietary filter
     if (dietaryVals.length) {
       const dietaryOR = [];
 
       for (const dietary of dietaryVals) {
-        const keyword = dietary.replace("-", " "); // gluten-free -> gluten free
-        dietaryOR.push(
-          { ingredients: { contains: dietary, mode: "insensitive" } },
-          { prep_steps: { contains: dietary, mode: "insensitive" } },
-          { ingredients: { contains: keyword, mode: "insensitive" } },
-          { prep_steps: { contains: keyword, mode: "insensitive" } }
-        );
-      }
+        // Map frontend values to database enum values
+        let dbValue = dietary;
+        if (dietary === "gluten-free") dbValue = "Gluten-Free";
+        else if (dietary === "dairy-free") dbValue = "Dairy-Free";
+        else if (dietary === "nut-free") dbValue = "Nut-Free";
+        // Keep as-is for exact matches like "Vegan", "Vegetarian", "Halal"
 
-      AND.push({ OR: dietaryOR });
+        dietaryOR.push({ dietary_tags: { has: dbValue } });
+      }
+      if (dietaryOR.length) AND.push({ OR: dietaryOR });
     }
 
-    // difficulty not supported in DB yet (ignore for now)
+    // Difficulty filter
     if (difficultyVals.length) {
-      console.log("⚠️ difficulty filter requested but ignored:", difficultyVals);
+      const difficultyOR = [];
+      for (const difficulty of difficultyVals) {
+        const capitalized = difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
+        if (["Easy", "Medium", "Hard"].includes(capitalized)) {
+          difficultyOR.push({ difficulty: capitalized });
+        }
+      }
+      if (difficultyOR.length) AND.push({ OR: difficultyOR });
+    }
+
+    // Allergies filter
+    if (allergyVals.length) {
+      const allergyOR = [];
+      for (const allergy of allergyVals) {
+        let dbValue = allergy;
+        if (allergy === "nut-free") dbValue = "Nut-Free";
+        else if (allergy === "dairy-free") dbValue = "Dairy-Free";
+        else if (allergy === "gluten-free") dbValue = "Gluten-Free";
+
+        allergyOR.push({ allergens: { has: dbValue } });
+      }
+      if (allergyOR.length) AND.push({ OR: allergyOR });  // Recipe has any of these allergens
     }
 
     const where = AND.length ? { AND } : undefined;
     console.log("🧠 Prisma where:", JSON.stringify(where, null, 2));
 
-    const recipes = await prisma.recipes.findMany({
-      where,
-      include: {
-        owner: { select: { firstName: true, lastName: true, email: true } },
-      },
-      orderBy: { created_at: "desc" },
-    });
+    const recipes = await getAllRecipes(where);
 
     return res.json(recipes);
   } catch (error) {
@@ -309,19 +333,7 @@ app.get("/api/recipes", authMiddleware, async (req, res) => {
 // Get recipe by ID with owner info
 app.get("/api/recipes/:id", async (req, res) => {
   try {
-    const recipe = await prisma.recipes.findUnique({
-      where: { id: parseInt(req.params.id) },
-      include: {
-        owner: {
-          select: {
-            firstName: true,
-            lastName: true,
-            email: true
-          }
-        }
-      }
-    });
-
+    const recipe = await getRecipeById(parseInt(req.params.id));
     if (!recipe) {
       return res.status(404).json({ error: "Recipe not found" });
     }
@@ -335,15 +347,24 @@ app.get("/api/recipes/:id", async (req, res) => {
 // CREATE recipe with ownerId
 app.post("/api/recipes", authMiddleware, async (req, res) => {
   try {
-    const { name, ingredients, prep_time, prep_steps, cost } = req.body;
-    const ownerId = req.user.userId; // Get ownerId from authenticated user
 
-    const newRecipe = await prisma.recipes.create({
-      data: { name, ingredients, prep_time, prep_steps, cost, ownerId },
-      include: { owner: { select: { firstName: true, lastName: true, email: true } } }
-    });
+    const { name, ingredients, prep_time, prep_steps, cost, difficulty, dietary_tags, allergens } = req.body;
+    const ownerId = parseInt(req.user.userId);
+    const recipeData = {
+      name,
+      ingredients,
+      prep_time: parseInt(prep_time),
+      prep_steps,
+      cost,
+      difficulty,
+      dietary_tags: dietary_tags || [],
+      allergens: allergens || [],
+      ownerId
+    };
 
+    const newRecipe = await createRecipe(recipeData);
     res.status(201).json(newRecipe);
+
   } catch (error) {
     console.error("Error creating recipe:", error);
     res.status(500).json({ error: error.message });
@@ -353,8 +374,8 @@ app.post("/api/recipes", authMiddleware, async (req, res) => {
 // UPDATE recipe
 app.put("/api/recipes/:id", checkRecipeOwner, async (req, res) => {
   try {
-    const result = await updateRecipe(parseInt(req.params.id), req.body);
-    res.json(result);
+    const updatedRecipe = await updateRecipe(parseInt(req.params.id), req.body);
+    res.json(updatedRecipe);
   } catch (error) {
     console.error("Error updating recipe:", error);
     res.status(500).json({ error: error.message });
@@ -364,7 +385,7 @@ app.put("/api/recipes/:id", checkRecipeOwner, async (req, res) => {
 // DELETE recipe
 app.delete("/api/recipes/:id", checkRecipeOwner, async (req, res) => {
   try {
-    const result = await deleteRecipe(parseInt(req.params.id));
+    const deletedRecipe = await deleteRecipe(parseInt(req.params.id));
     res.json({ message: "Recipe deleted successfully" });
   } catch (error) {
     console.error("Error deleting recipe:", error);
@@ -436,9 +457,23 @@ app.post('/api/auth/reset-password', async (req, res) => {
   }
 });
 
+
+/*** Error handling ***/
+
+// 404 handler for undefined routes
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: "Internal server error" });
+});
+
+
 // Start server
 export default app;
-const PORT = 4000;
+const PORT = 4001;
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
