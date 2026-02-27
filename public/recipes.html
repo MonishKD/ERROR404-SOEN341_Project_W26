@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="profile-styles.css">
     <link rel="stylesheet" href="recipe-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="script.js" defer></script>
 </head>
 
 <body>
@@ -179,26 +181,22 @@
         </div>
 
         <!--My recipes-->
+        
         <section class="section">
-            <div class="section-header">
-                <h2>👨‍🍳 My Recipes</h2>
-                <a href="create-recipe.html" class="btn-green">+ Create Recipe</a>
-            </div>
+        <div class="section-header">
+            <h2>👨‍🍳 My Recipes</h2>
+            <a href="create-recipe.html" class="btn-green">+ Create Recipe</a>
+        </div>
 
-            <!--Shown until populated-->
-            <div class="empty-state">
-                <div class="empty-icon">📝</div>
-                <h3>No recipes yet!</h3>
-                <p>Click <strong>+ Create Recipe</strong> to add your first recipe.</p>
-            </div>
+        <!--Shown until populated-->
+        <div id="myRecipesEmpty" class="empty-state">
+            <div class="empty-icon">📝</div>
+            <h3>No recipes yet!</h3>
+            <p>Click <strong>+ Create Recipe</strong> to add your first recipe.</p>
+        </div>
 
-            <!-- Backend: render user recipes into #myRecipesGrid and hide .empty-state above once user creates own recipes.
-                 Copy card structure from General Recipes below but replace the save button with:
-                 <div class="recipe-card-actions">
-                     <button class="btn-edit-recipe">✏️ Edit</a>
-                     <button class="btn-delete-recipe">🗑️ Delete</button>
-                 </div>-->
-
+        <!-- Recipes will be injected here by script.js -->
+        <div id="myRecipesGrid" class="recipe-cards-grid"></div>
         </section>
 
         <!--General recipes-->
