@@ -545,7 +545,7 @@ function matchesTimeFilter(prepTime, selectedTimeFilters) {
     if (timeFilter === '60plus') return prepTime >= 60;
     return false;
   });
-});
+};
 
 async function filterRecipes() {
   const timeCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(1) input[type="checkbox"]');
@@ -561,15 +561,20 @@ async function filterRecipes() {
     allergenCheckboxes.forEach(cb => {
       if (cb.checked) {
         // Map checkbox values to database values
-        const val = cb.value;
-        if (val === 'peanuts') excludedAllergens.push('Peanuts');
-        else if (val === 'tree-nuts') excludedAllergens.push('Tree Nuts');
-        else if (val === 'dairy') excludedAllergens.push('Dairy');
-        else if (val === 'eggs') excludedAllergens.push('Eggs');
-        else if (val === 'soy') excludedAllergens.push('Soy');
-        else if (val === 'wheat') excludedAllergens.push('Wheat');
-        else if (val === 'fish') excludedAllergens.push('Fish');
-        else if (val === 'shellfish') excludedAllergens.push('Shellfish');
+        const map = {
+        'peanuts': 'Peanuts',
+        'tree-nuts': 'Tree Nuts',
+        'dairy': 'Dairy',
+        'eggs': 'Eggs',
+        'soy': 'Soy',
+        'wheat': 'Wheat',
+        'fish': 'Fish',
+        'shellfish': 'Shellfish'
+      };
+        const mappedValue = map[cb.value];
+        if (mappedValue) {
+          excludedAllergens.push(mappedValue);
+        }
       }
     });
 
@@ -606,7 +611,7 @@ async function filterRecipes() {
 
       // Filter by dietary preferences
       if (dietaryCheckboxes.some(cb => cb.checked)) {
-        const matchesDietary =  // diet not in database
+        const matchesDietary =
           (dietaryCheckboxes[0].checked && recipe.diet === 'Gluten-Free') ||
           (dietaryCheckboxes[1].checked && recipe.diet === 'Dairy-Free') ||
           (dietaryCheckboxes[2].checked && recipe.diet === 'Nut-Free') ||
@@ -617,7 +622,7 @@ async function filterRecipes() {
         if (!matchesDietary) return false;
 
         // Filter by allergens
-        if (excludedAllergens.length > 0 && recipe.allergens && recipe.allergens.length > 0) {
+        if (excludedAllergens.length > 0 && recipe.allergens?.length > 0) {
           const hasExcludedAllergen = excludedAllergens.some(allergen =>
             recipe.allergens.includes(allergen)
           );
@@ -628,7 +633,7 @@ async function filterRecipes() {
       return true;
     });
 
-    displayRecipes(filteredRecipes); // to do
+    displayRecipes(filteredRecipes);
   }
 }
 
@@ -719,6 +724,102 @@ function displaySuggestedRecipes(recipes) {
   });
 }
 
+//helper function for display in general recipes page
+function createRecipeCard(recipe) {
+  const details = document.createElement("details");
+  details.className = "recipe-card-full";
+
+  // Convert cost number to label
+  let costLabel = "Low";
+  if (recipe.cost == "Low") costLabel = "💰 Low";
+  else if (recipe.cost == "Medium") costLabel = "💰💰 Medium";
+  else if (recipe.cost == "High") costLabel = "💰💰💰 High";
+
+  // Convert diet array to string
+  const dietText = recipe.diet && recipe.diet.length > 0
+    ? recipe.diet.join(" · ")
+    : "No specific diet";
+
+  details.innerHTML = `
+    <summary class="recipe-card-top">
+      <div class="recipe-card-emoji">${recipe.emoji || "🍽️"}</div>
+
+      <div class="recipe-card-summary">
+        <div class="recipe-card-tags">
+          <span class="tag tag-easy">${recipe.difficulty}</span>
+          <span class="tag tag-cost">${costLabel}</span>
+        </div>
+
+        <h3 class="recipe-card-title">${recipe.title}</h3>
+
+        <div class="recipe-card-meta">
+          <span>⏱️ ${recipe.prep_time} min</span>
+          <span>${dietText}</span>
+        </div>
+      </div>
+
+      <span class="recipe-card-chevron">▼</span>
+    </summary>
+
+    <div class="recipe-card-details">
+      <div class="recipe-card-ingredients">
+        <strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}
+      </div>
+
+      <div class="recipe-card-steps">
+        <strong>Steps:</strong>
+        <ol>
+          ${recipe.prep_steps
+            .split(",")
+            .map(step => `<li>${step.trim()}</li>`)
+            .join("")}
+        </ol>
+      </div>
+
+      <button class="btn-save-recipe" data-id="${recipe._id}">
+        + Save to My Recipes
+      </button>
+    </div>
+  `;
+
+  return details;
+}
+
+// display recipes in general recipes page
+function displayRecipes(recipes) {
+  recipeGrid = document.getElementById('generalRecipesGrid');
+  recipeGrid.innerHTML = ''; // Clear previous content
+
+  recipes.forEach(recipe => {
+    const card = createRecipeCard(recipe);
+    recipeGrid.appendChild(card);
+  });
+}
+
+// Search recipes based on search bar input
+async function searchRecipes() {
+  const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+  const recipes = await get(`${API_BASE_URL}/recipes`);
+
+  const filteredRecipes = recipes.filter(recipe =>
+    recipe.title.toLowerCase().includes(searchInput)
+  );
+
+  const generalRecipesSection = document.getElementById('generalRecipesGrid');
+  
+  if(filteredRecipes.length === 0) {
+    generalRecipesSection.innerHTML = '<p class="no-results">No recipes found matching your search.</p>';
+    return;
+  }
+
+  displayRecipes(filteredRecipes);
+
+  // Scroll to recipes section
+  generalRecipesSection.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
 
 /**
  * Update user profile
