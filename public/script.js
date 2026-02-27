@@ -799,6 +799,12 @@ function displayRecipes(recipes) {
 // Search recipes based on search bar input
 async function searchRecipes() {
   const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+
+  if(searchInput === '') {
+    alert('Please enter a search term');
+    return;
+  }
+  
   const recipes = await get(`${API_BASE_URL}/recipes`);
 
   const filteredRecipes = recipes.filter(recipe =>
