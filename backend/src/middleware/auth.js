@@ -26,28 +26,38 @@ export function authMiddleware(req, res, next) {
   }
 }
 
-export async function checkRecipeOwner(req, res, next){
+export async function checkRecipeOwner(req, res, next) {
   try {
-  const recipeId = req.params.id;
-  const userId = req.user.userId; // from authMiddleware
+    // Check if user exists FIRST
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
 
-  const recipe = await prisma.recipes.findUnique({
-    where: { id: parseInt(recipeId) },
-    select: { ownerId: true }
-  });
+    const recipeId = req.params.id;
+    const userId = req.user.userId;
 
-  if (!recipe) {
-    return res.status(404).json({ message: "Recipe not found" });
-  }
+    // Validate recipeId
+    if (!recipeId) {
+      return res.status(400).json({ message: "Recipe ID is required" });
+    }
 
-  if (recipe.ownerId !== userId) {
-    return res.status(403).json({ message: "You don't have permission to modify this recipe" });
-  }
+    const recipe = await prisma.recipes.findUnique({
+      where: { id: parseInt(recipeId) },
+      select: { ownerId: true }
+    });
 
-  req.recipe = recipe; // attach recipe info if needed in the route handler
-  next();
-} catch (err) {
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+
+    if (recipe.ownerId !== userId) {
+      return res.status(403).json({ message: "You don't have permission to modify this recipe" });
+    }
+
+    req.recipe = recipe;
+    next();
+  } catch (err) {
     console.error("Error checking recipe owner:", err);
     return res.status(500).json({ message: "Server error" });
   }
-};
+}

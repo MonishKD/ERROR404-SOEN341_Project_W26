@@ -495,3 +495,14 @@
 .allergen-filter .checkbox-icon {
     font-size: 13px;
 }
+
+/* Apply Filters button */
+.filter-apply {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+#applyFiltersBtn {
+    min-width: 150px;
+}

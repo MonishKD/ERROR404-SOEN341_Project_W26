@@ -15,8 +15,8 @@ async function main() {
         ingredients: "chickpeas, tortilla, tahini, lemon, cucumber, vegan",
         prep_steps: "Mash chickpeas + spices. Spread tahini. Add veggies. Wrap. (vegan)",
         difficulty: "Easy",
-        dietary_tags: ["vegan"],
-        allergens: ["gluten", "sesame"],
+        dietary_tags: ["Vegan"],
+        allergens: ["Gluten", "Sesame"],
         ownerId,
       },
       {
@@ -26,19 +26,19 @@ async function main() {
         ingredients: "shrimp, pasta, garlic, butter, parsley",
         prep_steps: "Boil pasta. Sauté garlic + butter. Add shrimp. Toss with pasta.",
         difficulty: "Medium",
-        dietary_tags: ["dairy"],
-        allergens: ["shellfish", "gluten", "dairy"],
+        dietary_tags: ["Dairy-Free"],
+        allergens: ["Shellfish", "Gluten", "Dairy"],
         ownerId,
       },
       {
         name: "One-Pan Veggie Fried Rice",
         prep_time: 30,
-      cost: "Low",
+        cost: "Low",
         ingredients: "rice, soy sauce, carrots, peas, eggs, vegetarian",
         prep_steps: "Cook rice. Stir-fry veggies. Add rice + soy sauce. Add eggs. (vegetarian)",
         difficulty: "Easy",
-        dietary_tags: ["vegetarian"],
-        allergens: ["soy", "eggs"],
+        dietary_tags: ["Vegetarian"],
+        allergens: ["Soy", "Eggs", "Gluten"],
         ownerId,
       },
       {
@@ -48,7 +48,7 @@ async function main() {
         ingredients: "ground beef, beans, tomato, onion, spices, gluten-free",
         prep_steps: "Brown beef. Add all ingredients. Simmer 60+ min. (gluten-free)",
         difficulty: "Medium",
-        dietary_tags: ["gluten-free"],
+        dietary_tags: ["Gluten-Free"],
         allergens: [],
         ownerId,
       },
@@ -59,8 +59,8 @@ async function main() {
         ingredients: "salmon, lemon, potatoes, broccoli, dairy-free",
         prep_steps: "Season salmon + veggies. Bake 35–40 min. (dairy-free)",
         difficulty: "Easy",
-        dietary_tags: ["dairy-free"],
-        allergens: ["fish"],
+        dietary_tags: ["Dairy-Free"],
+        allergens: ["Fish"],
         ownerId,
       },
       {
@@ -70,8 +70,8 @@ async function main() {
         ingredients: "chicken, rice, garlic sauce, cucumber, halal",
         prep_steps: "Season chicken shawarma-style. Cook rice. Assemble bowl. (halal)",
         difficulty: "Medium",
-        dietary_tags: ["halal", "dairy-free"],
-        allergens: ["gluten"],
+        dietary_tags: ["Halal", "Dairy-Free"],
+        allergens: ["Gluten", "Dairy"],
         ownerId,
       },
     ],
@@ -86,4 +86,3 @@ main()
   .finally(() => prisma.$disconnect());
 
 
-  

@@ -146,37 +146,37 @@
                 <span class="filter-group-title">🥗 Dietary</span>
                 <div class="filter-toggles">
                     <label class="checkbox-card filter-card">
-                        <input type="checkbox" name="dietary" value="gluten-free">
+                        <input type="checkbox" name="diet" value="gluten-free">
                         <span class="checkbox-content">
                             <span class="checkbox-label">🌾 Gluten-Free</span>
                         </span>
                     </label>
                     <label class="checkbox-card filter-card">
-                        <input type="checkbox" name="dietary" value="dairy-free">
+                        <input type="checkbox" name="diet" value="dairy-free">
                         <span class="checkbox-content">
                             <span class="checkbox-label">🥛 Dairy-Free</span>
                         </span>
                     </label>
                     <label class="checkbox-card filter-card">
-                        <input type="checkbox" name="dietary" value="nut-free">
+                        <input type="checkbox" name="diet" value="nut-free">
                         <span class="checkbox-content">
                             <span class="checkbox-label">🥜 Nut-Free</span>
                         </span>
                     </label>
                     <label class="checkbox-card filter-card">
-                        <input type="checkbox" name="dietary" value="vegan">
+                        <input type="checkbox" name="diet" value="vegan">
                         <span class="checkbox-content">
                             <span class="checkbox-label">🌱 Vegan</span>
                         </span>
                     </label>
                     <label class="checkbox-card filter-card">
-                        <input type="checkbox" name="dietary" value="vegetarian">
+                        <input type="checkbox" name="diet" value="vegetarian">
                         <span class="checkbox-content">
                             <span class="checkbox-label">🥗 Vegetarian</span>
                         </span>
                     </label>
                     <label class="checkbox-card filter-card">
-                        <input type="checkbox" name="dietary" value="halal">
+                        <input type="checkbox" name="diet" value="halal">
                         <span class="checkbox-content">
                             <span class="checkbox-label">🕌 Halal</span>
                         </span>
@@ -247,6 +247,10 @@
                     </label>
                 </div>
             </div>
+            <!-- Apply Filters Button -->
+            <div class="filter-apply">
+                <button id="applyFiltersBtn" class="btn-green">Apply Filters</button>
+            </div>
         </div>
 
         <!--My recipes-->
@@ -275,224 +279,8 @@
                 <p class="section-subtitle">Click any card to see full details</p>
             </div>
 
-            <div class="recipe-cards-grid" id="generalRecipesGrid">
-
-                <!--Card 1: overnight oats-->
-                <details class="recipe-card-full">
-                    <summary class="recipe-card-top">
-                        <div class="recipe-card-emoji">🥣</div>
-                        <div class="recipe-card-summary">
-                            <div class="recipe-card-tags">
-                                <span class="tag tag-easy">Easy</span>
-                                <span class="tag tag-cost">💰 Low</span>
-                            </div>
-                            <h3 class="recipe-card-title">Overnight Oats</h3>
-                            <div class="recipe-card-meta">
-                                <span>⏱️ 10 min</span>
-                                <span>🌾 Gluten-Free · 🥛 Dairy-Free</span>
-                            </div>
-                        </div>
-                        <span class="recipe-card-chevron">▼</span>
-                    </summary>
-                    <div class="recipe-card-details">
-                        <div class="recipe-card-ingredients">
-                            <strong>Ingredients:</strong> Rolled oats, almond milk, chia seeds, honey, berries
-                        </div>
-                        <div class="recipe-card-steps">
-                            <strong>Steps:</strong>
-                            <ol>
-                                <li>Add oats and chia seeds to a jar</li>
-                                <li>Pour in almond milk and stir well</li>
-                                <li>Drizzle honey on top</li>
-                                <li>Cover and refrigerate overnight</li>
-                                <li>Top with fresh berries before serving</li>
-                            </ol>
-                        </div>
-                        <button class="btn-save-recipe">+ Save to My Recipes</button>
-                    </div>
-                </details>
-
-                <!--Card 2: greek salad-->
-                <details class="recipe-card-full">
-                    <summary class="recipe-card-top">
-                        <div class="recipe-card-emoji">🥗</div>
-                        <div class="recipe-card-summary">
-                            <div class="recipe-card-tags">
-                                <span class="tag tag-medium">Medium</span>
-                                <span class="tag tag-cost">💰💰 Medium</span>
-                            </div>
-                            <h3 class="recipe-card-title">Greek Salad</h3>
-                            <div class="recipe-card-meta">
-                                <span>⏱️ 15 min</span>
-                                <span>🥦 Vegetarian</span>
-                            </div>
-                        </div>
-                        <span class="recipe-card-chevron">▼</span>
-                    </summary>
-                    <div class="recipe-card-details">
-                        <div class="recipe-card-ingredients">
-                            <strong>Ingredients:</strong> Cucumber, tomato, red onion, olives, feta, olive oil, oregano,
-                            salt
-                        </div>
-                        <div class="recipe-card-steps">
-                            <strong>Steps:</strong>
-                            <ol>
-                                <li>Cut cucumber, tomato, and red onion into chunks</li>
-                                <li>Add olives and crumbled feta</li>
-                                <li>Drizzle with olive oil</li>
-                                <li>Sprinkle oregano and salt</li>
-                                <li>Toss gently and serve</li>
-                            </ol>
-                        </div>
-                        <button class="btn-save-recipe">+ Save to My Recipes</button>
-                    </div>
-                </details>
-
-                <!--Card 3: classic lasagna-->
-                <details class="recipe-card-full">
-                    <summary class="recipe-card-top">
-                        <div class="recipe-card-emoji">🍝</div>
-                        <div class="recipe-card-summary">
-                            <div class="recipe-card-tags">
-                                <span class="tag tag-hard">Hard</span>
-                                <span class="tag tag-cost">💰💰 Medium</span>
-                            </div>
-                            <h3 class="recipe-card-title">Classic Lasagna</h3>
-                            <div class="recipe-card-meta">
-                                <span>⏱️ 75 min</span>
-                                <span>🥛 Contains: Gluten, Dairy</span>
-                            </div>
-                        </div>
-                        <span class="recipe-card-chevron">▼</span>
-                    </summary>
-                    <div class="recipe-card-details">
-                        <div class="recipe-card-ingredients">
-                            <strong>Ingredients:</strong> Lasagna sheets, ground beef, tomato sauce, béchamel,
-                            mozzarella, parmesan, garlic, onion
-                        </div>
-                        <div class="recipe-card-steps">
-                            <strong>Steps:</strong>
-                            <ol>
-                                <li>Brown beef with garlic and onion</li>
-                                <li>Add tomato sauce and simmer 15 min</li>
-                                <li>Prepare béchamel sauce separately</li>
-                                <li>Layer: pasta, meat sauce, béchamel, cheese</li>
-                                <li>Repeat layers and top with mozzarella</li>
-                                <li>Bake at 375°F for 45 minutes</li>
-                            </ol>
-                        </div>
-                        <button class="btn-save-recipe">+ Save to My Recipes</button>
-                    </div>
-                </details>
-
-                <!--Card 4: banana ice cream-->
-                <details class="recipe-card-full">
-                    <summary class="recipe-card-top">
-                        <div class="recipe-card-emoji">🍌</div>
-                        <div class="recipe-card-summary">
-                            <div class="recipe-card-tags">
-                                <span class="tag tag-easy">Easy</span>
-                                <span class="tag tag-cost">💰 Low</span>
-                            </div>
-                            <h3 class="recipe-card-title">Banana Ice Cream</h3>
-                            <div class="recipe-card-meta">
-                                <span>⏱️ 5 min</span>
-                                <span>🌱 Vegan · 🌾 Gluten-Free</span>
-                            </div>
-                        </div>
-                        <span class="recipe-card-chevron">▼</span>
-                    </summary>
-                    <div class="recipe-card-details">
-                        <div class="recipe-card-ingredients">
-                            <strong>Ingredients:</strong> 2 frozen bananas (optional: peanut butter, cocoa powder,
-                            vanilla)
-                        </div>
-                        <div class="recipe-card-steps">
-                            <strong>Steps:</strong>
-                            <ol>
-                                <li>Peel and freeze bananas overnight</li>
-                                <li>Break into chunks and blend until smooth</li>
-                                <li>Add any optional mix-ins and blend again</li>
-                                <li>Serve immediately or freeze 30 min for firmer texture</li>
-                            </ol>
-                        </div>
-                        <button class="btn-save-recipe">+ Save to My Recipes</button>
-                    </div>
-                </details>
-
-                <!--Card 5: fluffy pancakes-->
-                <details class="recipe-card-full">
-                    <summary class="recipe-card-top">
-                        <div class="recipe-card-emoji">🥞</div>
-                        <div class="recipe-card-summary">
-                            <div class="recipe-card-tags">
-                                <span class="tag tag-easy">Easy</span>
-                                <span class="tag tag-cost">💰 Low</span>
-                            </div>
-                            <h3 class="recipe-card-title">Fluffy Pancakes</h3>
-                            <div class="recipe-card-meta">
-                                <span>⏱️ 20 min</span>
-                                <span>🥛 Contains: Gluten, Dairy, Eggs</span>
-                            </div>
-                        </div>
-                        <span class="recipe-card-chevron">▼</span>
-                    </summary>
-                    <div class="recipe-card-details">
-                        <div class="recipe-card-ingredients">
-                            <strong>Ingredients:</strong> 1 cup flour, 1 tbsp baking powder, 1 cup milk, 1 egg, 2 tbsp
-                            butter, 1 tbsp sugar, pinch of salt, vanilla
-                        </div>
-                        <div class="recipe-card-steps">
-                            <strong>Steps:</strong>
-                            <ol>
-                                <li>Mix dry ingredients: flour, baking powder, sugar, salt</li>
-                                <li>Whisk wet ingredients: milk, egg, melted butter, vanilla</li>
-                                <li>Combine wet and dry, do not overmix</li>
-                                <li>Heat buttered pan over medium heat</li>
-                                <li>Pour ¼ cup batter per pancake, flip when bubbles form</li>
-                            </ol>
-                        </div>
-                        <button class="btn-save-recipe">+ Save to My Recipes</button>
-                    </div>
-                </details>
-
-                <!--Card 6: lemon herb chicken-->
-                <details class="recipe-card-full">
-                    <summary class="recipe-card-top">
-                        <div class="recipe-card-emoji">🍗</div>
-                        <div class="recipe-card-summary">
-                            <div class="recipe-card-tags">
-                                <span class="tag tag-medium">Medium</span>
-                                <span class="tag tag-cost">💰💰💰 High</span>
-                            </div>
-                            <h3 class="recipe-card-title">Lemon Herb Chicken</h3>
-                            <div class="recipe-card-meta">
-                                <span>⏱️ 45 min</span>
-                                <span>🌾 Gluten-Free · 🥛 Dairy-Free</span>
-                            </div>
-                        </div>
-                        <span class="recipe-card-chevron">▼</span>
-                    </summary>
-                    <div class="recipe-card-details">
-                        <div class="recipe-card-ingredients">
-                            <strong>Ingredients:</strong> Chicken thighs, lemon juice, garlic, rosemary, thyme, olive
-                            oil, salt, pepper
-                        </div>
-                        <div class="recipe-card-steps">
-                            <strong>Steps:</strong>
-                            <ol>
-                                <li>Mix lemon juice, garlic, herbs, olive oil, salt and pepper</li>
-                                <li>Marinate chicken for at least 30 minutes</li>
-                                <li>Preheat oven to 400°F</li>
-                                <li>Bake 35-40 minutes until golden and cooked through</li>
-                                <li>Rest 5 minutes before serving</li>
-                            </ol>
-                        </div>
-                        <button class="btn-save-recipe">+ Save to My Recipes</button>
-                    </div>
-                </details>
-
-            </div>
+            <!-- Recipes will be injected here by script.js -->
+            <div id="generalRecipesGrid" class="recipe-cards-grid"></div>
             <p id="noRecipesMessage" class="no-recipes-message" hidden>No recipes match the selected filters.</p>
         </section>
 

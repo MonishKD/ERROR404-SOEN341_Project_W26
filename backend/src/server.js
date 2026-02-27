@@ -330,6 +330,78 @@ app.get("/api/recipes", authMiddleware, async (req, res) => {
   }
 });
 
+// CREATE recipe with ownerId
+// CREATE recipe with ownerId - DEBUG VERSION
+app.post("/api/recipes", authMiddleware, async (req, res) => {
+  try {
+    console.log("========== RECIPE CREATION DEBUG ==========");
+    console.log("1. Full request body:", JSON.stringify(req.body, null, 2));
+
+    const { name, ingredients, prep_time, prep_steps, cost, difficulty, dietary_tags, allergens } = req.body;
+    const ownerId = parseInt(req.user.userId);
+
+    console.log("2. Extracted dietary_tags:", dietary_tags);
+    console.log("3. Type of dietary_tags:", typeof dietary_tags);
+    console.log("4. Is array?", Array.isArray(dietary_tags));
+
+    // Check if it's a string that needs parsing
+    let parsedDietaryTags = dietary_tags;
+    if (typeof dietary_tags === 'string') {
+      try {
+        parsedDietaryTags = JSON.parse(dietary_tags);
+        console.log("5. Parsed dietary_tags from string:", parsedDietaryTags);
+      } catch (e) {
+        console.log("5. Failed to parse dietary_tags as JSON:", e.message);
+      }
+    }
+
+    // Ensure it's an array
+    const dietaryTagsArray = Array.isArray(parsedDietaryTags) ? parsedDietaryTags : [];
+    console.log("6. Dietary tags as array:", dietaryTagsArray);
+
+    // Map the values
+    const mappedDietaryTags = dietaryTagsArray.map(tag => {
+      console.log(`7. Mapping tag: "${tag}"`);
+
+      if (tag === "gluten-free" || tag === "Gluten-Free") return "Gluten-Free";
+      if (tag === "dairy-free" || tag === "Dairy-Free") return "Dairy-Free";
+      if (tag === "nut-free" || tag === "Nut-Free") return "Nut-Free";
+      if (tag === "vegan" || tag === "Vegan") return "Vegan";
+      if (tag === "vegetarian" || tag === "Vegetarian") return "Vegetarian";
+      if (tag === "halal" || tag === "Halal") return "Halal";
+
+      console.log(`8. No match found for: "${tag}"`);
+      return tag;
+    });
+
+    console.log("9. Final mapped dietary_tags:", mappedDietaryTags);
+
+    const recipeData = {
+      name,
+      ingredients,
+      prep_time: parseInt(prep_time),
+      prep_steps,
+      cost,
+      difficulty,
+      dietary_tags: mappedDietaryTags,
+      allergens: allergens || [],
+      ownerId
+    };
+
+    console.log("10. Recipe data being sent to Prisma:", JSON.stringify(recipeData, null, 2));
+
+    const newRecipe = await createRecipe(recipeData);
+    console.log("11. Recipe saved successfully:", JSON.stringify(newRecipe, null, 2));
+    console.log("12. Saved dietary_tags:", newRecipe.dietary_tags);
+    console.log("==========================================");
+
+    res.status(201).json(newRecipe);
+  } catch (error) {
+    console.error("❌ ERROR creating recipe:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get recipe by ID with owner info
 app.get("/api/recipes/:id", async (req, res) => {
   try {
@@ -344,37 +416,45 @@ app.get("/api/recipes/:id", async (req, res) => {
   }
 });
 
-// CREATE recipe with ownerId
-app.post("/api/recipes", authMiddleware, async (req, res) => {
+// UPDATE recipe
+app.put("/api/recipes/:id", authMiddleware, checkRecipeOwner, async (req, res) => {
   try {
-
     const { name, ingredients, prep_time, prep_steps, cost, difficulty, dietary_tags, allergens } = req.body;
-    const ownerId = parseInt(req.user.userId);
-    const recipeData = {
+
+    console.log("Updating with dietary_tags:", dietary_tags);
+
+    // Map dietary tags to match database enum values
+    let mappedDietaryTags = [];
+    if (dietary_tags && Array.isArray(dietary_tags)) {
+      mappedDietaryTags = dietary_tags.map(tag => {
+        if (tag === "gluten-free") return "Gluten-Free";
+        if (tag === "dairy-free") return "Dairy-Free";
+        if (tag === "nut-free") return "Nut-Free";
+        if (tag === "vegan") return "Vegan";
+        if (tag === "vegetarian") return "Vegetarian";
+        if (tag === "halal") return "Halal";
+        return tag;
+      });
+    }
+
+    const updateData = {
       name,
       ingredients,
-      prep_time: parseInt(prep_time),
+      prep_time: prep_time ? parseInt(prep_time) : undefined,
       prep_steps,
       cost,
       difficulty,
-      dietary_tags: dietary_tags || [],
-      allergens: allergens || [],
-      ownerId
+      dietary_tags: mappedDietaryTags,
+      allergens: allergens || []
     };
 
-    const newRecipe = await createRecipe(recipeData);
-    res.status(201).json(newRecipe);
+    // Remove undefined fields
+    Object.keys(updateData).forEach(key =>
+      updateData[key] === undefined && delete updateData[key]
+    );
 
-  } catch (error) {
-    console.error("Error creating recipe:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// UPDATE recipe
-app.put("/api/recipes/:id", checkRecipeOwner, async (req, res) => {
-  try {
-    const updatedRecipe = await updateRecipe(parseInt(req.params.id), req.body);
+    const updatedRecipe = await updateRecipe(parseInt(req.params.id), updateData);
+    console.log("Recipe updated with dietary_tags:", updatedRecipe.dietary_tags);
     res.json(updatedRecipe);
   } catch (error) {
     console.error("Error updating recipe:", error);
@@ -383,7 +463,7 @@ app.put("/api/recipes/:id", checkRecipeOwner, async (req, res) => {
 });
 
 // DELETE recipe
-app.delete("/api/recipes/:id", checkRecipeOwner, async (req, res) => {
+app.delete("/api/recipes/:id", authMiddleware, checkRecipeOwner, async (req, res) => {
   try {
     const deletedRecipe = await deleteRecipe(parseInt(req.params.id));
     res.json({ message: "Recipe deleted successfully" });
@@ -473,7 +553,7 @@ app.use((err, req, res, next) => {
 
 // Start server
 export default app;
-const PORT = 4001;
+const PORT = 4002;
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {

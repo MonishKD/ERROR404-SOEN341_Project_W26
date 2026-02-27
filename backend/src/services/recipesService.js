@@ -15,10 +15,11 @@ export async function createRecipe(recipeData) {
   }
 }
 
-// Get all recipes
-export async function getAllRecipes() {
+// Get all recipes, optionally filtered with a Prisma `where` clause
+export async function getAllRecipes(where) {
   try {
     const recipes = await prisma.recipes.findMany({
+      where,
       include: { owner: { select: { firstName: true, lastName: true, email: true } } }
     });
     return recipes;
