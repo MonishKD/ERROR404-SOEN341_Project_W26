@@ -19,6 +19,7 @@ This project was built with the following:
 - HTML/CSS for the frontend
 - JavaScript/Node.js/Express for the backend/server hosting
 - PostgreSQL for the database engine with pgAdmin for the GUI
+- CI implemented using GitHub Actions
 
 To run the project (from project root):
 

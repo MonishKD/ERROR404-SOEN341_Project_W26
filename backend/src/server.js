@@ -208,25 +208,101 @@ app.put('/api/profile/health-metrics', authMiddleware, async (req, res) => {
 
 /*** Recipe routes ***/
 
-// Get all recipes with owner info
+// Get all recipes with optional search + filters
 app.get("/api/recipes", authMiddleware, async (req, res) => {
   try {
-    const recipes = await prisma.recipes.findMany({
-      include: {
-        owner: {
-          select: {
-            firstName: true,
-            lastName: true,
-            email: true
-          }
-        }
+    console.log("✅ /api/recipes route HIT", req.query);
+
+    const q = (req.query.q || "").trim();
+
+    // allow single value OR comma-separated list (ex: time=under-15,15-30)
+    const normalize = (v) =>
+      (v || "")
+        .toString()
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+    const timeVals = normalize(req.query.time);       // under-15, 15-30, 30-60, 60plus
+    const costVals = normalize(req.query.cost);       // low, medium, high
+    const dietaryVals = normalize(req.query.dietary); // gluten-free, vegan, etc.
+    const difficultyVals = normalize(req.query.difficulty); // ignored for now
+
+    const AND = [];
+
+    // Search across fields
+    if (q) {
+      AND.push({
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { ingredients: { contains: q, mode: "insensitive" } },
+          { prep_steps: { contains: q, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    // Time filter (if multiple selected, treat as OR inside AND)
+    if (timeVals.length) {
+      const timeOR = [];
+
+      for (const time of timeVals) {
+        if (time === "under-15") timeOR.push({ prep_time: { lt: 15 } });
+        else if (time === "15-30") timeOR.push({ prep_time: { gte: 15, lte: 30 } });
+        else if (time === "30-60") timeOR.push({ prep_time: { gte: 30, lte: 60 } });
+        else if (time === "60plus") timeOR.push({ prep_time: { gt: 60 } });
       }
+
+      if (timeOR.length) AND.push({ OR: timeOR });
+    }
+
+    // Cost filter thresholds (adjust with team if needed)
+    if (costVals.length) {
+      const costOR = [];
+      for (const cost of costVals) {
+        if (cost === "low") costOR.push({ cost: { lt: 6 } });
+        else if (cost === "medium") costOR.push({ cost: { gte: 6, lte: 15 } });
+        else if (cost === "high") costOR.push({ cost: { gt: 15 } });
+      }
+      if (costOR.length) AND.push({ OR: costOR });
+    }
+
+    // Dietary keyword match (no dietary column)
+    if (dietaryVals.length) {
+      const dietaryOR = [];
+
+      for (const dietary of dietaryVals) {
+        const keyword = dietary.replace("-", " "); // gluten-free -> gluten free
+        dietaryOR.push(
+          { ingredients: { contains: dietary, mode: "insensitive" } },
+          { prep_steps: { contains: dietary, mode: "insensitive" } },
+          { ingredients: { contains: keyword, mode: "insensitive" } },
+          { prep_steps: { contains: keyword, mode: "insensitive" } }
+        );
+      }
+
+      AND.push({ OR: dietaryOR });
+    }
+
+    // difficulty not supported in DB yet (ignore for now)
+    if (difficultyVals.length) {
+      console.log("⚠️ difficulty filter requested but ignored:", difficultyVals);
+    }
+
+    const where = AND.length ? { AND } : undefined;
+    console.log("🧠 Prisma where:", JSON.stringify(where, null, 2));
+
+    const recipes = await prisma.recipes.findMany({
+      where,
+      include: {
+        owner: { select: { firstName: true, lastName: true, email: true } },
+      },
+      orderBy: { created_at: "desc" },
     });
 
-    res.json(recipes);
+    return res.json(recipes);
   } catch (error) {
     console.error("Error fetching recipes:", error);
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
