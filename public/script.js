@@ -1,11 +1,14 @@
 // script.js
 // Frontend-Backend Integration for MealMajor
-// Handles: Login, Signup, Form Validation, Token Management, Profile Loading
+// Handles: Login, Signup, Form Validation, Token Management, Profile Loading, Recipes
 
 
 // CONFIGURATION
-const API_BASE_URL = 'http://localhost:4001/api';
+const API_BASE_URL = 'http://localhost:4002/api';
 const TOKEN_KEY = 'mealmajor_token';
+
+// Global variable to store all recipes for filtering
+let allRecipes = [];
 
 
 // UTILITY FUNCTIONS
@@ -121,16 +124,6 @@ function validatePassword(password) {
   return { valid: true, message: '' };
 }
 
-/**
- * Validate full name (not empty, at least 2 characters)
- */
-function validateFullName(name) {
-  if (!name || name.trim().length < 2) {
-    return { valid: false, message: 'Please enter a valid full name' };
-  }
-  return { valid: true, message: '' };
-}
-
 
 // API FUNCTIONS
 /**
@@ -213,9 +206,70 @@ async function getUserProfile() {
   }
 }
 
-// Add these new functions to your script.js
+/**
+ * Update user profile
+ */
+async function updateUserProfile(updates) {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
 
-// Check profile completion status
+    const response = await fetch(`${API_BASE_URL}/profile`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updates),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update profile');
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Fetch recipes from the API
+ */
+async function fetchRecipes(ownerId = null) {
+  try {
+    let url = `${API_BASE_URL}/recipes`;
+    if (ownerId) {
+      url += `?ownerId=${ownerId}`;
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch recipes');
+    }
+
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error fetching recipes:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+
+// PROFILE FUNCTIONS
+/**
+ * Check profile completion status
+ */
 async function checkProfileCompletion() {
   console.log('🔍 CHECK_PROFILE_COMPLETION STARTED at:', new Date().toISOString());
 
@@ -283,7 +337,9 @@ async function checkProfileCompletion() {
   }
 }
 
-// Show profile prompt
+/**
+ * Show profile prompt
+ */
 function showProfilePrompt(missingFields) {
   const prompt = document.getElementById('profilePrompt');
   if (prompt) {
@@ -306,7 +362,9 @@ function showProfilePrompt(missingFields) {
   }
 }
 
-// Close prompt
+/**
+ * Close prompt
+ */
 function closePrompt() {
   const prompt = document.getElementById('profilePrompt');
   if (prompt) {
@@ -314,7 +372,9 @@ function closePrompt() {
   }
 }
 
-// Show success toast
+/**
+ * Show success toast
+ */
 function showSuccessToast(message) {
   const toast = document.getElementById('successToast');
   const toastMessage = document.querySelector('.toast-message');
@@ -330,7 +390,9 @@ function showSuccessToast(message) {
   }
 }
 
-// Save health metrics
+/**
+ * Save health metrics
+ */
 async function saveHealthMetrics(event) {
   event.preventDefault();
 
@@ -397,469 +459,687 @@ async function saveHealthMetrics(event) {
   }
 }
 
-// Update initHomePage function
-function initHomePage() {
-  console.log('🏠 INIT_HOME_PAGE CALLED at:', new Date().toISOString());
-  console.log('Current URL:', window.location.href);
-  console.log('Document readyState:', document.readyState);
+/**
+ * Load user profile and display on home page
+ */
+async function loadUserProfile() {
+  const result = await getUserProfile();
 
-  // Check if prompt exists
-  const prompt = document.getElementById('profilePrompt');
-  console.log('Prompt element exists at init:', !!prompt);
+  if (result.success) {
+    // Update name display
+    const firstNameElement = document.getElementById('firstName');
+    if (firstNameElement) {
+      firstNameElement.textContent = `${result.data.firstName || 'User'}`;
+    }
 
-  // Check authentication
-  if (!isAuthenticated()) {
-    window.location.href = 'login-page.html';
-    return;
-  }
-
-  // Load user profile and display name
-  loadUserProfile();
-
-  // Check profile completion
-  checkProfileCompletion();
-
-  // Setup logout functionality
-  const logoutLink = document.querySelector('.nav-link.logout');
-  if (logoutLink) {
-    logoutLink.addEventListener('click', (e) => {
-      e.preventDefault();
+    const fullNameElement = document.getElementById('fullName');
+    if (fullNameElement) {
+      fullNameElement.textContent = `${result.data.firstName} ${result.data.lastName}`;
+    }
+  } else {
+    console.error('Failed to load profile:', result.error);
+    // If token is invalid, redirect to login
+    if (result.error.includes('token') || result.error.includes('auth')) {
       clearToken();
       window.location.href = 'login-page.html';
-    });
-  }
-
-  // Add form submit handler
-  const metricsForm = document.getElementById('healthMetricsForm');
-  if (metricsForm) {
-    metricsForm.addEventListener('submit', saveHealthMetrics);
+    }
   }
 }
 
 /**
- * Filter recipes based on preferences setup in edit profile
+ * Load user profile and populate edit form
  */
-async function suggestedRecipes() {
-  // get preferences from user profile
-  const user = await get(`${API_BASE_URL}/api/profile`);
+async function loadUserProfileForEdit() {
+  const result = await getUserProfile();
 
-  const cookingSkill = user.cookingSkill;
-  const mealPrepTime = user.mealPrepTime;
-  const budgetRange = user.budgetRange;
-  const userAllergies = user.allergies || [];  // User's allergens
-  const userDiets = user.dietPreferences;
+  if (result.success) {
+    const profile = result.data;
+    console.log('Profile loaded:', profile);
 
-  const recipes = await get(`${API_BASE_URL}/recipes`);
-
-  // Remove recipes that have allergies the user has
-  const safeRecipes = recipes.filter(recipe => {
-    // If user has no allergies, all recipes are safe
-    if (!userAllergies || userAllergies.length === 0) return true;
-
-    // If recipe has no allergens listed, consider it safe
-    if (!recipe.allergens || recipe.allergens.length === 0) return true;
-
-    // Check if recipe contains any allergen the user is allergic to
-    const hasAllergen = userAllergies.some(allergy =>
-      recipe.allergens.includes(allergy)
-    );
-
-    // Return true if recipe is safe (NO matching allergens)
-    return !hasAllergen;
-  });
-
-  const filteredRecipes = safeRecipes.map(recipe => {
-    let matches = 0;
-
-    // Filter by cooking skill
-    if (cookingSkill == "beginner" && recipe.difficulty == "Easy") matches++;
-    if (cookingSkill == "intermediate" && recipe.difficulty == "Medium") matches++;
-    if (cookingSkill == "advanced" && recipe.difficulty == "Hard") matches++;
-    if (cookingSkill == "expert" && recipe.difficulty == "Hard") matches++;
-
-    // Filter by meal prep time
-    if (mealPrepTime == "quick" && recipe.prep_time <= 15) matches++;
-    if (mealPrepTime == "moderate" && recipe.prep_time > 15 && recipe.prep_time <= 30) matches++;
-    if (mealPrepTime == "extended" && recipe.prep_time > 30 && recipe.prep_time <= 60) matches++;
-    if (mealPrepTime == "elaborate" && recipe.prep_time > 60) matches++;
-    if (mealPrepTime == "any") matches++;
-
-    // Filter by budget
-    if (budgetRange) {
-      if (budgetRange === "low" && recipe.cost === 'Low') matches++;
-      if (budgetRange === "medium" && recipe.cost === 'Medium') matches++;
-      if (budgetRange === "high" && recipe.cost === 'High') matches++;
+    // Populate basic fields
+    if (document.getElementById('firstName')) {
+      document.getElementById('firstName').value = profile.firstName || '';
+    }
+    if (document.getElementById('lastName')) {
+      document.getElementById('lastName').value = profile.lastName || '';
+    }
+    if (document.getElementById('email')) {
+      document.getElementById('email').value = profile.email || '';
     }
 
-    // Filter by diet
-    if (recipe.dietary_tags && userDiets.length > 0) {
-      const dietMatch = userDiets.some(diet =>
-        recipe.dietary_tags.includes(diet)
-      );
-      if (dietMatch) matches++;
+    // Populate health metrics
+    if (document.getElementById('editAge')) {
+      document.getElementById('editAge').value = profile.age || '';
+    }
+    if (document.getElementById('editWeight')) {
+      document.getElementById('editWeight').value = profile.weight || '';
+    }
+    if (document.getElementById('editHeight')) {
+      document.getElementById('editHeight').value = profile.height || '';
     }
 
-    return { ...recipe, matches };
-  });
+    // Populate diet preferences
+    if (profile.dietPreferences && Array.isArray(profile.dietPreferences)) {
+      profile.dietPreferences.forEach(diet => {
+        const checkbox = document.querySelector(`input[name="diet"][value="${diet}"]`);
+        if (checkbox) checkbox.checked = true;
+      });
+    }
 
-  // Sort recipes by the number of matches
-  filteredRecipes.sort((a, b) => b.matches - a.matches);
-
-  displaySuggestedRecipes(filteredRecipes.slice(0, 4)); // return top 4 suggestions
-}
-// Helper function to parse recipe card data
-function parseRecipeCard(card) {
-  const title = card.querySelector('.recipe-card-title')?.textContent?.trim().toLowerCase() || '';
-  const timeText = card.querySelector('.recipe-card-meta span')?.textContent || '';
-  // Extract number from time text (e.g., "30 min" -> 30)
-  const timeMatch = timeText.match(/\d+/);
-  const prepTime = timeMatch ? parseInt(timeMatch[0], 10) : 0;
-
-// Determine difficulty based on tags
-  let difficulty = '';
-  if (card.querySelector('.tag-easy')) difficulty = 'easy';
-  else if (card.querySelector('.tag-medium')) difficulty = 'medium';
-  else if (card.querySelector('.tag-hard')) difficulty = 'hard';
-// Determine cost based on tags
-  let cost = '';
-  const costText = card.querySelector('.tag-cost')?.textContent?.toLowerCase() || '';
-  if (costText.includes('high')) cost = 'high';
-  else if (costText.includes('medium')) cost = 'medium';
-  else if (costText.includes('low')) cost = 'low';
-
-  // Extract dietary information from the second span in the meta section (if it exists)
-  const dietaryText = card.querySelectorAll('.recipe-card-meta span')[1]?.textContent?.toLowerCase() || '';
-
-  // Return an object with all the extracted information
-  return { title, prepTime, difficulty, cost, dietaryText };
-}
-// Helper function to check if a recipe matches the selected time filters
-function matchesTimeFilter(prepTime, selectedTimeFilters) {
-  if (selectedTimeFilters.length === 0) return true;
-
-// Check if prep time matches any of the selected time filters (15 min, 15-30 min, 30-60 min, 60+ min)
-  return selectedTimeFilters.some((timeFilter) => {
-    if (timeFilter === 'under-15') return prepTime < 15;
-    if (timeFilter === '15-30') return prepTime >= 15 && prepTime < 30;
-    if (timeFilter === '30-60') return prepTime >= 30 && prepTime < 60;
-    if (timeFilter === '60plus') return prepTime >= 60;
-    return false;
-  });
-};
-
-async function filterRecipes() {
-  const timeCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(1) input[type="checkbox"]');
-  const difficultyCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(2) input[type="checkbox"]');
-  const costCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(3) input[type="checkbox"]');
-  const dietaryCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(4) input[type="checkbox"]');
-  const allergenCheckboxes = document.querySelectorAll('.filter-group:nth-of-type(5) input[type="checkbox"]');
-
-  const recipes = await get(`${API_BASE_URL}/recipes`);
-
-  const excludedAllergens = [];
-  if (allergenCheckboxes.length > 0) {
-    allergenCheckboxes.forEach(cb => {
-      if (cb.checked) {
-        // Map checkbox values to database values
-        const map = {
-        'peanuts': 'Peanuts',
-        'tree-nuts': 'Tree Nuts',
-        'dairy': 'Dairy',
-        'eggs': 'Eggs',
-        'soy': 'Soy',
-        'wheat': 'Wheat',
-        'fish': 'Fish',
-        'shellfish': 'Shellfish'
-      };
-        const mappedValue = map[cb.value];
-        if (mappedValue) {
-          excludedAllergens.push(mappedValue);
+    // Populate allergies
+    if (profile.allergies && Array.isArray(profile.allergies)) {
+      const customAllergies = [];
+      profile.allergies.forEach(allergy => {
+        const checkbox = document.querySelector(`input[name="allergy"][value="${allergy}"]`);
+        if (checkbox) {
+          checkbox.checked = true;
+        } else {
+          customAllergies.push(allergy);
+        }
+      });
+      //extra allergies that are not predefined
+      if (customAllergies.length > 0) {
+        const otherAllergiesArea = document.getElementById('otherAllergies');
+        if (otherAllergiesArea) {
+          otherAllergiesArea.value = customAllergies.join(', ');
         }
       }
-    });
+    }
 
-    const filteredRecipes = recipes.filter(recipe => {
-      // Filter by time
-      if (timeCheckboxes.some(cb => cb.checked)) {
-        const matchesTime =
-          (timeCheckboxes[0].checked && recipe.prep_time < 15) ||      // Quick
-          (timeCheckboxes[1].checked && recipe.prep_time >= 15 && recipe.prep_time < 30) || // Medium
-          (timeCheckboxes[2].checked && recipe.prep_time >= 30 && recipe.prep_time < 60) || // Long
-          (timeCheckboxes[3].checked && recipe.prep_time >= 60);       // Very long
+    // Populate cooking skill
+    if (document.getElementById('cookingSkill')) {
+      document.getElementById('cookingSkill').value = profile.cookingSkill || '';
+    }
+    // Populate meal prep time
+    if (document.getElementById('mealPrepTime')) {
+      document.getElementById('mealPrepTime').value = profile.mealPrepTime || '';
+    }
 
-        if (!matchesTime) return false;
-      }
-      // Filter by difficulty
-      if (difficultyCheckboxes.some(cb => cb.checked)) {
-        const matchesDifficulty =  // difficulty not in database
-          (difficultyCheckboxes[0].checked && recipe.difficulty === 'Easy') ||
-          (difficultyCheckboxes[1].checked && recipe.difficulty === 'Medium') ||
-          (difficultyCheckboxes[2].checked && recipe.difficulty === 'Hard');
-
-        if (!matchesDifficulty) return false;
-      }
-
-      // Filter by cost
-      if (costCheckboxes.some(cb => cb.checked)) {
-        const matchesCost =
-          (costCheckboxes[0].checked && recipe.cost === 'Low') || // low
-          (costCheckboxes[1].checked && recipe.cost === 'Medium') || // medium
-          (costCheckboxes[2].checked && recipe.cost === 'High'); // high
-
-        if (!matchesCost) return false;
-      }
-
-      // Filter by dietary preferences
-      if (dietaryCheckboxes.some(cb => cb.checked)) {
-        const matchesDietary =
-          (dietaryCheckboxes[0].checked && recipe.diet === 'Gluten-Free') ||
-          (dietaryCheckboxes[1].checked && recipe.diet === 'Dairy-Free') ||
-          (dietaryCheckboxes[2].checked && recipe.diet === 'Nut-Free') ||
-          (dietaryCheckboxes[3].checked && recipe.diet === 'Vegan') ||
-          (dietaryCheckboxes[4].checked && recipe.diet === 'Vegetarian') ||
-          (dietaryCheckboxes[5].checked && recipe.diet === 'Halal');
-
-        if (!matchesDietary) return false;
-
-        // Filter by allergens
-        if (excludedAllergens.length > 0 && recipe.allergens?.length > 0) {
-          const hasExcludedAllergen = excludedAllergens.some(allergen =>
-            recipe.allergens.includes(allergen)
-          );
-          if (hasExcludedAllergen) return false;
-        }
-      }
-
-      return true;
-    });
-
-    displayRecipes(filteredRecipes);
+    // Populate budget range
+    if (document.getElementById('budgetRange')) {
+      document.getElementById('budgetRange').value = profile.budgetRange || '';
+    }
+  } else {
+    console.error('Failed to load profile:', result.error);
+    // If token is invalid, redirect to login
+    if (result.error.includes('token') || result.error.includes('auth')) {
+      clearToken();
+      window.location.href = 'login-page.html';
+    }
   }
 }
 
-// Function to display recipes dynamically
-function displaySuggestedRecipes(recipes) {
-  const grid = document.querySelector('.recipes-grid');
 
-  // Clear previous content
-  grid.innerHTML = '';
+// RECIPE FUNCTIONS
 
+/**
+ * Load all recipes for filtering
+ */
+async function loadAllRecipes() {
+  const result = await fetchRecipes();
+  if (result.success) {
+    allRecipes = result.data;
+    console.log('Loaded all recipes for filtering:', allRecipes.length);
+  }
+}
+
+/**
+ * Load My Recipes
+ */
+async function loadMyRecipes() {
+  console.log('Loading My Recipes...');
+
+  const myRecipesGrid = document.getElementById('myRecipesGrid');
+  const emptyState = document.getElementById('myRecipesEmpty');
+
+  if (!myRecipesGrid) return;
+
+  try {
+    // Get current user profile to get their ID
+    const profileResult = await getUserProfile();
+
+    if (!profileResult.success) {
+      console.error('Failed to get user profile:', profileResult.error);
+      return;
+    }
+
+    const ownerId = profileResult.data.id;
+
+    // Fetch recipes owned by this user
+    const result = await fetchRecipes(ownerId);
+
+    if (result.success) {
+      const recipes = result.data;
+      console.log('My Recipes fetched:', recipes.length);
+
+      if (recipes.length === 0) {
+        // Show empty state
+        if (emptyState) emptyState.style.display = 'flex';
+        myRecipesGrid.innerHTML = '';
+      } else {
+        // Hide empty state
+        if (emptyState) emptyState.style.display = 'none';
+
+        // Display recipes
+        myRecipesGrid.innerHTML = '';
+        recipes.forEach(recipe => {
+          const card = createRecipeCard(recipe, true);
+          myRecipesGrid.appendChild(card);
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error in loadMyRecipes:', error);
+  }
+}
+
+/**
+ * Load General Recipes
+ */
+async function loadGeneralRecipes() {
+  console.log('Loading General Recipes...');
+
+  const generalGrid = document.getElementById('generalRecipesGrid');
+  if (!generalGrid) return;
+
+  try {
+    // Fetch all recipes
+    const result = await fetchRecipes();
+
+    if (result.success) {
+      // Filter to ONLY show recipes with ownerId = 1 (seed recipes)
+      let recipes = result.data.filter(recipe => recipe.ownerId === 1);
+
+      // Assign emojis based on recipe names
+      recipes = recipes.map(recipe => {
+        // Create a copy of the recipe with an emoji
+        const recipeWithEmoji = { ...recipe };
+
+        // Assign emoji based on name
+        if (recipe.name.includes("Chickpea")) recipeWithEmoji.emoji = "🌯";
+        else if (recipe.name.includes("Shrimp")) recipeWithEmoji.emoji = "🍝";
+        else if (recipe.name.includes("Fried Rice")) recipeWithEmoji.emoji = "🍚";
+        else if (recipe.name.includes("Beef Chili")) recipeWithEmoji.emoji = "🥘";
+        else if (recipe.name.includes("Salmon")) recipeWithEmoji.emoji = "🐟";
+        else if (recipe.name.includes("Shawarma")) recipeWithEmoji.emoji = "🥙";
+        else recipeWithEmoji.emoji = "🍽️"; // Default emoji
+
+        return recipeWithEmoji;
+      });
+
+      console.log('General recipes fetched (ownerId=1):', recipes.length);
+
+      // Store in global variable for filtering
+      allRecipes = recipes;
+
+      // Clear and populate grid
+      generalGrid.innerHTML = '';
+
+      recipes.forEach(recipe => {
+        const card = createRecipeCard(recipe, false);
+        generalGrid.appendChild(card);
+      });
+    }
+  } catch (error) {
+    console.error('Error in loadGeneralRecipes:', error);
+  }
+}
+
+/**
+ * Filter recipes by search term
+ */
+function filterRecipesBySearch(searchTerm) {
+  console.log('Searching for:', searchTerm);
+
+  const generalGrid = document.querySelector('.section:last-child .recipe-cards-grid');
+  if (!generalGrid) return;
+
+  // If search is empty, show all recipes
+  if (!searchTerm || searchTerm === '') {
+    displayFilteredRecipes(allRecipes);
+    return;
+  }
+
+  // Convert search term to lowercase for case-insensitive comparison
+  const term = searchTerm.toLowerCase();
+
+  // Filter recipes by name (partial match)
+  const filtered = allRecipes.filter(recipe => {
+    return recipe.name && recipe.name.toLowerCase().includes(term);
+  });
+
+  console.log('Search results:', filtered.length);
+
+  if (filtered.length === 0) {
+    generalGrid.innerHTML = '<p class="no-results">No recipes match your search</p>';
+  } else {
+    displayFilteredRecipes(filtered);
+  }
+}
+
+/**
+ * Filter recipes based on selected filters
+ */
+async function filterRecipes() {
+  console.log('Filtering recipes...');
+
+  // Get all selected filter values by name attribute (more reliable)
+  const timeChecked = Array.from(document.querySelectorAll('input[name="time"]:checked')).map(cb => cb.value);
+  const difficultyChecked = Array.from(document.querySelectorAll('input[name="difficulty"]:checked')).map(cb => cb.value);
+  const costChecked = Array.from(document.querySelectorAll('input[name="cost"]:checked')).map(cb => cb.value);
+  const dietaryChecked = Array.from(document.querySelectorAll('input[name="diet"]:checked')).map(cb => cb.value);
+  const allergenChecked = Array.from(document.querySelectorAll('input[name="allergy"]:checked')).map(cb => cb.value);
+
+  console.log('Selected filters:', {
+    time: timeChecked,
+    difficulty: difficultyChecked,
+    cost: costChecked,
+    dietary: dietaryChecked,
+    allergens: allergenChecked
+  });
+
+  // If no filters selected, show all recipes
+  if (timeChecked.length === 0 && difficultyChecked.length === 0 &&
+    costChecked.length === 0 && dietaryChecked.length === 0 &&
+    allergenChecked.length === 0) {
+    displayFilteredRecipes(allRecipes);
+    return;
+  }
+
+  // Filter recipes
+  const filtered = allRecipes.filter(recipe => {
+    // TIME FILTER
+    if (timeChecked.length > 0) {
+      const timeMatch = timeChecked.some(time => {
+        if (time === 'under-15' && recipe.prep_time < 15) return true;
+        if (time === '15-30' && recipe.prep_time >= 15 && recipe.prep_time <= 30) return true;
+        if (time === '30-60' && recipe.prep_time >= 30 && recipe.prep_time <= 60) return true;
+        if (time === '60plus' && recipe.prep_time > 60) return true;
+        return false;
+      });
+      if (!timeMatch) return false;
+    }
+
+    // DIFFICULTY FILTER (case insensitive)
+    if (difficultyChecked.length > 0) {
+      const difficultyMatch = difficultyChecked.some(diff =>
+        recipe.difficulty && recipe.difficulty.toLowerCase() === diff.toLowerCase()
+      );
+      if (!difficultyMatch) return false;
+    }
+
+    // COST FILTER (case insensitive)
+    if (costChecked.length > 0) {
+      const costMatch = costChecked.some(cost =>
+        recipe.cost && recipe.cost.toLowerCase() === cost.toLowerCase()
+      );
+      if (!costMatch) return false;
+    }
+
+    // DIETARY FILTER (case insensitive)
+    if (dietaryChecked.length > 0 && recipe.dietary_tags) {
+      const dietaryMatch = dietaryChecked.some(diet => {
+        // Use case-insensitive comparison for all dietary tags
+        return recipe.dietary_tags.some(tag =>
+          tag.toLowerCase() === diet.toLowerCase()
+        );
+      });
+      if (!dietaryMatch) return false;
+    }
+
+    // ALLERGEN FILTER - Hide recipes with selected allergens (case insensitive)
+    if (allergenChecked.length > 0 && recipe.allergens) {
+      const hasAllergen = allergenChecked.some(allergen => {
+        return recipe.allergens.some(recipeAllergen =>
+          recipeAllergen.toLowerCase() === allergen.toLowerCase()
+        );
+      });
+      if (hasAllergen) return false; // Hide recipes with these allergens
+    }
+
+    return true;
+  });
+
+  console.log('Filtered recipes:', filtered.length);
+  displayFilteredRecipes(filtered);
+}
+/**
+ * Display filtered recipes in the general grid
+ */
+function displayFilteredRecipes(recipes) {
+  const generalGrid = document.querySelector('.section:last-child .recipe-cards-grid');
+  if (!generalGrid) return;
+
+  // Clear grid
+  generalGrid.innerHTML = '';
+
+  if (recipes.length === 0) {
+    generalGrid.innerHTML = '<p class="no-results">No recipes match your filters</p>';
+    return;
+  }
+
+  // Display each recipe
   recipes.forEach(recipe => {
-    // Link to recipe
-    const card = document.createElement('a');
-    card.href = `recipe-detail.html?id=${recipe.id}`;
-    card.classList.add('recipe-card');
-
-    if (recipe.allergens && recipe.allergens.length > 0) {
-      card.setAttribute('data-allergens', recipe.allergens.join(','));
-      // Add small warning indicator
-      const warningBadge = document.createElement('span');
-      warningBadge.classList.add('allergen-badge');
-      warningBadge.title = `Contains: ${recipe.allergens.join(', ')}`;
-      warningBadge.textContent = '⚠️';
-      warningBadge.style.position = 'absolute';
-      warningBadge.style.top = '5px';
-      warningBadge.style.right = '5px';
-      card.style.position = 'relative';
-      card.appendChild(warningBadge);
-    }
-
-    // emoji placeholder for recipe image
-    const imageDiv = document.createElement('div');
-    imageDiv.classList.add('recipe-image');
-    imageDiv.textContent = '🍽️';
-
-    // create recipe info container
-    const infoDiv = document.createElement('div');
-    infoDiv.classList.add('recipe-info');
-
-    // title
-    const title = document.createElement('h4');
-    title.textContent = recipe.name;
-
-    // recipe details container
-    const detailsDiv = document.createElement('div');
-    detailsDiv.classList.add('recipe-details');
-
-    // time
-    const timeSpan = document.createElement('span');
-    timeSpan.textContent = `⏱️ ${recipe.prep_time} min`;
-
-    // cost
-    const costSpan = document.createElement('span');
-    let costLabel = '';
-    if (recipe.cost === 'Low') costLabel = '💰 Low';
-    else if (recipe.cost === 'Medium') costLabel = '💰💰 Medium';
-    else if (recipe.cost === 'High') costLabel = '💰💰💰 High';
-    costSpan.textContent = costLabel;
-
-    // difficulty
-    const difficultySpan = document.createElement('span');
-    let difficultyLabel = '';
-    if (recipe.difficulty === 'Easy') difficultyLabel = '🌱 Easy';
-    else if (recipe.difficulty === 'Medium') difficultyLabel = '📊 Medium';
-    else if (recipe.difficulty === 'Hard') difficultyLabel = '🔥 Hard';
-
-    if (recipe.difficulty) {
-      difficultySpan.textContent = difficultyLabel;
-    }
-
-    // add time and cost to details
-    detailsDiv.appendChild(timeSpan);
-    detailsDiv.appendChild(costSpan);
-    if (recipe.difficulty) {
-      detailsDiv.appendChild(difficultySpan);
-    }
-
-    // add title and details to info
-    infoDiv.appendChild(title);
-    infoDiv.appendChild(detailsDiv);
-
-    // add image and info to card
-    card.appendChild(imageDiv);
-    card.appendChild(infoDiv);
-
-    // add card to grid
-    grid.appendChild(card);
+    const card = createRecipeCard(recipe, false);
+    generalGrid.appendChild(card);
   });
 }
 
-//helper function for display in general recipes page
-function createRecipeCard(recipe) {
-  const details = document.createElement("details");
-  details.className = "recipe-card-full";
+/**
+ * Create recipe card element
+ */
+function createRecipeCard(recipe, isMyRecipe = false) {
+  const details = document.createElement('details');
+  details.className = 'recipe-card-full';
 
-  // Convert cost number to label
-  let costLabel = "Low";
-  if (recipe.cost == "Low") costLabel = "💰 Low";
-  else if (recipe.cost == "Medium") costLabel = "💰💰 Medium";
-  else if (recipe.cost == "High") costLabel = "💰💰💰 High";
+  // Determine difficulty class
+  let difficultyClass = 'tag-easy';
+  if (recipe.difficulty === 'Medium') difficultyClass = 'tag-medium';
+  if (recipe.difficulty === 'Hard') difficultyClass = 'tag-hard';
 
-  // Convert diet array to string
-  const dietText = recipe.diet && recipe.diet.length > 0
-    ? recipe.diet.join(" · ")
-    : "No specific diet";
+  // Cost display
+  let costDisplay = '💰 Low';
+  if (recipe.cost === 'Medium') costDisplay = '💰💰 Medium';
+  if (recipe.cost === 'High') costDisplay = '💰💰💰 High';
 
-  details.innerHTML = `
-    <summary class="recipe-card-top">
-      <div class="recipe-card-emoji">${recipe.emoji || "🍽️"}</div>
+  // Dietary tags display
+  const dietaryDisplay = recipe.dietary_tags && recipe.dietary_tags.length > 0
+    ? recipe.dietary_tags.join(' · ')
+    : '';
 
-      <div class="recipe-card-summary">
-        <div class="recipe-card-tags">
-          <span class="tag tag-easy">${recipe.difficulty}</span>
-          <span class="tag tag-cost">${costLabel}</span>
-        </div>
-
-        <h3 class="recipe-card-title">${recipe.title}</h3>
-
-        <div class="recipe-card-meta">
-          <span>⏱️ ${recipe.prep_time} min</span>
-          <span>${dietText}</span>
-        </div>
+  // Summary
+  const summary = document.createElement('summary');
+  summary.className = 'recipe-card-top';
+  summary.innerHTML = `
+<div class="recipe-card-emoji">${recipe.emoji || '🍽️'}</div>
+    <div class="recipe-card-summary">
+      <div class="recipe-card-tags">
+        <span class="tag ${difficultyClass}">${recipe.difficulty || 'Easy'}</span>
+        <span class="tag tag-cost">${costDisplay}</span>
       </div>
-
-      <span class="recipe-card-chevron">▼</span>
-    </summary>
-
-    <div class="recipe-card-details">
-      <div class="recipe-card-ingredients">
-        <strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}
+      <h3 class="recipe-card-title">${recipe.name}</h3>
+      <div class="recipe-card-meta">
+        <span>⏱️ ${recipe.prep_time} min</span>
+        <span>${dietaryDisplay}</span>
       </div>
-
-      <div class="recipe-card-steps">
-        <strong>Steps:</strong>
-        <ol>
-          ${recipe.prep_steps
-            .split(",")
-            .map(step => `<li>${step.trim()}</li>`)
-            .join("")}
-        </ol>
-      </div>
-
-      <button class="btn-save-recipe" data-id="${recipe._id}">
-        + Save to My Recipes
-      </button>
     </div>
+    <span class="recipe-card-chevron">▼</span>
   `;
+
+  // Details content
+  const detailsDiv = document.createElement('div');
+  detailsDiv.className = 'recipe-card-details';
+
+  // Format steps as list items
+  const steps = recipe.prep_steps ? recipe.prep_steps.split('.').filter(step => step.trim()) : [];
+  const stepsList = steps.map(step => `<li>${step.trim()}</li>`).join('');
+
+  // Action buttons based on recipe ownership
+  let actionButtons = '';
+  if (isMyRecipe) {
+    actionButtons = `
+      <div class="recipe-card-actions">
+        <button class="btn-edit-recipe" onclick="editRecipe(${recipe.id})">Edit</button>
+        <button class="btn-delete-recipe" onclick="deleteRecipe(${recipe.id})">Delete</button>
+      </div>
+    `;
+  } else {
+    actionButtons = `
+      <button class="btn-save-recipe" onclick="saveRecipeToMyCollection(${recipe.id})">+ Save to My Recipes</button>
+    `;
+  }
+
+  detailsDiv.innerHTML = `
+    <div class="recipe-card-ingredients">
+      <strong>Ingredients:</strong> ${recipe.ingredients || ''}
+    </div>
+    <div class="recipe-card-steps">
+      <strong>Steps:</strong>
+      <ol>
+        ${stepsList}
+      </ol>
+    </div>
+    ${actionButtons}
+  `;
+
+  details.appendChild(summary);
+  details.appendChild(detailsDiv);
 
   return details;
 }
 
-// display recipes in general recipes page
-function displayRecipes(recipes) {
-  recipeGrid = document.getElementById('generalRecipesGrid');
-  recipeGrid.innerHTML = ''; // Clear previous content
-
-  recipes.forEach(recipe => {
-    const card = createRecipeCard(recipe);
-    recipeGrid.appendChild(card);
-  });
+// Functions for edit/delete/save
+async function editRecipe(id) {
+  console.log('Edit recipe:', id);
+  window.location.href = `edit-recipe.html?id=${id}`;
 }
 
-// Search recipes based on search bar input
-async function searchRecipes() {
-  const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+async function deleteRecipe(id) {
+  if (confirm('Are you sure you want to delete this recipe?')) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+      });
 
-  if(searchInput === '') {
-    alert('Please enter a search term');
-    return;
+      if (response.ok) {
+        alert('Recipe deleted successfully!');
+        // Reload recipes
+        loadMyRecipes();
+        loadAllRecipes();
+        loadGeneralRecipes();
+      } else {
+        alert('Failed to delete recipe');
+      }
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
+      alert('Error deleting recipe');
+    }
   }
-  
-  const recipes = await get(`${API_BASE_URL}/recipes`);
+}
 
-  const filteredRecipes = recipes.filter(recipe =>
-    recipe.title.toLowerCase().includes(searchInput)
-  );
+async function saveRecipeToMyCollection(recipeId) {
+  // This function would copy a recipe to the user's collection
+  // You'll need to implement this based on your backend
+  console.log('Save recipe to my collection:', recipeId);
+  alert('Save recipe functionality coming soon!');
+}
 
-  const generalRecipesSection = document.getElementById('generalRecipesGrid');
-  
-  if(filteredRecipes.length === 0) {
-    generalRecipesSection.innerHTML = '<p class="no-results">No recipes found matching your search.</p>';
-    return;
-  }
 
-  displayRecipes(filteredRecipes);
+// CREATE/EDIT RECIPE FUNCTIONS
 
-  // Scroll to recipes section
-  generalRecipesSection.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
+/**
+ * Helper functions to get selected tags
+ */
+function getSelectedDietaryTags() {
+  const checkboxes = document.querySelectorAll('input[name="dietary"]:checked');
+  return Array.from(checkboxes).map(cb => cb.value);
+}
+
+function getSelectedAllergens() {
+  const checkboxes = document.querySelectorAll('input[name="allergy"]:checked');
+  const customAllergies = document.getElementById('otherAllergies')?.value
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.length > 0) || [];
+
+  const selectedAllergies = Array.from(checkboxes).map(cb => cb.value);
+  return [...selectedAllergies, ...customAllergies];
 }
 
 /**
- * Update user profile
+ * Save new recipe
  */
-async function updateUserProfile(updates) {
-  try {
-    const token = getToken();
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
+async function saveRecipe(event) {
+  event.preventDefault();
 
-    const response = await fetch(`${API_BASE_URL}/profile`, {
-      method: 'PUT',
+  // Get form values once
+  const dietaryTags = getSelectedDietaryTags();
+  const allergens = getSelectedAllergens();
+
+  const recipeData = {
+    name: document.getElementById('recipeName')?.value,
+    prep_time: parseInt(document.getElementById('prepTime')?.value),
+    cost: document.getElementById('cost')?.value,
+    difficulty: document.getElementById('difficulty')?.value,
+    ingredients: document.getElementById('ingredients')?.value,
+    prep_steps: document.getElementById('steps')?.value,
+    dietary_tags: dietaryTags,
+    allergens: allergens
+  };
+
+  console.log('Saving recipe with data:', recipeData);
+
+  // Validate required fields
+  if (!recipeData.name || !recipeData.prep_time || !recipeData.ingredients || !recipeData.prep_steps) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipes`, {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
       },
-      body: JSON.stringify(updates),
+      body: JSON.stringify(recipeData)
     });
 
-    const data = await response.json();
+    const responseData = await response.json();
+    console.log('Server response:', responseData);
 
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to update profile');
+    if (response.ok) {
+      alert('Recipe saved successfully!');
+      window.location.href = 'recipes.html';
+    } else {
+      alert('Error: ' + (responseData.message || 'Failed to save recipe'));
     }
-
-    return { success: true, data };
   } catch (error) {
-    return { success: false, error: error.message };
+    console.error('Error saving recipe:', error);
+    alert('Failed to save recipe. Please try again.');
+  }
+}
+
+/**
+ * Populate edit form with recipe data
+ */
+function populateEditForm(recipe) {
+  // Basic fields
+  setFieldValue('recipeName', recipe.name);
+  setFieldValue('prepTime', recipe.prep_time);
+  setFieldValue('cost', recipe.cost);
+  setFieldValue('difficulty', recipe.difficulty);
+  setFieldValue('ingredients', recipe.ingredients);
+  setFieldValue('steps', recipe.prep_steps);
+
+  // Dietary tags checkboxes - match your HTML name="dietary"
+  if (recipe.dietary_tags && Array.isArray(recipe.dietary_tags)) {
+    recipe.dietary_tags.forEach(tag => {
+      // Map database values back to form values if needed
+      let formValue = tag;
+      if (tag === 'Gluten-Free') formValue = 'gluten-free';
+      if (tag === 'Dairy-Free') formValue = 'dairy-free';
+      if (tag === 'Nut-Free') formValue = 'nut-free';
+      if (tag === 'Vegan') formValue = 'vegan';
+      if (tag === 'Vegetarian') formValue = 'vegetarian';
+      if (tag === 'Halal') formValue = 'halal';
+
+      const checkbox = document.querySelector(`input[name="dietary"][value="${formValue}"]`);
+      if (checkbox) checkbox.checked = true;
+    });
+  }
+
+  // Allergens checkboxes
+  if (recipe.allergens && Array.isArray(recipe.allergens)) {
+    const customAllergies = [];
+
+    recipe.allergens.forEach(allergen => {
+      const checkbox = document.querySelector(`input[name="allergy"][value="${allergen.toLowerCase()}"]`);
+      if (checkbox) {
+        checkbox.checked = true;
+      } else {
+        customAllergies.push(allergen);
+      }
+    });
+
+    // Set custom allergies
+    if (customAllergies.length > 0) {
+      const otherAllergies = document.getElementById('otherAllergies');
+      if (otherAllergies) {
+        otherAllergies.value = customAllergies.join(', ');
+      }
+    }
+  }
+}
+
+/**
+ * Helper to set field value
+ */
+function setFieldValue(id, value) {
+  const field = document.getElementById(id);
+  if (field && value) {
+    field.value = value;
+  }
+}
+
+/**
+ * Update recipe
+ */
+async function updateRecipe(recipeId) {
+  // Get form values
+  const dietaryTags = getSelectedDietaryTags();
+  const allergens = getSelectedAllergens();
+
+  const recipeData = {
+    name: document.getElementById('recipeName')?.value,
+    prep_time: parseInt(document.getElementById('prepTime')?.value),
+    cost: document.getElementById('cost')?.value,
+    difficulty: document.getElementById('difficulty')?.value,
+    ingredients: document.getElementById('ingredients')?.value,
+    prep_steps: document.getElementById('steps')?.value,
+    dietary_tags: dietaryTags,
+    allergens: allergens
+  };
+
+  console.log('Updating recipe with data:', recipeData);
+
+  // Validate required fields
+  if (!recipeData.name || !recipeData.prep_time || !recipeData.ingredients || !recipeData.prep_steps) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipes/${recipeId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      },
+      body: JSON.stringify(recipeData)
+    });
+
+    const responseData = await response.json();
+    console.log('Server response:', responseData);
+
+    if (response.ok) {
+      alert('Recipe updated successfully!');
+      window.location.href = 'recipes.html';
+    } else {
+      alert('Error: ' + (responseData.message || 'Failed to update recipe'));
+    }
+  } catch (error) {
+    console.error('Error updating recipe:', error);
+    alert('Failed to update recipe. Please try again.');
   }
 }
 
 
-// PAGE-SPECIFIC INITIALIZATION
+// PAGE INITIALIZATION FUNCTIONS
+
 /**
  * Initialize login page
  */
@@ -1008,6 +1288,44 @@ function initSignupPage() {
   });
 }
 
+/**
+ * Initialize home page
+ */
+function initHomePage() {
+  console.log('🏠 INIT_HOME_PAGE CALLED at:', new Date().toISOString());
+
+  // Check if prompt exists
+  const prompt = document.getElementById('profilePrompt');
+  console.log('Prompt element exists at init:', !!prompt);
+
+  // Check authentication
+  if (!isAuthenticated()) {
+    window.location.href = 'login-page.html';
+    return;
+  }
+
+  // Load user profile and display name
+  loadUserProfile();
+
+  // Check profile completion
+  checkProfileCompletion();
+
+  // Setup logout functionality
+  const logoutLink = document.querySelector('.nav-link.logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearToken();
+      window.location.href = 'login-page.html';
+    });
+  }
+
+  // Add form submit handler
+  const metricsForm = document.getElementById('healthMetricsForm');
+  if (metricsForm) {
+    metricsForm.addEventListener('submit', saveHealthMetrics);
+  }
+}
 
 /**
  * Initialize edit profile page
@@ -1055,7 +1373,7 @@ function initEditProfilePage() {
         budgetRange: document.getElementById('budgetRange')?.value || '',
       };
 
-      console.log('Form data collected:', formData); // Debug log
+      console.log('Form data collected:', formData);
 
       // Get selected diet preferences
       const dietCheckboxes = document.querySelectorAll('input[name="diet"]:checked');
@@ -1106,39 +1424,9 @@ function initEditProfilePage() {
   }
 }
 
-
-
 /**
- * Load user profile and display on home page
+ * Initialize recipes page
  */
-async function loadUserProfile() {
-  const result = await getUserProfile();
-
-  if (result.success) {
-    // Update name display
-    const firstNameElement = document.getElementById('firstName'); //Name of user
-    if (firstNameElement) {
-      firstNameElement.textContent = `${result.data.firstName || 'User'}`;
-    }
-
-    const fullNameElement = document.getElementById('fullName');
-    if (fullNameElement) {
-      fullNameElement.textContent = `${result.data.firstName} ${result.data.lastName}`;
-    }
-
-  } else {
-    console.error('Failed to load profile:', result.error);
-    // If token is invalid, redirect to login
-    if (result.error.includes('token') || result.error.includes('auth')) {
-      clearToken();
-      window.location.href = 'login-page.html';
-    }
-  }
-}
-
-/**
-* Initialize recipes page 
-*/
 function initRecipesPage() {
   console.log('🍽️ INIT_RECIPES_PAGE CALLED');
 
@@ -1148,8 +1436,10 @@ function initRecipesPage() {
     return;
   }
 
-  // Load recipes
+  // Load My Recipes
   loadMyRecipes();
+
+  // Load General Recipes
   loadGeneralRecipes();
 
   // Setup logout functionality
@@ -1168,193 +1458,55 @@ function initRecipesPage() {
 
   if (searchBtn && searchInput) {
     searchBtn.addEventListener('click', () => {
-      const searchTerm = searchInput.value.toLowerCase();
+      console.log('Search button clicked');
+      const searchTerm = searchInput.value.trim();
       filterRecipesBySearch(searchTerm);
     });
 
     searchInput.addEventListener('keyup', (e) => {
       if (e.key === 'Enter') {
-        const searchTerm = searchInput.value.toLowerCase();
+        console.log('Enter key pressed');
+        const searchTerm = searchInput.value.trim();
         filterRecipesBySearch(searchTerm);
       }
     });
+  } else {
+    console.log('Search button or input not found');
   }
 
-  // Setup filter checkboxes
-  const filterCheckboxes = document.querySelectorAll('.filter-bar input[type="checkbox"]');
-  filterCheckboxes.forEach(cb => {
-    cb.addEventListener('change', () => {
+  // Setup Apply Filters button
+  const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+  console.log('Apply Filters button found:', applyFiltersBtn);
+
+  if (applyFiltersBtn) {
+    applyFiltersBtn.addEventListener('click', () => {
+      console.log('Apply Filters button clicked');
       filterRecipes();
     });
-  });
-}
-
-/**
- * Fetch recipes from the API
- */
-async function fetchRecipes(ownerId = null) {
-  try {
-    let url = `${API_BASE_URL}/recipes`;
-    if (ownerId) {
-      url += `?ownerId=${ownerId}`;
-    }
-
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${getToken()}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch recipes');
-    }
-
-    const data = await response.json();
-    return { success: true, data };
-  } catch (error) {
-    console.error('Error fetching recipes:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-/**
- * Load My Recipes
- */
-async function loadMyRecipes() {
-  console.log('Loading My Recipes...');
-
-  const myRecipesGrid = document.getElementById('myRecipesGrid');
-  const emptyState = document.getElementById('myRecipesEmpty');
-
-  if (!myRecipesGrid) return;
-
-  try {
-    // Get current user profile to get their ID
-    const profileResult = await getUserProfile();
-
-    if (!profileResult.success) {
-      console.error('Failed to get user profile:', profileResult.error);
-      return;
-    }
-
-    const ownerId = profileResult.data.id;
-
-    // Fetch recipes owned by this user
-    const result = await fetchRecipes(ownerId);
-
-    if (result.success) {
-      const recipes = result.data;
-      console.log('My Recipes fetched:', recipes.length);
-
-      if (recipes.length === 0) {
-        // Show empty state
-        if (emptyState) emptyState.style.display = 'flex';
-        myRecipesGrid.innerHTML = '';
-      } else {
-        // Hide empty state
-        if (emptyState) emptyState.style.display = 'none';
-
-        // Display recipes
-        myRecipesGrid.innerHTML = '';
-        recipes.forEach(recipe => {
-          const card = createRecipeCard(recipe, true);
-          myRecipesGrid.appendChild(card);
-        });
-      }
-    }
-  } catch (error) {
-    console.error('Error in loadMyRecipes:', error);
-  }
-}
-
-/**
- * Create recipe card element
- */
-function createRecipeCard(recipe, isMyRecipe = false) {
-  const details = document.createElement('details');
-  details.className = 'recipe-card-full';
-
-  // Determine difficulty class
-  let difficultyClass = 'tag-easy';
-  if (recipe.difficulty === 'Medium') difficultyClass = 'tag-medium';
-  if (recipe.difficulty === 'Hard') difficultyClass = 'tag-hard';
-
-  // Cost display
-  let costDisplay = '💰 Low';
-  if (recipe.cost === 'Medium') costDisplay = '💰💰 Medium';
-  if (recipe.cost === 'High') costDisplay = '💰💰💰 High';
-
-  // Dietary tags display
-  const dietaryDisplay = recipe.dietary_tags && recipe.dietary_tags.length > 0
-    ? recipe.dietary_tags.join(' · ')
-    : '';
-
-  // Summary
-  const summary = document.createElement('summary');
-  summary.className = 'recipe-card-top';
-  summary.innerHTML = `
-    <div class="recipe-card-emoji">🍽️</div>
-    <div class="recipe-card-summary">
-      <div class="recipe-card-tags">
-        <span class="tag ${difficultyClass}">${recipe.difficulty || 'Easy'}</span>
-        <span class="tag tag-cost">${costDisplay}</span>
-      </div>
-      <h3 class="recipe-card-title">${recipe.name}</h3>
-      <div class="recipe-card-meta">
-        <span>⏱️ ${recipe.prep_time} min</span>
-        <span>${dietaryDisplay}</span>
-      </div>
-    </div>
-    <span class="recipe-card-chevron">▼</span>
-  `;
-
-  // Details content
-  const detailsDiv = document.createElement('div');
-  detailsDiv.className = 'recipe-card-details';
-
-  // Format steps as list items
-  const steps = recipe.prep_steps.split('.').filter(step => step.trim());
-  const stepsList = steps.map(step => `<li>${step.trim()}</li>`).join('');
-
-  // Action buttons based on recipe ownership
-  let actionButtons = '';
-  if (isMyRecipe) {
-    actionButtons = `
-      <div class="recipe-card-actions">
-        <button class="btn-edit-recipe" onclick="editRecipe(${recipe.id})">Edit</button>
-        <button class="btn-delete-recipe" onclick="deleteRecipe(${recipe.id})">Delete</button>
-      </div>
-    `;
   } else {
-    actionButtons = `
-      <button class="btn-save-recipe" onclick="saveRecipe(${recipe.id})">+ Save to My Recipes</button>
-    `;
+    console.log('Apply Filters button NOT found - check if ID is correct in HTML');
   }
 
-  detailsDiv.innerHTML = `
-    <div class="recipe-card-ingredients">
-      <strong>Ingredients:</strong> ${recipe.ingredients}
-    </div>
-    <div class="recipe-card-steps">
-      <strong>Steps:</strong>
-      <ol>
-        ${stepsList}
-      </ol>
-    </div>
-    ${actionButtons}
-  `;
-
-  details.appendChild(summary);
-  details.appendChild(detailsDiv);
-
-  return details;
+  // Setup Clear Filters button
+  const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', () => {
+      console.log('Clear Filters button clicked');
+      // Uncheck all checkboxes
+      document.querySelectorAll('.filter-bar input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+      });
+      // Show all recipes
+      displayFilteredRecipes(allRecipes);
+    });
+  }
 }
 
 /**
- * Initialize recipes page
+ * Initialize create recipe page
  */
-function initRecipesPage() {
-  console.log('🍽️ INIT_RECIPES_PAGE CALLED');
+function initCreateRecipePage() {
+  console.log('📝 INIT_CREATE_RECIPE PAGE');
 
   // Check authentication
   if (!isAuthenticated()) {
@@ -1362,11 +1514,13 @@ function initRecipesPage() {
     return;
   }
 
-  // Load recipes
-  loadMyRecipes();
-  loadGeneralRecipes();
+  const form = document.getElementById('createRecipeForm');
+  if (!form) return;
 
-  // Setup logout functionality
+  // Override the default form submission
+  form.addEventListener('submit', saveRecipe);
+
+  // Setup logout
   const logoutLink = document.querySelector('.nav-link.logout');
   if (logoutLink) {
     logoutLink.addEventListener('click', (e) => {
@@ -1377,128 +1531,73 @@ function initRecipesPage() {
   }
 }
 
-// placeholder functions for edit/delete/save
-async function editRecipe(id) {
-  console.log('Edit recipe:', id);
-  window.location.href = `edit-recipe.html?id=${id}`;
-}
-
-async function deleteRecipe(id) {
-  if (confirm('Are you sure you want to delete this recipe?')) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/recipes/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${getToken()}`
-        }
-      });
-
-      if (response.ok) {
-        // Reload recipes
-        loadMyRecipes();
-      } else {
-        alert('Failed to delete recipe');
-      }
-    } catch (error) {
-      console.error('Error deleting recipe:', error);
-      alert('Error deleting recipe');
-    }
-  }
-}
-
-async function saveRecipe(id) {
-  console.log('Save recipe:', id);
-  // Implement save to my recipes functionality
-  alert('Save recipe functionality to be implemented');
-}
-
 /**
- * Load user profile and populate edit form
+ * Initialize edit recipe page
  */
-async function loadUserProfileForEdit() {
-  const result = await getUserProfile();
+async function initEditRecipePage() {
+  console.log('✏️ INIT_EDIT_RECIPE PAGE');
 
-  if (result.success) {
-    const profile = result.data;
-    console.log('Profile loaded:', profile); // Debug log
+  // Check authentication
+  if (!isAuthenticated()) {
+    window.location.href = 'login-page.html';
+    return;
+  }
 
-    // Populate basic fields
-    if (document.getElementById('firstName')) {
-      document.getElementById('firstName').value = profile.firstName || '';
-    }
-    if (document.getElementById('lastName')) {
-      document.getElementById('lastName').value = profile.lastName || '';
-    }
-    if (document.getElementById('email')) {
-      document.getElementById('email').value = profile.email || '';
-    }
+  // Get recipe ID from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const recipeId = urlParams.get('id');
 
-    // Populate health metrics
-    if (document.getElementById('editAge')) {
-      document.getElementById('editAge').value = profile.age || '';
-    }
-    if (document.getElementById('editWeight')) {
-      document.getElementById('editWeight').value = profile.weight || '';
-    }
-    if (document.getElementById('editHeight')) {
-      document.getElementById('editHeight').value = profile.height || '';
-    }
+  if (!recipeId) {
+    alert('No recipe ID specified');
+    window.location.href = 'recipes.html';
+    return;
+  }
 
-    // Populate diet preferences
-    if (profile.dietPreferences && Array.isArray(profile.dietPreferences)) {
-      profile.dietPreferences.forEach(diet => {
-        const checkbox = document.querySelector(`input[name="diet"][value="${diet}"]`);
-        if (checkbox) checkbox.checked = true;
-      });
-    }
-
-    // Populate allergies
-    if (profile.allergies && Array.isArray(profile.allergies)) {
-      const customAllergies = [];
-      profile.allergies.forEach(allergy => {
-        const checkbox = document.querySelector(`input[name="allergy"][value="${allergy}"]`);
-        if (checkbox) {
-          checkbox.checked = true;
-        } else {
-          customAllergies.push(allergy);
-        }
-      });
-      //extra allergies that are not predefined
-      if (customAllergies.length > 0) {
-        const otherAllergiesArea = document.getElementById('otherAllergies');
-        if (otherAllergiesArea) {
-          otherAllergiesArea.value = customAllergies.join(', ');
-        }
+  // Fetch recipe data
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipes/${recipeId}`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
       }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch recipe');
     }
 
-    // Populate cooking skill
-    if (document.getElementById('cookingSkill')) {
-      document.getElementById('cookingSkill').value = profile.cookingSkill || '';
-    }
-    // Populate meal prep time
-    if (document.getElementById('mealPrepTime')) {
-      document.getElementById('mealPrepTime').value = profile.mealPrepTime || '';
-    }
+    const recipe = await response.json();
 
-    // Populate budget range
-    if (document.getElementById('budgetRange')) {
-      document.getElementById('budgetRange').value = profile.budgetRange || '';
-    }
+    // Populate form fields
+    populateEditForm(recipe);
 
-  } else {
-    console.error('Failed to load profile:', result.error);
-    // If token is invalid, redirect to login
-    if (result.error.includes('token') || result.error.includes('auth')) {
+  } catch (error) {
+    console.error('Error fetching recipe:', error);
+    alert('Error loading recipe');
+    window.location.href = 'recipes.html';
+  }
+
+  // Setup form submission
+  const form = document.getElementById('editRecipeForm');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await updateRecipe(recipeId);
+    });
+  }
+
+  // Setup logout
+  const logoutLink = document.querySelector('.nav-link.logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
       clearToken();
       window.location.href = 'login-page.html';
-    }
+    });
   }
 }
 
 
 // AUTO-INITIALIZATION ON PAGE LOAD
-
 document.addEventListener('DOMContentLoaded', () => {
   // Detect which page we're on and initialize accordingly
   const path = window.location.pathname;
@@ -1532,7 +1631,15 @@ document.addEventListener('DOMContentLoaded', () => {
     case 'recipes.html':
       initRecipesPage();
       break;
-    // add case recipes page
+
+    case 'create-recipe.html':
+      initCreateRecipePage();
+      break;
+
+    case 'edit-recipe.html':
+      initEditRecipePage();
+      break;
+
     default:
       console.log('Page not recognized for auto-initialization');
   }
