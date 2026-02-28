@@ -637,7 +637,6 @@ async function loadMyRecipes() {
  * Load General Recipes
  */
 async function loadGeneralRecipes() {
-  console.log('Loading General Recipes...');
 
   const generalGrid = document.getElementById('generalRecipesGrid');
   if (!generalGrid) return;
@@ -870,9 +869,15 @@ function createRecipeCard(recipe, isMyRecipe = false) {
   const detailsDiv = document.createElement('div');
   detailsDiv.className = 'recipe-card-details';
 
+  // Format ingredients as list items
+  const ingredientsList = recipe.ingredients && Array.isArray(recipe.ingredients)
+    ? recipe.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')
+    : '<li>No ingredients listed</li>';
+
   // Format steps as list items
-  const steps = recipe.prep_steps ? recipe.prep_steps.split('.').filter(step => step.trim()) : [];
-  const stepsList = steps.map(step => `<li>${step.trim()}</li>`).join('');
+  const stepsList = recipe.prep_steps && Array.isArray(recipe.prep_steps)
+    ? recipe.prep_steps.map(step => `<li>${step}</li>`).join('')
+    : '<li>No steps provided</li>';
 
   // Action buttons based on recipe ownership
   let actionButtons = '';
@@ -891,7 +896,10 @@ function createRecipeCard(recipe, isMyRecipe = false) {
 
   detailsDiv.innerHTML = `
     <div class="recipe-card-ingredients">
-      <strong>Ingredients:</strong> ${recipe.ingredients || ''}
+      <strong>Ingredients:</strong>
+<ul>
+  ${ingredientsList}
+</ul>
     </div>
     <div class="recipe-card-steps">
       <strong>Steps:</strong>
@@ -979,13 +987,25 @@ async function saveRecipe(event) {
   const dietaryTags = getSelectedDietaryTags();
   const allergens = getSelectedAllergens();
 
+  const ingredientsText = document.getElementById('ingredients')?.value || '';
+  const ingredientsArray = ingredientsText
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+  const stepsText = document.getElementById('steps')?.value || '';
+  const stepsArray = stepsText
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
   const recipeData = {
     name: document.getElementById('recipeName')?.value,
     prep_time: parseInt(document.getElementById('prepTime')?.value),
     cost: document.getElementById('cost')?.value,
     difficulty: document.getElementById('difficulty')?.value,
-    ingredients: document.getElementById('ingredients')?.value,
-    prep_steps: document.getElementById('steps')?.value,
+    ingredients: ingredientsArray,
+    prep_steps: stepsArray,
     dietary_tags: dietaryTags,
     allergens: allergens
   };
@@ -993,7 +1013,7 @@ async function saveRecipe(event) {
   console.log('Saving recipe with data:', recipeData);
 
   // Validate required fields
-  if (!recipeData.name || !recipeData.prep_time || !recipeData.ingredients || !recipeData.prep_steps) {
+  if (!recipeData.name || !recipeData.prep_time || !ingredientsArray.length || !stepsArray.length) {
     alert('Please fill in all required fields');
     return;
   }
@@ -1032,13 +1052,22 @@ function populateEditForm(recipe) {
   setFieldValue('prepTime', recipe.prep_time);
   setFieldValue('cost', recipe.cost);
   setFieldValue('difficulty', recipe.difficulty);
-  setFieldValue('ingredients', recipe.ingredients);
-  setFieldValue('steps', recipe.prep_steps);
 
-  // Dietary tags checkboxes - match your HTML name="dietary"
+  // Convert ingredients to text for editing
+  if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
+    setFieldValue('ingredients', recipe.ingredients.join('\n'));
+  }
+
+  // Convert steps to text for editing
+  if (recipe.prep_steps && Array.isArray(recipe.prep_steps)) {
+    setFieldValue('steps', recipe.prep_steps.join('\n'));
+  }
+
+
+  // Dietary tags checkboxes
   if (recipe.dietary_tags && Array.isArray(recipe.dietary_tags)) {
     recipe.dietary_tags.forEach(tag => {
-      // Map database values back to form values if needed
+      // Map database values back to form values
       let formValue = tag;
       if (tag === 'Gluten-Free') formValue = 'gluten-free';
       if (tag === 'Dairy-Free') formValue = 'dairy-free';
@@ -1093,13 +1122,27 @@ async function updateRecipe(recipeId) {
   const dietaryTags = getSelectedDietaryTags();
   const allergens = getSelectedAllergens();
 
+  // Convert ingredients from text to array
+  const ingredientsText = document.getElementById('ingredients')?.value || '';
+  const ingredientsArray = ingredientsText
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+  // Convert steps from text to array
+  const stepsText = document.getElementById('steps')?.value || '';
+  const stepsArray = stepsText
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
   const recipeData = {
     name: document.getElementById('recipeName')?.value,
     prep_time: parseInt(document.getElementById('prepTime')?.value),
     cost: document.getElementById('cost')?.value,
     difficulty: document.getElementById('difficulty')?.value,
-    ingredients: document.getElementById('ingredients')?.value,
-    prep_steps: document.getElementById('steps')?.value,
+    ingredients: ingredientsArray,
+    prep_steps: stepsArray,
     dietary_tags: dietaryTags,
     allergens: allergens
   };
@@ -1107,7 +1150,7 @@ async function updateRecipe(recipeId) {
   console.log('Updating recipe with data:', recipeData);
 
   // Validate required fields
-  if (!recipeData.name || !recipeData.prep_time || !recipeData.ingredients || !recipeData.prep_steps) {
+  if (!recipeData.name || !recipeData.prep_time || !ingredientsArray.length || !stepsArray.length) {
     alert('Please fill in all required fields');
     return;
   }
