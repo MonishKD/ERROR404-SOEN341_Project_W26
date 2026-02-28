@@ -12,6 +12,11 @@ jobs:
     defaults:
       run:
         working-directory: backend
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NODE_ENV: test
+      
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
