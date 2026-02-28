@@ -15,6 +15,7 @@ A weekly meal planner is available to them for determine the meals assigned to t
 ### Links:
 - Link to Project Planning: https://liveconcordia-my.sharepoint.com/:x:/g/personal/l_chara_live_concordia_ca/IQD5OXHngoiFTomhX_sbMb6-AVpZgNg431IBatTNJU6YrFA?e=1O6bVY
 - Link to Log Hours document: https://docs.google.com/document/d/1tIu-qLDb8lNtS7tbpw9qXpfxKIiN-aUp493lUhxygqo/edit?usp=sharing
+- Link to meeting minutes document: https://liveconcordia-my.sharepoint.com/:w:/g/personal/l_josefe_live_concordia_ca/IQBQcvPxHpuTTqQLOR40hGg0AXuGEWnaYQWpocy2ttCdsH8?e=ZeKgB4
 
 ### Project Information
 
