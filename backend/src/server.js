@@ -244,8 +244,9 @@ app.get("/api/recipes", authMiddleware, async (req, res) => {
       AND.push({
         OR: [
           { name: { contains: q, mode: "insensitive" } },
-          { ingredients: { contains: q, mode: "insensitive" } },
-          { prep_steps: { contains: q, mode: "insensitive" } },
+          // For array fields, we need to search within the array
+          { ingredients: { has: q } },
+          { prep_steps: { has: q } },
         ],
       });
     }
@@ -319,10 +320,7 @@ app.get("/api/recipes", authMiddleware, async (req, res) => {
     }
 
     const where = AND.length ? { AND } : undefined;
-    console.log("🧠 Prisma where:", JSON.stringify(where, null, 2));
-
     const recipes = await getAllRecipes(where);
-
     return res.json(recipes);
   } catch (error) {
     console.error("Error fetching recipes:", error);
@@ -331,37 +329,69 @@ app.get("/api/recipes", authMiddleware, async (req, res) => {
 });
 
 // CREATE recipe with ownerId
-// CREATE recipe with ownerId - DEBUG VERSION
 app.post("/api/recipes", authMiddleware, async (req, res) => {
   try {
-    console.log("========== RECIPE CREATION DEBUG ==========");
-    console.log("1. Full request body:", JSON.stringify(req.body, null, 2));
-
     const { name, ingredients, prep_time, prep_steps, cost, difficulty, dietary_tags, allergens } = req.body;
     const ownerId = parseInt(req.user.userId);
 
-    console.log("2. Extracted dietary_tags:", dietary_tags);
-    console.log("3. Type of dietary_tags:", typeof dietary_tags);
-    console.log("4. Is array?", Array.isArray(dietary_tags));
+    // Parse ingredients if it's a string
+    let ingredientsArray = ingredients;
+    if (typeof ingredients === 'string') {
+      try {
+        // Try to parse as JSON first
+        ingredientsArray = JSON.parse(ingredients);
+      } catch (e) {
+        // If not JSON, split by newlines or commas
+        if (ingredients.includes('\n')) {
+          ingredientsArray = ingredients.split('\n').map(i => i.trim()).filter(i => i.length > 0);
+        } else if (ingredients.includes(',')) {
+          ingredientsArray = ingredients.split(',').map(i => i.trim()).filter(i => i.length > 0);
+        } else {
+          ingredientsArray = [ingredients];
+        }
+      }
+    }
+    // Ensure it's an array
+    if (!Array.isArray(ingredientsArray)) {
+      ingredientsArray = ingredientsArray ? [ingredientsArray] : [];
+    }
 
-    // Check if it's a string that needs parsing
+    // Parse prep_steps if it's a string
+    let prepStepsArray = prep_steps;
+    if (typeof prep_steps === 'string') {
+      try {
+        // Try to parse as JSON first
+        prepStepsArray = JSON.parse(prep_steps);
+      } catch (e) {
+        // If not JSON, split by newlines or periods
+        if (prep_steps.includes('\n')) {
+          prepStepsArray = prep_steps.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+        } else if (prep_steps.includes('.')) {
+          prepStepsArray = prep_steps.split('.').map(s => s.trim()).filter(s => s.length > 0);
+        } else {
+          prepStepsArray = [prep_steps];
+        }
+      }
+    }
+    // Ensure it's an array
+    if (!Array.isArray(prepStepsArray)) {
+      prepStepsArray = prepStepsArray ? [prepStepsArray] : [];
+    }
+
+    // Parse dietary tags if it's a string
     let parsedDietaryTags = dietary_tags;
     if (typeof dietary_tags === 'string') {
       try {
         parsedDietaryTags = JSON.parse(dietary_tags);
-        console.log("5. Parsed dietary_tags from string:", parsedDietaryTags);
       } catch (e) {
         console.log("5. Failed to parse dietary_tags as JSON:", e.message);
       }
     }
-
     // Ensure it's an array
     const dietaryTagsArray = Array.isArray(parsedDietaryTags) ? parsedDietaryTags : [];
-    console.log("6. Dietary tags as array:", dietaryTagsArray);
 
     // Map the values
     const mappedDietaryTags = dietaryTagsArray.map(tag => {
-      console.log(`7. Mapping tag: "${tag}"`);
 
       if (tag === "gluten-free" || tag === "Gluten-Free") return "Gluten-Free";
       if (tag === "dairy-free" || tag === "Dairy-Free") return "Dairy-Free";
@@ -369,35 +399,44 @@ app.post("/api/recipes", authMiddleware, async (req, res) => {
       if (tag === "vegan" || tag === "Vegan") return "Vegan";
       if (tag === "vegetarian" || tag === "Vegetarian") return "Vegetarian";
       if (tag === "halal" || tag === "Halal") return "Halal";
-
-      console.log(`8. No match found for: "${tag}"`);
       return tag;
     });
 
-    console.log("9. Final mapped dietary_tags:", mappedDietaryTags);
+    // Parse allergens if present
+    let allergensArray = allergens;
+    if (typeof allergens === 'string') {
+      try {
+        allergensArray = JSON.parse(allergens);
+      } catch (e) {
+        if (allergens.includes(',')) {
+          allergensArray = allergens.split(',').map(a => a.trim()).filter(a => a.length > 0);
+        } else if (allergens.length > 0) {
+          allergensArray = [allergens];
+        } else {
+          allergensArray = [];
+        }
+      }
+    }
+    if (!Array.isArray(allergensArray)) {
+      allergensArray = allergensArray ? [allergensArray] : [];
+    }
 
     const recipeData = {
       name,
-      ingredients,
+      ingredients: ingredientsArray,
       prep_time: parseInt(prep_time),
-      prep_steps,
+      prep_steps: prepStepsArray,
       cost,
       difficulty,
       dietary_tags: mappedDietaryTags,
-      allergens: allergens || [],
+      allergens: allergensArray,
       ownerId
     };
 
-    console.log("10. Recipe data being sent to Prisma:", JSON.stringify(recipeData, null, 2));
-
     const newRecipe = await createRecipe(recipeData);
-    console.log("11. Recipe saved successfully:", JSON.stringify(newRecipe, null, 2));
-    console.log("12. Saved dietary_tags:", newRecipe.dietary_tags);
-    console.log("==========================================");
-
     res.status(201).json(newRecipe);
   } catch (error) {
-    console.error("❌ ERROR creating recipe:", error);
+    console.error("Error creating recipe:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -421,7 +460,37 @@ app.put("/api/recipes/:id", authMiddleware, checkRecipeOwner, async (req, res) =
   try {
     const { name, ingredients, prep_time, prep_steps, cost, difficulty, dietary_tags, allergens } = req.body;
 
-    console.log("Updating with dietary_tags:", dietary_tags);
+    // Parse ingredients if it's a string
+    let ingredientsArray = ingredients;
+    if (typeof ingredients === 'string') {
+      try {
+        ingredientsArray = JSON.parse(ingredients);
+      } catch (e) {
+        if (ingredients.includes('\n')) {
+          ingredientsArray = ingredients.split('\n').map(i => i.trim()).filter(i => i.length > 0);
+        } else if (ingredients.includes(',')) {
+          ingredientsArray = ingredients.split(',').map(i => i.trim()).filter(i => i.length > 0);
+        } else {
+          ingredientsArray = ingredients ? [ingredients] : undefined;
+        }
+      }
+    }
+
+    // Parse prep_steps if it's a string
+    let prepStepsArray = prep_steps;
+    if (typeof prep_steps === 'string') {
+      try {
+        prepStepsArray = JSON.parse(prep_steps);
+      } catch (e) {
+        if (prep_steps.includes('\n')) {
+          prepStepsArray = prep_steps.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+        } else if (prep_steps.includes('.')) {
+          prepStepsArray = prep_steps.split('.').map(s => s.trim()).filter(s => s.length > 0);
+        } else {
+          prepStepsArray = prep_steps ? [prep_steps] : undefined;
+        }
+      }
+    }
 
     // Map dietary tags to match database enum values
     let mappedDietaryTags = [];
@@ -437,15 +506,32 @@ app.put("/api/recipes/:id", authMiddleware, checkRecipeOwner, async (req, res) =
       });
     }
 
+    // Parse allergens if needed
+    let allergensArray = allergens;
+    if (typeof allergens === 'string') {
+      try {
+        allergensArray = JSON.parse(allergens);
+      } catch (e) {
+        if (allergens.includes(',')) {
+          allergensArray = allergens.split(',').map(a => a.trim()).filter(a => a.length > 0);
+        } else {
+          allergensArray = allergens ? [allergens] : [];
+        }
+      }
+    }
+    if (allergensArray && !Array.isArray(allergensArray)) {
+      allergensArray = [allergensArray];
+    }
+
     const updateData = {
       name,
-      ingredients,
+      ingredients: ingredientsArray,
       prep_time: prep_time ? parseInt(prep_time) : undefined,
-      prep_steps,
+      prep_steps: prepStepsArray,
       cost,
       difficulty,
       dietary_tags: mappedDietaryTags,
-      allergens: allergens || []
+      allergens: allergensArray || []
     };
 
     // Remove undefined fields
@@ -454,7 +540,6 @@ app.put("/api/recipes/:id", authMiddleware, checkRecipeOwner, async (req, res) =
     );
 
     const updatedRecipe = await updateRecipe(parseInt(req.params.id), updateData);
-    console.log("Recipe updated with dietary_tags:", updatedRecipe.dietary_tags);
     res.json(updatedRecipe);
   } catch (error) {
     console.error("Error updating recipe:", error);
@@ -558,7 +643,6 @@ const PORT = 4002;
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
     console.log(`App running at http://localhost:${PORT}`);
-    console.log("Static files served from:", publicPath);
     console.log("Prisma connected: Recipe routes ready at /api/recipes");
   });
 }
