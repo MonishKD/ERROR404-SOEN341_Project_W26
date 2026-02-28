@@ -23,8 +23,6 @@ if (!process.env.DATABASE_URL) {
   }
 }
 
-}
-
 // Create Prisma Client
 export const prisma = new PrismaClient({
   log: process.env.NODE_ENV === 'test' ? [] : ['error', 'warn'],
