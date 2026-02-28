@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+import pg from 'pg'
+import { PrismaPg } from '@prisma/adapter-pg'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -23,8 +25,20 @@ if (!process.env.DATABASE_URL) {
   }
 }
 
-// Create Prisma Client
+// Create PostgreSQL connection pool
+const pool = new pg.Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false // Required for Neon
+  }
+})
+
+// Create Prisma adapter
+const adapter = new PrismaPg(pool)
+
+// Create Prisma Client with adapter
 export const prisma = new PrismaClient({
+  adapter,
   log: process.env.NODE_ENV === 'test' ? [] : ['error', 'warn'],
 })
 
