@@ -9,7 +9,7 @@ Users can register and login to access their account. They can also manage their
 
 Users can also create, edit, filter, search, and delete recipes. Each recipe has its attributes: ingredients, preparation time, preparation steps, cost, etc.
 
-A weekly meal planner is available to them for determine the meals assigned to the days and categories of meals (breakfast, lunch, or dinner).
+A weekly meal planner is available to them to determine the meals assigned to the days and categories of meals (breakfast, lunch, or dinner).
 
 ******************************************************************
 ### Links:
@@ -37,7 +37,6 @@ node backend/src/server.js
 ### Team Members:
 - Laila
 - Ishrak
-- Simran
 - Monish
 - Liliana
 - Shekinah
@@ -48,7 +47,6 @@ node backend/src/server.js
 
 - Frontend/UI:
     - Ishrak
-    - Simran
     - Shekinah
 - Backend:
     - Liliana
@@ -57,4 +55,3 @@ node backend/src/server.js
 - Database:
     - Monish
     - Ishrak
-    - Simran
