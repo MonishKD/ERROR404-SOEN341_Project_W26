@@ -59,7 +59,62 @@ model recipes {
   ownerId      Int         
   
   // Relationship: A recipe belongs to a user
-  owner        users   @relation(fields: [ownerId], references:[id])
+  owner        users    @relation(fields: [ownerId], references:[id])
   
   @@map("recipes")
+}
+
+model MealPlan {
+  id                Int      @id @default(autoincrement())
+  name              String   @db.VarChar(255)
+  week_start_date   DateTime
+  week_end_date     DateTime
+  ownerId           Int       
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  // Relationship: A meal plan belongs to a user
+  owner             users    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Relationship: A meal plan can have many meal plan items
+  mealPlanItems     MealPlanItem[]
+
+  @@unique([ownerId, week_start_date, week_end_date]) // Prevent duplicate plans for same week
+  @@map("meal_plans")  
+}
+
+model MealPlanItem {
+  id              Int       @id @default(autoincrement())
+  mealPlanId    Int
+  recipeId       Int
+  day_of_week     DayOfWeek
+  meal_type       MealType
+  notes           String?   @db.VarChar(255)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  // Relationships
+  mealPlan        MealPlan  @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipe          recipes   @relation(fields: [recipeId], references, [id], onDelete: Restrict)
+
+  @@unique([mealPlanId, day_of_week, meal_type])
+  @@map("meal_plan_items")
+}
+
+// Enums for type safety
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
 }
