@@ -26,7 +26,7 @@ model users {
 
   // Relationship: A user can have many recipes
   recipes          recipes[]
-  mealPlanItems    MealPlan[]
+  mealPlans        MealPlan[]
   resetTokens      passwordResetTokens[]
 
   @@map("users")
@@ -60,6 +60,9 @@ model recipes {
   
   // Relationship: A recipe belongs to a user
   owner        users    @relation(fields: [ownerId], references:[id])
+  
+  // Back relation to MealPlanItem
+  mealPlanItems MealPlanItem[]
   
   @@map("recipes")
 }
