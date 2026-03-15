@@ -94,9 +94,9 @@ model MealPlanItem {
   updated_at      DateTime  @updatedAt
 
   // Relationships
-  mealPlan        MealPlan  @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
-  recipe          recipes   @relation(fields: [recipeId], references, [id], onDelete: Restrict)
-
+  mealPlan          MealPlan      @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipe            recipes       @relation(fields: [recipeId], references: [id], onDelete: Restrict)
+  
   @@unique([mealPlanId, day_of_week, meal_type])
   @@map("meal_plan_items")
 }
