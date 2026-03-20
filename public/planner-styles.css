@@ -1,0 +1,297 @@
+/*Override profile-container width for wider grid layout*/
+.profile-container {
+    max-width: 1200px;
+}
+
+/*Planner controls*/
+.planner-controls {
+    background: white;
+    border-radius: 18px;
+    padding: 20px 28px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    margin-bottom: 30px;
+}
+
+.planner-week-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.week-nav-btn {
+    background: #f0f9f4;
+    border: 2px solid #e6f4ec;
+    color: #1b8c4f;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.week-nav-btn:hover {
+    background: #0e9c50;
+    color: white;
+    border-color: #0e9c50;
+}
+
+.planner-week-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 160px;
+}
+
+.week-month {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1b8c4f;
+}
+
+.week-range {
+    font-size: 13px;
+    color: #888;
+    font-weight: 500;
+}
+
+.planner-actions-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-left: auto;
+}
+
+/*Date picker*/
+.week-date-input {
+    padding: 9px 14px;
+    border: 2px solid #e6f4ec;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    cursor: pointer;
+}
+
+.week-date-input:focus {
+    outline: none;
+    border-color: #0e9c50;
+}
+
+/*Weekly grid*/
+.planner-grid-wrapper {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    overflow-x: auto;
+    margin-bottom: 40px;
+}
+
+.planner-grid {
+    display: grid;
+    grid-template-columns: 110px repeat(7, 1fr);
+    min-width: 780px;
+}
+
+.grid-header-corner {
+    background: #f8fafc;
+    border-bottom: 2px solid #e6f4ec;
+    border-right: 2px solid #e6f4ec;
+    border-radius: 18px 0 0 0;
+}
+
+.grid-day-header {
+    background: #f8fafc;
+    border-bottom: 2px solid #e6f4ec;
+    border-right: 1px solid #f0f0f0;
+    padding: 14px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.grid-day-header:last-child {
+    border-right: none;
+    border-radius: 0 18px 0 0;
+}
+
+.day-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1b8c4f;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.day-date {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+}
+
+.grid-day-header.today {
+    background: #e6f4ec;
+}
+
+.grid-day-header.today .day-date {
+    background: #0e9c50;
+    color: white;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.grid-meal-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 16px 8px;
+    border-right: 2px solid #e6f4ec;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fafafa;
+    font-weight: 600;
+    font-size: 13px;
+    color: #555;
+}
+
+.meal-label-icon {
+    font-size: 22px;
+}
+
+.grid-cell {
+    border-right: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 10px;
+    min-height: 100px;
+}
+
+.grid-cell:nth-child(8n) {
+    border-right: none;
+}
+
+.grid-cell.empty:hover {
+    background: #f0f9f4;
+}
+
+.cell-add-btn {
+    width: 100%;
+    height: 100%;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: none;
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    color: #aaa;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.cell-add-btn:hover {
+    border-color: #0e9c50;
+    color: #0e9c50;
+    background: #f0f9f4;
+}
+
+.cell-add-btn .add-icon {
+    font-size: 20px;
+}
+
+.cell-filled {
+    background: #e6f4ec;
+    border: 2px solid #9dd4b3;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    height: 100%;
+    min-height: 80px;
+}
+
+.cell-recipe-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1b4f35;
+    line-height: 1.3;
+    flex: 1;
+}
+
+.cell-recipe-meta {
+    font-size: 11px;
+    color: #4a8a67;
+}
+
+.cell-filled-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.cell-action-btn {
+    flex: 1;
+    padding: 5px 0;
+    border-radius: 6px;
+    border: none;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cell-btn-edit {
+    background: white;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+}
+
+.cell-btn-edit:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.cell-btn-remove {
+    background: white;
+    color: #dc2626;
+    border: 1px solid #dc2626;
+    flex: 0;
+    padding: 5px 8px;
+}
+
+.cell-btn-remove:hover {
+    background: #dc2626;
+    color: white;
+}
+
+/*Recipe cards on add-meal page*/
+.recipe-image {
+    font-size: 44px;
+}
+
+.recipe-details {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.back-btn-wrapper {
+    margin: 30px 0;
+}

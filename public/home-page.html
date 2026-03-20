@@ -23,7 +23,7 @@
             <div class="nav-links">
                 <a href="home-page.html" class="nav-link active">Home</a>
                 <a href="recipes.html" class="nav-link">Recipes</a>
-                <a href="#" class="nav-link">Meal Planner</a>
+                <a href="meal-planner.html" class="nav-link">Meal Planner</a>
                 <a href="edit-profile.html" class="nav-link">Profile</a>
                 <a href="login-page.html" class="nav-link logout">Logout</a>
             </div>
@@ -99,7 +99,7 @@
             <div class="stat-card">
                 <div class="stat-icon">📅</div>
                 <div class="stat-content">
-                    <h3>5</h3>
+                    <h3 id="mealsPlannedCount">14</h3>
                     <p>Meals Planned</p>
                 </div>
             </div>
@@ -126,7 +126,7 @@
                     <div class="action-icon">📆</div>
                     <h3>Plan Your Week</h3>
                     <p>Create or update your weekly meal schedule</p>
-                    <button type="button" class="action-button">Plan Now</button>
+                    <a href="meal-planner.html" class="action-button">Plan Now</a>
                 </div>
                 <div class="action-card">
                     <div class="action-icon">➕</div>
@@ -145,49 +145,61 @@
                     <div class="meal-day">Monday</div>
                     <div class="meal-item">
                         <span class="meal-type">Breakfast</span>
-                        <span class="meal-name">Pancakes</span>
+                        <span class="meal-name">🥞 Pancakes</span>
                     </div>
                     <div class="meal-item">
                         <span class="meal-type">Lunch</span>
-                        <span class="meal-name">Rice & Chicken</span>
+                        <span class="meal-name">🥗 Greek Salad</span>
                     </div>
                     <div class="meal-item">
                         <span class="meal-type">Dinner</span>
-                        <span class="meal-name">Lasagna</span>
+                        <span class="meal-name">🍝 Shrimp Pasta</span>
                     </div>
+                    <a href="meal-planner.html" class="meal-item empty">
+                        <span class="meal-type">Snack</span>
+                        <span class="meal-name">+ Add Snack</span>
+                    </a>
                 </div>
                 <div class="meal-card">
                     <div class="meal-day">Tuesday</div>
                     <div class="meal-item">
                         <span class="meal-type">Breakfast</span>
-                        <span class="meal-name">Oatmeal Bowl</span>
+                        <span class="meal-name">🥣 Oatmeal Bowl</span>
                     </div>
-                    <div class="meal-item">
+                    <a href="meal-planner.html" class="meal-item empty">
                         <span class="meal-type">Lunch</span>
-                        <span class="meal-name">Greek Salad</span>
-                    </div>
+                        <span class="meal-name">+ Add Lunch</span>
+                    </a>
                     <div class="meal-item empty">
                         <span class="meal-type">Dinner</span>
-                        <span class="meal-name">+ Add Meal</span>
+                        <span class="meal-name">🥘 Beef Chili</span>
+                    </div>
+                    <div class="meal-item">
+                        <span class="meal-type">Snack</span>
+                        <span class="meal-name">🍎 Apple &amp; Peanut Butter</span>
                     </div>
                 </div>
                 <div class="meal-card">
                     <div class="meal-day">Wednesday</div>
-                    <div class="meal-item empty">
+                    <a href="meal-planner.html" class="meal-item empty">
                         <span class="meal-type">Breakfast</span>
-                        <span class="meal-name">+ Add Meal</span>
-                    </div>
-                    <div class="meal-item empty">
+                        <span class="meal-name">+ Add Breakfast</span>
+                    </a>
+                    <div class="meal-item">
                         <span class="meal-type">Lunch</span>
-                        <span class="meal-name">+ Add Meal</span>
+                        <span class="meal-name">🌯 Chickpea Wrap</span>
                     </div>
-                    <div class="meal-item empty">
+                    <a href="meal-planner.html" class="meal-item empty">
                         <span class="meal-type">Dinner</span>
-                        <span class="meal-name">+ Add Meal</span>
-                    </div>
+                        <span class="meal-name">+ Add Dinner</span>
+                    </a>
+                    <a href="meal-planner.html" class="meal-item empty">
+                        <span class="meal-type">Snack</span>
+                        <span class="meal-name">+ Add Snack</span>
+                    </a>
                 </div>
             </div>
-            <button type="button" class="view-full-plan">View Full Weekly Plan →</button>
+            <a href="meal-planner.html" class="view-full-plan">View Full Weekly Plan →</a>
         </section>
 
         <!--Suggested recipes-->
