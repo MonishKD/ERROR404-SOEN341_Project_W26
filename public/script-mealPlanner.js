@@ -11,6 +11,11 @@ function setTodayDate() {
 }
 window.onload = setTodayDate;
 
+function parseLocalDate(dateString) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day); // months are 0-indexed
+}
+
 function mealPlannerDate() {
     const dateContainer = document.getElementById("mealplanWeekDate");
     dateContainer.innerHTML = "";
@@ -23,7 +28,7 @@ function mealPlannerDate() {
 
     const inputValue = document.getElementById("weekPicker").value;
 
-    const selectedDate = inputValue ? new Date(inputValue) : new Date();
+    const selectedDate = inputValue ? parseLocalDate(inputValue) : new Date();
 
     // Month
     const monthFormatter = new Intl.DateTimeFormat("en-US", {
@@ -54,8 +59,12 @@ function mealPlannerDate() {
 
 function mealPlannerWeek(input) {
     const inputDate = document.getElementById("weekPicker");
-    
-    let date = inputDate.value ? new Date(inputDate.value) : new Date();
+
+    let date = inputDate.value ? parseLocalDate(inputDate.value) : new Date();
+
+    const currentDay = date.getDay(); // 0 = Sunday
+    const diffToMonday = (currentDay === 0 ? -6 : 1 - currentDay);
+    date.setDate(date.getDate() + diffToMonday);
 
     // Move 7 days
     if(input == "next"){
@@ -63,11 +72,6 @@ function mealPlannerWeek(input) {
     } else if (input == "prev"){
         date.setDate(date.getDate() - 7);
     }
-
-    // Go to Monday of that week
-    const day = date.getDay(); // 0 = Sunday
-    const diffToMonday = (day === 0 ? -6 : 1 - day);
-    date.setDate(date.getDate() + diffToMonday);
 
     // Update input value
     inputDate.value = date.toISOString().split("T")[0];
