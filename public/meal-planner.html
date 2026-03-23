@@ -41,13 +41,13 @@
         <!--Week controls-->
         <div class="planner-controls">
             <div class="planner-week-row">
-                <button class="week-nav-btn">&#8249;</button>
-                <div class="planner-week-label">
+                <button class="week-nav-btn" onclick="mealPlannerWeek('prev')">&#8249;</button>
+                <div class="planner-week-label" id="mealplanWeekDate">
                     <span class="week-month">March 2026</span>
                     <span class="week-range">Mar 17 - Mar 23</span>
                 </div>
-                <button class="week-nav-btn">&#8250;</button>
-                <input type="date" id="weekPicker" class="week-date-input">
+                <button class="week-nav-btn" onclick="mealPlannerWeek('next')">&#8250;</button>
+                <input type="date" id="weekPicker" class="week-date-input" onchange="mealPlannerDate()">
                 <div class="planner-actions-row">
                     <button class="planner-clear-btn">🗑️ Clear All</button>
                 </div>

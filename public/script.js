@@ -1180,6 +1180,240 @@ async function updateRecipe(recipeId) {
   }
 }
 
+// MEAL PLANNER FUNCTIONS
+function setTodayDate() {
+    const today = new Date();
+    // Format as YYYY-MM-DD
+    const formattedDate = today.toISOString().split('T')[0];
+    
+    document.getElementById("weekPicker").value = formattedDate;
+
+    mealPlannerDate();
+}
+window.onload = setTodayDate;
+
+function parseLocalDate(dateString) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day); // months are 0-indexed
+}
+
+function mealPlannerDate() {
+    const dateContainer = document.getElementById("mealplanWeekDate");
+    dateContainer.innerHTML = "";
+
+    const spanMonth = document.createElement("span");
+    const spanWeek = document.createElement("span");
+
+    spanMonth.className = "week-month";
+    spanWeek.className = "week-range";
+
+    const inputValue = document.getElementById("weekPicker").value;
+
+    const selectedDate = inputValue ? parseLocalDate(inputValue) : new Date();
+
+    // Month
+    const monthFormatter = new Intl.DateTimeFormat("en-US", {
+        month: "long",
+        year: "numeric"
+    });
+    spanMonth.textContent = monthFormatter.format(selectedDate);
+    
+    // Week range
+    const startOfWeek = new Date(selectedDate);
+    const day = startOfWeek.getDay(); // 0 = Sunday
+    const diffToMonday = (day === 0 ? -6 : 1 - day); // adjust to Monday
+
+    startOfWeek.setDate(selectedDate.getDate() + diffToMonday);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    const shortFormatter = new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric"
+    });
+    spanWeek.textContent = `${shortFormatter.format(startOfWeek)} - ${shortFormatter.format(endOfWeek)}`;
+    
+    dateContainer.appendChild(spanMonth);
+    dateContainer.appendChild(spanWeek);
+
+    weeklyMeals(selectedDate);
+}
+
+function mealPlannerWeek(input) {
+    const inputDate = document.getElementById("weekPicker");
+
+    let date = inputDate.value ? parseLocalDate(inputDate.value) : new Date();
+
+    const currentDay = date.getDay(); // 0 = Sunday
+    const diffToMonday = (currentDay === 0 ? -6 : 1 - currentDay);
+    date.setDate(date.getDate() + diffToMonday);
+
+    // Move 7 days
+    if(input == "next"){
+        date.setDate(date.getDate() + 7);
+    } else if (input == "prev"){
+        date.setDate(date.getDate() - 7);
+    }
+
+    // Update input value
+    inputDate.value = date.toISOString().split("T")[0];
+
+    mealPlannerDate();
+}
+
+async function weeklyMeals(currentDate) {
+    const plannerGrid = document.getElementsByClassName("planner-grid")[0];
+    plannerGrid.innerHTML = "";
+
+    //create header row
+    const corner = document.createElement("div");
+    corner.className = "grid-header-corner";
+    plannerGrid.appendChild(corner);
+
+    const currentDay = currentDate.getDay(); // 0 = Sunday
+    const diffToMonday = (currentDay === 0 ? -6 : 1 - currentDay);
+    const monday = new Date(currentDate);
+    monday.setDate(currentDate.getDate() + diffToMonday);
+
+    //loop through week
+    for(let i = 0; i < 7; i++){
+        const day = document.createElement("div");
+        
+        const dateForDay = new Date(monday);
+        dateForDay.setDate(monday.getDate() + i);
+
+        //highlight today
+        const today = new Date();
+        if(dateForDay.getDate() === today.getDate() &&
+            dateForDay.getMonth() === today.getMonth() &&
+            dateForDay.getFullYear() === today.getFullYear()){
+            day.className = "grid-day-header today"
+        }
+        else{
+            day.className = "grid-day-header"
+        }
+
+        let nameDay = document.createElement("span");
+        let dateDay = document.createElement("span");
+        nameDay.className = "day-name";
+        dateDay.className = "day-date";
+
+        nameDay.textContent = dateForDay.toLocaleDateString("en-US", { weekday: "short" });
+        dateDay.textContent = dateForDay.toLocaleDateString("en-US", { day: "numeric" });
+
+        day.appendChild(nameDay);
+        day.appendChild(dateDay);
+
+        plannerGrid.appendChild(day);
+    }
+
+    //get mealPlan for the week
+    const mondayStr = monday.toISOString().split("T")[0];
+    const mealPlanResponse = await fetch(`/api/mealPlan/${mondayStr}`, {
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        }
+    });
+    const mealPlan = await mealPlanResponse.json();
+    let mealPlanItems = [];
+    if (mealPlan) {
+        const itemsResponse = await fetch(`/api/mealPlan/${mealPlan.id}`);
+        mealPlanItems = await itemsResponse.json();
+    }
+
+    // Define meal types
+    const MEAL_TYPES = [
+        { type: "BREAKFAST", icon: "🍳" },
+        { type: "LUNCH", icon: "🥗" },
+        { type: "DINNER", icon: "🍽️" },
+        { type: "SNACK", icon: "🍎"}
+    ];
+
+    const WEEKDAY_ENUM = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+    const startOfWeek = new Date(monday);
+
+    // loop through meal types
+    for (const meal of MEAL_TYPES) {
+
+        //label cell
+        const mealTypeLabel = document.createElement("div");
+        mealTypeLabel.className = "grid-meal-label";
+
+        const icon = document.createElement("span");
+        icon.className = "meal-label-icon";
+        icon.textContent = meal.icon;
+
+        const text = document.createElement("span");
+        text.textContent = meal.type;
+
+        mealTypeLabel.appendChild(icon);
+        mealTypeLabel.appendChild(text);
+        plannerGrid.appendChild(mealTypeLabel);
+        
+        // loop through each day
+        for(let i = 0; i < 7; i++){
+            const grid = document.createElement("div");
+            grid.className = "grid-cell";
+            
+            const dateForDay = new Date(startOfWeek);
+            dateForDay.setDate(startOfWeek.getDate() + i);
+            const dayEnum = WEEKDAY_ENUM[dateForDay.getDay()];
+
+            const item = mealPlanItems.find(e =>
+                e.meal_type === meal.type &&
+                e.day_of_week === dayEnum
+            );
+
+            if(item){
+                const recipeResponse  = await fetch(`/api/recipes/${item.recipeId}`);
+                const recipe = await recipeResponse.json();
+
+                const cellFilled = document.createElement("div");
+                cellFilled.className = "cell-filled";
+
+                const recipeName = document.createElement("div");
+                recipeName.className = "cell-recipe-name";
+                recipeName.textContent = recipe.name;
+
+                const recipeMeta = document.createElement("div");
+                recipeMeta.className = "cell-recipe-meta";
+                recipeMeta.textContent = `${recipe.prep_time} mins · ${recipe.difficulty}`;
+
+                const actions = document.createElement("div");
+                actions.className = "cell-filled-actions";
+
+                const editBtn = document.createElement("button");
+                editBtn.className = "cell-action-btn cell-btn-edit";
+                editBtn.textContent = "✏️ Edit";
+
+                const removeBtn = document.createElement("button");
+                removeBtn.className = "cell-action-btn cell-btn-remove";
+                removeBtn.textContent = "✕";
+
+                actions.appendChild(editBtn);
+                actions.appendChild(removeBtn);
+
+                cellFilled.appendChild(recipeName);
+                cellFilled.appendChild(recipeMeta);
+                cellFilled.appendChild(actions);
+
+                grid.appendChild(cellFilled);
+            }
+            else {
+                grid.classname = "grid-cell empty";
+                grid.innerHTML = `
+                    <a href="add-meal.html" class="cell-add-btn">
+                            <span class="add-icon">＋</span>
+                            <span>Add ${meal.type}</span>
+                    </a>
+                `;
+            }
+          plannerGrid.appendChild(grid);
+        }
+    }
+};
+
 
 // PAGE INITIALIZATION FUNCTIONS
 

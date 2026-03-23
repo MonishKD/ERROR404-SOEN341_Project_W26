@@ -622,6 +622,65 @@ app.post('/api/auth/reset-password', async (req, res) => {
   }
 });
 
+/* Meal Plan routes */
+
+// GET mealPlan for the week
+app.get('/api/mealPlan/:startDate', authMiddleware, async (req, res) => {
+  try{
+    const { startDate } = req.params;
+    const ownerId = parseInt(req.user.userId);
+    console.log(startDate, ownerId);
+
+    const startOfDay = new Date(startDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(startDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const mealPlan = await prisma.mealPlan.findFirst({
+      where: {
+        ownerId,
+        week_start_date: {
+          gte: startOfDay,
+          lte: endOfDay
+        }
+      }
+    });
+
+    if (!mealPlan) return res.json(null);
+    return res.json(mealPlan);
+  }catch (error) {
+    console.error('Error fetching mealPlan by date:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET mealPlan items based on mealPlan id
+app.get('/api/mealPlan/:id', async (req, res) => {
+  try{
+    const { id } = req.params;
+    const mealPlanItems = await prisma.mealPlanItem.findMany({
+      where: { mealPlanId: id }
+    });
+    return res.json(mealPlanItems);
+  }catch (error) {
+    console.error('Error fetching mealPlanItems:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//CREATE mealPlan item
+app.post('/api/mealPlan/update', async (req,res) =>
+{
+  try{
+    const {mealPlanId, recipeId, day_of_week, meal_type} = req.body;
+    
+  } catch (error){
+    console.error('Error updating mealPlan item:', error);
+    throw error;
+  }
+});
+
 
 /*** Error handling ***/
 
