@@ -622,6 +622,46 @@ app.post('/api/auth/reset-password', async (req, res) => {
   }
 });
 
+/* Meal Plan routes */
+
+// GET mealPlan for the week
+app.get('api/mealPlan/:startDate', async (req, res) => {
+  try{
+    const mealPlan = await prisma.mealPlan.findUnique({
+      where: { week_start_date: startDate }
+    });
+    return mealPlan
+  }catch (error) {
+    console.error('Error fetching mealPlan by date:', error);
+    throw error; // re-throw to be handled by route handler
+  }
+});
+
+// GET mealPlan items based on mealPlan id
+app.get('api/mealPlan/:id', async (req, res) => {
+  try{
+    const mealPlanItems = await prisma.mealPlanItem.findUnique({
+      where: { mealPlanId: id }
+    });
+    return mealPlan
+  }catch (error) {
+    console.error('Error fetching mealPlanItems:', error);
+    throw error;
+  }
+});
+
+//UPDATE mealPlan item
+app.post('api/mealPlan/update', async (req,res) =>
+{
+  try{
+    const {mealPlanId, recipeId, day_of_week, meal_type} = req.body;
+    
+  } catch (error){
+    console.error('Error updating mealPlan item:', error);
+    throw error;
+  }
+});
+
 
 /*** Error handling ***/
 
