@@ -38,12 +38,7 @@ npm install
 npx prisma generate
 ```
 
-4. Run migrations to sync database
-``` git bash
-npx prisma migrate dev --name init
-```
-
-5. Start the server
+4. Start the server
 ``` git bash
 npm start
 ```
