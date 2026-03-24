@@ -624,8 +624,108 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
 /* Meal Plan routes */
 
+// CREATE mealPlan item
+app.post('/api/mealPlan/item', authMiddleware, async (req, res) => {
+  console.log('HIT /api/mealPlan/item route');
+  try {
+    const ownerId = parseInt(req.user.userId, 10);
+    const { mealPlanId, recipeId, day_of_week, meal_type, notes } = req.body;
+
+    const validDays = [
+      'MONDAY',
+      'TUESDAY',
+      'WEDNESDAY',
+      'THURSDAY',
+      'FRIDAY',
+      'SATURDAY',
+      'SUNDAY'
+    ];
+
+    const validMealTypes = [
+      'BREAKFAST',
+      'LUNCH',
+      'DINNER',
+      'SNACK'
+    ];
+
+    // Validation
+    if (!mealPlanId || Number.isNaN(parseInt(mealPlanId, 10))) {
+      return res.status(400).json({ message: 'Valid mealPlanId is required' });
+    }
+
+    if (!recipeId || Number.isNaN(parseInt(recipeId, 10))) {
+      return res.status(400).json({ message: 'Valid recipeId is required' });
+    }
+
+    if (!day_of_week || !validDays.includes(day_of_week)) {
+      return res.status(400).json({ message: 'Invalid day_of_week value' });
+    }
+
+    if (!meal_type || !validMealTypes.includes(meal_type)) {
+      return res.status(400).json({ message: 'Invalid meal_type value' });
+    }
+
+    if (notes !== undefined && typeof notes !== 'string') {
+      return res.status(400).json({ message: 'Notes must be a string' });
+    }
+
+    // Make sure meal plan belongs to logged-in user
+    const mealPlan = await prisma.mealPlan.findFirst({
+      where: {
+        id: parseInt(mealPlanId, 10),
+        ownerId
+      }
+    });
+
+    if (!mealPlan) {
+      return res.status(404).json({ message: 'Meal plan not found' });
+    }
+
+    // Make sure recipe exists and belongs to logged-in user
+    const recipe = await prisma.recipes.findFirst({
+      where: {
+        id: parseInt(recipeId, 10),
+        ownerId
+      }
+    });
+
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe not found' });
+    }
+
+    const mealPlanItem = await prisma.mealPlanItem.create({
+      data: {
+        mealPlanId: parseInt(mealPlanId, 10),
+        recipeId: parseInt(recipeId, 10),
+        day_of_week,
+        meal_type,
+        notes: notes?.trim() || null
+      },
+      include: {
+        recipe: true
+      }
+    });
+
+    return res.status(201).json({
+      message: 'Meal plan item created successfully',
+      mealPlanItem
+    });
+
+  } catch (error) {
+    console.error('Error creating mealPlan item:', error);
+
+    if (error.code === 'P2002') {
+      return res.status(409).json({
+        message: 'A meal is already assigned to this day and meal type'
+      });
+    }
+
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // GET mealPlan for the week
-app.get('/api/mealPlan/:startDate', authMiddleware, async (req, res) => {
+app.get('/api/mealPlan/week/:startDate', authMiddleware, async (req, res) => {
   try{
     const { startDate } = req.params;
     const ownerId = parseInt(req.user.userId);
@@ -656,31 +756,34 @@ app.get('/api/mealPlan/:startDate', authMiddleware, async (req, res) => {
 });
 
 // GET mealPlan items based on mealPlan id
-app.get('/api/mealPlan/:id', async (req, res) => {
-  try{
-    const { id } = req.params;
-    const mealPlanItems = await prisma.mealPlanItem.findMany({
-      where: { mealPlanId: id }
+app.get('/api/mealPlan/:id/items', authMiddleware, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const ownerId = parseInt(req.user.userId, 10);
+
+    if (!id || Number.isNaN(id)) {
+      return res.status(400).json({ message: 'Valid mealPlan id is required' });
+    }
+
+    const mealPlan = await prisma.mealPlan.findFirst({
+      where: { id, ownerId }
     });
+
+    if (!mealPlan) {
+      return res.status(404).json({ message: 'Meal plan not found' });
+    }
+
+    const mealPlanItems = await prisma.mealPlanItem.findMany({
+      where: { mealPlanId: id },
+      include: { recipe: true }
+    });
+
     return res.json(mealPlanItems);
-  }catch (error) {
+  } catch (error) {
     console.error('Error fetching mealPlanItems:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-//CREATE mealPlan item
-app.post('/api/mealPlan/update', async (req,res) =>
-{
-  try{
-    const {mealPlanId, recipeId, day_of_week, meal_type} = req.body;
-    
-  } catch (error){
-    console.error('Error updating mealPlan item:', error);
-    throw error;
-  }
-});
-
 
 /*** Error handling ***/
 
