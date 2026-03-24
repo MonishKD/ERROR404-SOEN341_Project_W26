@@ -26,6 +26,7 @@ model users {
 
   // Relationship: A user can have many recipes
   recipes          recipes[]
+  ratings          RecipeRating[]
   mealPlans        MealPlan[]
   resetTokens      passwordResetTokens[]
 
@@ -33,72 +34,92 @@ model users {
 }
 
 model passwordResetTokens {
-  id        Int      @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   userId    Int
-  token     String   @unique
+  token     String      @unique
   expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  used      Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  user      users       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("password_reset_tokens")
 }
 
 model recipes {
-  id           Int      @id @default(autoincrement())
-  name         String   @db.VarChar(255)
+  id           Int        @id @default(autoincrement())
+  name         String     @db.VarChar(255)
   ingredients  String[]
   prep_time    Int?
   prep_steps   String[]
-  cost         String?   // "Low", "Medium", "High"
-  difficulty   String?   // "Easy", "Medium", "Hard"
+  cost         String?    // "Low", "Medium", "High"
+  difficulty   String?    // "Easy", "Medium", "Hard"
   dietary_tags String[]
   allergens    String[]
-  created_at   DateTime @default(now())
-  updated_at   DateTime @default(now()) @updatedAt
-  ownerId      Int         
-  
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @default(now()) @updatedAt
+  ownerId      Int
+  privacy      Boolean    @default(false)   // false = private, true = public
+
   // Relationship: A recipe belongs to a user
-  owner        users    @relation(fields: [ownerId], references:[id])
+  owner        users      @relation(fields: [ownerId], references:[id])
   
   // Back relation to MealPlanItem
   mealPlanItems MealPlanItem[]
+
+  // Ratings relation
+  ratings RecipeRating[]
   
   @@map("recipes")
 }
 
+model RecipeRating {
+  id               Int            @id @default(autoincrement())
+  recipeId         Int
+  userId           Int
+  rating           Int            // Value from 1-5
+  comment          String?        @db.Text
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  // Relationships
+  recipe           recipes        @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user             users          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, userId])    // Prevent duplicate ratings from same user
+}
+
 model MealPlan {
-  id                Int      @id @default(autoincrement())
-  name              String   @db.VarChar(255)
+  id                Int           @id @default(autoincrement())
+  name              String        @db.VarChar(255)
   week_start_date   DateTime
   week_end_date     DateTime
   ownerId           Int       
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
 
   // Relationship: A meal plan belongs to a user
-  owner             users    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner           users           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   // Relationship: A meal plan can have many meal plan items
-  mealPlanItems     MealPlanItem[]
+  mealPlanItems   MealPlanItem[]
 
   @@unique([ownerId, week_start_date, week_end_date]) // Prevent duplicate plans for same week
   @@map("meal_plans")  
 }
 
 model MealPlanItem {
-  id              Int       @id @default(autoincrement())
-  mealPlanId    Int
-  recipeId       Int
+  id              Int           @id @default(autoincrement())
+  mealPlanId      Int
+  recipeId        Int
   day_of_week     DayOfWeek
   meal_type       MealType
-  notes           String?   @db.VarChar(255)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
+  notes           String?       @db.VarChar(255)
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
 
   // Relationships
-  mealPlan          MealPlan      @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
-  recipe            recipes       @relation(fields: [recipeId], references: [id], onDelete: Restrict)
+  mealPlan        MealPlan      @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipe          recipes       @relation(fields: [recipeId], references: [id], onDelete: Restrict)
   
   @@unique([mealPlanId, day_of_week, meal_type])
   @@map("meal_plan_items")
