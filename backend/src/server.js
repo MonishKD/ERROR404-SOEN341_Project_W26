@@ -729,6 +729,133 @@ app.post('/api/mealPlan/item', authMiddleware, async (req, res) => {
   }
 });
 
+// UPDATE mealPlan item by id
+app.put('/api/mealPlan/items/:itemId', authMiddleware, async (req, res) => {
+  try {
+    const itemId = parseInt(req.params.itemId, 10);
+    const ownerId = parseInt(req.user.userId, 10);
+    const { recipeId, day_of_week, meal_type, notes } = req.body;
+
+    const validDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+    const validMealTypes = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
+
+    if (Number.isNaN(itemId)) {
+      return res.status(400).json({ message: 'Invalid meal assignment id' });
+    }
+
+    if (day_of_week !== undefined && !validDays.includes(day_of_week)) {
+      return res.status(400).json({ message: 'Invalid day_of_week value' });
+    }
+
+    if (meal_type !== undefined && !validMealTypes.includes(meal_type)) {
+      return res.status(400).json({ message: 'Invalid meal_type value' });
+    }
+
+    if (notes !== undefined && typeof notes !== 'string') {
+      return res.status(400).json({ message: 'Notes must be a string' });
+    }
+
+    const item = await prisma.mealPlanItem.findUnique({
+      where: { id: itemId },
+      include: {
+        mealPlan: {
+          select: { ownerId: true }
+        }
+      }
+    });
+
+    if (!item) {
+      return res.status(404).json({ message: 'Meal assignment not found' });
+    }
+
+    if (item.mealPlan.ownerId !== ownerId) {
+      return res.status(403).json({ message: 'You do not have permission to update this meal assignment' });
+    }
+
+    const updateData = {};
+
+    if (recipeId !== undefined) {
+      const parsedRecipeId = parseInt(recipeId, 10);
+
+      if (Number.isNaN(parsedRecipeId)) {
+        return res.status(400).json({ message: 'Invalid recipeId' });
+      }
+
+      const recipe = await prisma.recipes.findFirst({
+        where: {
+          id: parsedRecipeId,
+          ownerId
+        }
+      });
+
+      if (!recipe) {
+        return res.status(404).json({ message: 'Recipe not found' });
+      }
+
+      updateData.recipeId = parsedRecipeId;
+    }
+
+    if (day_of_week !== undefined) updateData.day_of_week = day_of_week;
+    if (meal_type !== undefined) updateData.meal_type = meal_type;
+    if (notes !== undefined) updateData.notes = notes.trim() || null;
+
+    const updatedItem = await prisma.mealPlanItem.update({
+      where: { id: itemId },
+      data: updateData
+    });
+
+    return res.json(updatedItem);
+  } catch (error) {
+    console.error('Error updating mealPlan item:', error);
+
+    if (error.code === 'P2002') {
+      return res.status(409).json({
+        message: 'A meal is already assigned to that day and meal type'
+      });
+    }
+
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE mealPlan item by id
+app.delete('/api/mealPlan/items/:itemId', authMiddleware, async (req, res) => {
+  try {
+    const itemId = parseInt(req.params.itemId, 10);
+    const ownerId = parseInt(req.user.userId, 10);
+
+    if (Number.isNaN(itemId)) {
+      return res.status(400).json({ message: 'Invalid meal assignment id' });
+    }
+
+    const item = await prisma.mealPlanItem.findUnique({
+      where: { id: itemId },
+      include: {
+        mealPlan: {
+          select: { ownerId: true }
+        }
+      }
+    });
+
+    if (!item) {
+      return res.status(404).json({ message: 'Meal assignment not found' });
+    }
+
+    if (item.mealPlan.ownerId !== ownerId) {
+      return res.status(403).json({ message: 'You do not have permission to delete this meal assignment' });
+    }
+
+    await prisma.mealPlanItem.delete({
+      where: { id: itemId }
+    });
+
+    return res.json({ message: 'Meal plan item deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting mealPlan item:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET mealPlan for the week
 app.get('/api/mealPlan/week/:startDate', authMiddleware, async (req, res) => {
   try {
