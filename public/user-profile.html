@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMajor - Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="home-styles.css">
+    <link rel="stylesheet" href="profile-styles.css">
+    <link rel="stylesheet" href="recipe-styles.css">
+    <link rel="stylesheet" href="user-profile-styles.css">
+    <link rel="stylesheet" href="add-recipe-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!--Navigation bar-->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="home-page.html" class="nav-brand">
+                <span class="brand-icon">🍴</span>
+                <span class="brand-name">MealMajor</span>
+            </a>
+            <div class="nav-links">
+                <a href="home-page.html" class="nav-link">Home</a>
+                <a href="recipes.html" class="nav-link">Recipes</a>
+                <a href="meal-planner.html" class="nav-link">Meal Planner</a>
+                <a href="edit-profile.html" class="nav-link">Profile</a>
+                <a href="user-profile.html" class="nav-link nav-avatar active">
+                    <div class="avatar-circle">JD</div>
+                </a>
+                <a href="login-page.html" class="nav-link logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="profile-container">
+
+        <!--Profile-->
+        <div class="user-profile-hero">
+            <div class="avatar-circle avatar-large">JD</div>
+            <div class="user-hero-info">
+                <h1 class="user-display-name">John Doe</h1>
+                <p class="user-handle">@johndoe</p>
+                <div class="user-hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">2</span>
+                        <span class="hero-stat-label">Public Recipes</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">1</span>
+                        <span class="hero-stat-label">Private Recipes</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Tab navigation-->
+        <div class="profile-tabs">
+            <a href="#tab-public" class="profile-tab">🌍 Public Recipes</a>
+            <a href="#tab-private" class="profile-tab">🔒 My Private Recipes</a>
+        </div>
+
+        <!--Public recipes-->
+        <section id="tab-public" class="tab-section">
+
+            <!--Recipe card 1-->
+            <div class="recipe-card-full">
+                <details>
+                    <summary class="recipe-card-top">
+                        <span class="recipe-card-emoji">🥗</span>
+                        <div class="recipe-card-summary">
+                            <h3 class="recipe-card-title">Greek Salad</h3>
+                            <div class="recipe-card-tags">
+                                <span class="tag tag-easy">Easy</span>
+                                <span class="tag tag-cost">💰 Low</span>
+                            </div>
+                            <div class="recipe-card-meta">
+                                <span>⏱️ 15 min</span>
+                                <span class="recipe-rating">
+                                    <span class="stars-display">★★★★☆</span>
+                                    <span class="rating-score">4.2</span>
+                                    <span class="rating-count">(12 ratings)</span>
+                                </span>
+                            </div>
+                        </div>
+                        <span class="recipe-card-chevron">▼</span>
+                    </summary>
+                    <div class="recipe-card-details">
+                        <div class="recipe-card-ingredients">
+                            <strong>Ingredients:</strong><br>
+                            2 tomatoes · 1 cucumber · 100g feta · black olives · red onion · olive oil · oregano
+                        </div>
+                        <div class="recipe-card-steps">
+                            <strong>Steps:</strong>
+                            <ol>
+                                <li>Chop tomatoes, cucumber and onion into chunks.</li>
+                                <li>Add olives and crumbled feta.</li>
+                                <li>Drizzle with olive oil and sprinkle oregano. Serve immediately.</li>
+                            </ol>
+                        </div>
+
+                        <!--Star rating form-->
+                        <div class="star-rating-form">
+                            <p class="rate-prompt">Rate this recipe:</p>
+                            <div class="stars-input">
+                                <input type="radio" name="rating-r1" id="r1-star5" value="5">
+                                <label for="r1-star5">★</label>
+                                <input type="radio" name="rating-r1" id="r1-star4" value="4">
+                                <label for="r1-star4">★</label>
+                                <input type="radio" name="rating-r1" id="r1-star3" value="3">
+                                <label for="r1-star3">★</label>
+                                <input type="radio" name="rating-r1" id="r1-star2" value="2">
+                                <label for="r1-star2">★</label>
+                                <input type="radio" name="rating-r1" id="r1-star1" value="1">
+                                <label for="r1-star1">★</label>
+                            </div>
+                            <button type="button" class="btn-rate">Submit Rating</button>
+                        </div>
+
+                        <!--Video upload-->
+                        <div class="video-upload-form">
+                            <label class="video-upload-label">
+                                🎥 Add a video
+                                <input type="file" name="video" accept="video/*">
+                            </label>
+                            <button type="button" class="btn-secondary">Upload</button>
+                        </div>
+
+                    </div>
+                </details>
+            </div>
+
+            <!--Recipe card 2-->
+            <div class="recipe-card-full">
+                <details>
+                    <summary class="recipe-card-top">
+                        <span class="recipe-card-emoji">🍝</span>
+                        <div class="recipe-card-summary">
+                            <h3 class="recipe-card-title">Shrimp Pasta</h3>
+                            <div class="recipe-card-tags">
+                                <span class="tag tag-medium">Medium</span>
+                                <span class="tag tag-cost">💰💰 Medium</span>
+                            </div>
+                            <div class="recipe-card-meta">
+                                <span>⏱️ 30 min</span>
+                                <span class="recipe-rating">
+                                    <span class="stars-display">★★★★★</span>
+                                    <span class="rating-score">4.8</span>
+                                    <span class="rating-count">(5 ratings)</span>
+                                </span>
+                            </div>
+                        </div>
+                        <span class="recipe-card-chevron">▼</span>
+                    </summary>
+                    <div class="recipe-card-details">
+                        <div class="recipe-card-ingredients">
+                            <strong>Ingredients:</strong><br>
+                            300g pasta · 200g shrimp · 3 cloves garlic · olive oil · white wine · parsley · salt &amp; pepper
+                        </div>
+                        <div class="recipe-card-steps">
+                            <strong>Steps:</strong>
+                            <ol>
+                                <li>Cook pasta according to package instructions.</li>
+                                <li>Sauté garlic in olive oil, add shrimp and cook 2 min per side.</li>
+                                <li>Deglaze with white wine. Toss in pasta, season and garnish with parsley.</li>
+                            </ol>
+                        </div>
+
+                        <div class="star-rating-form">
+                            <p class="rate-prompt">Rate this recipe:</p>
+                            <div class="stars-input">
+                                <input type="radio" name="rating-r2" id="r2-star5" value="5">
+                                <label for="r2-star5">★</label>
+                                <input type="radio" name="rating-r2" id="r2-star4" value="4">
+                                <label for="r2-star4">★</label>
+                                <input type="radio" name="rating-r2" id="r2-star3" value="3">
+                                <label for="r2-star3">★</label>
+                                <input type="radio" name="rating-r2" id="r2-star2" value="2">
+                                <label for="r2-star2">★</label>
+                                <input type="radio" name="rating-r2" id="r2-star1" value="1">
+                                <label for="r2-star1">★</label>
+                            </div>
+                            <button type="button" class="btn-rate">Submit Rating</button>
+                        </div>
+
+                        <div class="video-upload-form">
+                            <label class="video-upload-label">
+                                🎥 Add a video
+                                <input type="file" name="video" accept="video/*">
+                            </label>
+                            <button type="button" class="btn-secondary">Upload</button>
+                        </div>
+
+                    </div>
+                </details>
+            </div>
+
+            <!--Add recipe button-->
+            <div class="tab-add-btn-wrapper">
+                <a href="add-recipe.html?visibility=public" class="btn-green">+ Add Public Recipe</a>
+            </div>
+
+        </section>
+
+        <!--Private recipes-->
+        <section id="tab-private" class="tab-section">
+
+            <p class="private-note">🔒 Only you can see these recipes.</p>
+
+            <!--Recipe card 1-->
+            <div class="recipe-card-full">
+                <details>
+                    <summary class="recipe-card-top">
+                        <span class="recipe-card-emoji">🥘</span>
+                        <div class="recipe-card-summary">
+                            <h3 class="recipe-card-title">Grandma's Beef Stew</h3>
+                            <div class="recipe-card-tags">
+                                <span class="tag tag-medium">Medium</span>
+                                <span class="tag tag-cost">💰💰 Medium</span>
+                                <span class="tag tag-private">🔒 Private</span>
+                            </div>
+                            <div class="recipe-card-meta">
+                                <span>⏱️ 90 min</span>
+                            </div>
+                        </div>
+                        <span class="recipe-card-chevron">▼</span>
+                    </summary>
+                    <div class="recipe-card-details">
+                        <div class="recipe-card-ingredients">
+                            <strong>Ingredients:</strong><br>
+                            500g beef chuck · 3 potatoes · 2 carrots · 1 onion · beef broth · thyme · bay leaf
+                        </div>
+                        <div class="recipe-card-steps">
+                            <strong>Steps:</strong>
+                            <ol>
+                                <li>Brown beef in batches over high heat.</li>
+                                <li>Add vegetables and broth. Simmer for 75 min.</li>
+                                <li>Season and serve hot with crusty bread.</li>
+                            </ol>
+                        </div>
+                        <div class="recipe-card-actions">
+                            <a href="edit-recipe.html?id=p1" class="btn-edit-recipe">✏️ Edit</a>
+                            <button type="button" class="btn-delete-recipe">🗑️ Delete</button>
+                            <button type="button" class="btn-make-public">🌍 Make Public</button>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Add recipe button-->
+            <div class="tab-add-btn-wrapper">
+                <a href="add-recipe.html?visibility=private" class="btn-green">+ Add Private Recipe</a>
+            </div>
+
+        </section>
+
+    </div>
+
+</body>
+</html>
