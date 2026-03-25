@@ -731,16 +731,19 @@ app.post('/api/mealPlan/item', authMiddleware, async (req, res) => {
 
 // GET mealPlan for the week
 app.get('/api/mealPlan/week/:startDate', authMiddleware, async (req, res) => {
-  try{
+  try {
     const { startDate } = req.params;
-    const ownerId = parseInt(req.user.userId);
-    console.log(startDate, ownerId);
+    const ownerId = parseInt(req.user.userId, 10);
 
-    const startOfDay = new Date(startDate);
-    startOfDay.setHours(0, 0, 0, 0);
+    // Parse YYYY-MM-DD as LOCAL date, not UTC
+    const [year, month, day] = startDate.split('-').map(Number);
 
-    const endOfDay = new Date(startDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+    console.log("Requested startDate:", startDate);
+    console.log("Query startOfDay:", startOfDay);
+    console.log("Query endOfDay:", endOfDay);
 
     const mealPlan = await prisma.mealPlan.findFirst({
       where: {
@@ -754,7 +757,7 @@ app.get('/api/mealPlan/week/:startDate', authMiddleware, async (req, res) => {
 
     if (!mealPlan) return res.json(null);
     return res.json(mealPlan);
-  }catch (error) {
+  } catch (error) {
     console.error('Error fetching mealPlan by date:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
@@ -787,6 +790,51 @@ app.get('/api/mealPlan/:id/items', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fetching mealPlanItems:', error);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// CREATE mealPlan for a week if it does not exist
+app.post('/api/mealPlan', authMiddleware, async (req, res) => {
+  try {
+    const ownerId = parseInt(req.user.userId, 10);
+    const { week_start_date, week_end_date, name } = req.body;
+
+    if (!week_start_date || !week_end_date) {
+      return res.status(400).json({ message: 'week_start_date and week_end_date are required' });
+    }
+
+    const startDate = new Date(week_start_date);
+    const endDate = new Date(week_end_date);
+
+    const existingMealPlan = await prisma.mealPlan.findFirst({
+      where: {
+        ownerId,
+        week_start_date: startDate
+      }
+    });
+
+    if (existingMealPlan) {
+      return res.status(200).json(existingMealPlan);
+    }
+
+    const newMealPlan = await prisma.mealPlan.create({
+      data: {
+        name: name || 'Weekly Meal Plan',
+        week_start_date: startDate,
+        week_end_date: endDate,
+        ownerId
+      }
+    });
+
+    return res.status(201).json(newMealPlan);
+  } catch (error) {
+    console.error('Error creating meal plan:', error);
+
+    if (error.code === 'P2002') {
+      return res.status(409).json({ message: 'Meal plan already exists for this week' });
+    }
+
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
 
