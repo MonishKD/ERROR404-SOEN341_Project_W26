@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="add-recipe-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
     <!--Navigation bar-->
@@ -33,7 +35,7 @@
             </div>
         </div>
     </nav>
-    
+
     <div class="profile-container">
 
         <!--Profile-->
@@ -57,7 +59,7 @@
 
         <!--Tab navigation-->
         <div class="profile-tabs">
-            <a href="#tab-public" class="profile-tab">🌍 Public Recipes</a>
+            <a href="#tab-public" class="profile-tab">🌍 My Public Recipes</a>
             <a href="#tab-private" class="profile-tab">🔒 My Private Recipes</a>
         </div>
 
@@ -100,22 +102,12 @@
                             </ol>
                         </div>
 
-                        <!--Star rating form-->
-                        <div class="star-rating-form">
-                            <p class="rate-prompt">Rate this recipe:</p>
-                            <div class="stars-input">
-                                <input type="radio" name="rating-r1" id="r1-star5" value="5">
-                                <label for="r1-star5">★</label>
-                                <input type="radio" name="rating-r1" id="r1-star4" value="4">
-                                <label for="r1-star4">★</label>
-                                <input type="radio" name="rating-r1" id="r1-star3" value="3">
-                                <label for="r1-star3">★</label>
-                                <input type="radio" name="rating-r1" id="r1-star2" value="2">
-                                <label for="r1-star2">★</label>
-                                <input type="radio" name="rating-r1" id="r1-star1" value="1">
-                                <label for="r1-star1">★</label>
-                            </div>
-                            <button type="button" class="btn-rate">Submit Rating</button>
+                        <!--Star rating-->
+                        <p class="rate-prompt">Your recipe's ratings</p>
+                        <div class="recipe-rating">
+                            <span class="stars-display">★★★★☆</span>
+                            <span class="rating-score">4.2</span>
+                            <span class="rating-count">(12 ratings)</span>
                         </div>
 
                         <!--Video upload-->
@@ -156,7 +148,8 @@
                     <div class="recipe-card-details">
                         <div class="recipe-card-ingredients">
                             <strong>Ingredients:</strong><br>
-                            300g pasta · 200g shrimp · 3 cloves garlic · olive oil · white wine · parsley · salt &amp; pepper
+                            300g pasta · 200g shrimp · 3 cloves garlic · olive oil · white wine · parsley · salt &amp;
+                            pepper
                         </div>
                         <div class="recipe-card-steps">
                             <strong>Steps:</strong>
@@ -167,21 +160,11 @@
                             </ol>
                         </div>
 
-                        <div class="star-rating-form">
-                            <p class="rate-prompt">Rate this recipe:</p>
-                            <div class="stars-input">
-                                <input type="radio" name="rating-r2" id="r2-star5" value="5">
-                                <label for="r2-star5">★</label>
-                                <input type="radio" name="rating-r2" id="r2-star4" value="4">
-                                <label for="r2-star4">★</label>
-                                <input type="radio" name="rating-r2" id="r2-star3" value="3">
-                                <label for="r2-star3">★</label>
-                                <input type="radio" name="rating-r2" id="r2-star2" value="2">
-                                <label for="r2-star2">★</label>
-                                <input type="radio" name="rating-r2" id="r2-star1" value="1">
-                                <label for="r2-star1">★</label>
-                            </div>
-                            <button type="button" class="btn-rate">Submit Rating</button>
+                        <p class="rate-prompt">Your recipe's ratings</p>
+                        <div class="recipe-rating">
+                            <span class="stars-display">★★★★☆</span>
+                            <span class="rating-score">4.2</span>
+                            <span class="rating-count">(12 ratings)</span>
                         </div>
 
                         <div class="video-upload-form">
@@ -258,4 +241,5 @@
     </div>
 
 </body>
+
 </html>
