@@ -1190,7 +1190,6 @@ function setTodayDate() {
 
     mealPlannerDate();
 }
-window.onload = setTodayDate;
 
 function parseLocalDate(dateString) {
     const [year, month, day] = dateString.split('-').map(Number);
@@ -1262,158 +1261,437 @@ function mealPlannerWeek(input) {
     mealPlannerDate();
 }
 
+console.log("weeklyMeals called");
+
+// Load meal plan for the week and populate the grid
 async function weeklyMeals(currentDate) {
-    const plannerGrid = document.getElementsByClassName("planner-grid")[0];
-    plannerGrid.innerHTML = "";
+  const plannerGrid = document.getElementsByClassName("planner-grid")[0];
+  plannerGrid.innerHTML = "";
 
-    //create header row
-    const corner = document.createElement("div");
-    corner.className = "grid-header-corner";
-    plannerGrid.appendChild(corner);
+  // create header corner
+  const corner = document.createElement("div");
+  corner.className = "grid-header-corner";
+  plannerGrid.appendChild(corner);
 
-    const currentDay = currentDate.getDay(); // 0 = Sunday
-    const diffToMonday = (currentDay === 0 ? -6 : 1 - currentDay);
-    const monday = new Date(currentDate);
-    monday.setDate(currentDate.getDate() + diffToMonday);
+  const currentDay = currentDate.getDay(); // 0 = Sunday
+  const diffToMonday = (currentDay === 0 ? -6 : 1 - currentDay);
+  const monday = new Date(currentDate);
+  monday.setDate(currentDate.getDate() + diffToMonday);
 
-    //loop through week
-    for(let i = 0; i < 7; i++){
-        const day = document.createElement("div");
-        
-        const dateForDay = new Date(monday);
-        dateForDay.setDate(monday.getDate() + i);
+  // header row
+  for (let i = 0; i < 7; i++) {
+    const day = document.createElement("div");
 
-        //highlight today
-        const today = new Date();
-        if(dateForDay.getDate() === today.getDate() &&
-            dateForDay.getMonth() === today.getMonth() &&
-            dateForDay.getFullYear() === today.getFullYear()){
-            day.className = "grid-day-header today"
-        }
-        else{
-            day.className = "grid-day-header"
-        }
+    const dateForDay = new Date(monday);
+    dateForDay.setDate(monday.getDate() + i);
 
-        let nameDay = document.createElement("span");
-        let dateDay = document.createElement("span");
-        nameDay.className = "day-name";
-        dateDay.className = "day-date";
-
-        nameDay.textContent = dateForDay.toLocaleDateString("en-US", { weekday: "short" });
-        dateDay.textContent = dateForDay.toLocaleDateString("en-US", { day: "numeric" });
-
-        day.appendChild(nameDay);
-        day.appendChild(dateDay);
-
-        plannerGrid.appendChild(day);
+    const today = new Date();
+    if (
+      dateForDay.getDate() === today.getDate() &&
+      dateForDay.getMonth() === today.getMonth() &&
+      dateForDay.getFullYear() === today.getFullYear()
+    ) {
+      day.className = "grid-day-header today";
+    } else {
+      day.className = "grid-day-header";
     }
 
-    //get mealPlan for the week
-    const mondayStr = monday.toISOString().split("T")[0];
-    const mealPlanResponse = await fetch(`/api/mealPlan/${mondayStr}`, {
-        headers: {
-            'Authorization': `Bearer ${getToken()}`
-        }
+    const nameDay = document.createElement("span");
+    const dateDay = document.createElement("span");
+    nameDay.className = "day-name";
+    dateDay.className = "day-date";
+
+    nameDay.textContent = dateForDay.toLocaleDateString("en-US", { weekday: "short" });
+    dateDay.textContent = dateForDay.toLocaleDateString("en-US", { day: "numeric" });
+
+    day.appendChild(nameDay);
+    day.appendChild(dateDay);
+
+    plannerGrid.appendChild(day);
+  }
+
+  // get meal plan for the week
+  const mondayStr = monday.toISOString().split("T")[0];
+  const mealPlanResponse = await fetch(`${API_BASE_URL}/mealPlan/week/${mondayStr}`, {
+    headers: {
+      'Authorization': `Bearer ${getToken()}`
+    }
+  });
+
+  const mealPlan = await mealPlanResponse.json();
+  let mealPlanItems = [];
+
+  if (mealPlan) {
+    const itemsResponse = await fetch(`${API_BASE_URL}/mealPlan/${mealPlan.id}/items`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
     });
-    const mealPlan = await mealPlanResponse.json();
-    let mealPlanItems = [];
-    if (mealPlan) {
-        const itemsResponse = await fetch(`/api/mealPlan/${mealPlan.id}`);
-        mealPlanItems = await itemsResponse.json();
-    }
+    mealPlanItems = await itemsResponse.json();
+  }
 
-    // Define meal types
-    const MEAL_TYPES = [
-        { type: "BREAKFAST", icon: "🍳" },
-        { type: "LUNCH", icon: "🥗" },
-        { type: "DINNER", icon: "🍽️" },
-        { type: "SNACK", icon: "🍎"}
-    ];
+  const MEAL_TYPES = [
+    { type: "BREAKFAST", icon: "🍳", label: "Breakfast" },
+    { type: "LUNCH", icon: "🥗", label: "Lunch" },
+    { type: "DINNER", icon: "🍽️", label: "Dinner" },
+    { type: "SNACK", icon: "🍎", label: "Snack" }
+  ];
 
-    const WEEKDAY_ENUM = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
-    const startOfWeek = new Date(monday);
+  const WEEKDAY_ENUM = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+  const startOfWeek = new Date(monday);
 
-    // loop through meal types
-    for (const meal of MEAL_TYPES) {
+  for (const meal of MEAL_TYPES) {
+    const mealTypeLabel = document.createElement("div");
+    mealTypeLabel.className = "grid-meal-label";
 
-        //label cell
-        const mealTypeLabel = document.createElement("div");
-        mealTypeLabel.className = "grid-meal-label";
+    const icon = document.createElement("span");
+    icon.className = "meal-label-icon";
+    icon.textContent = meal.icon;
 
-        const icon = document.createElement("span");
-        icon.className = "meal-label-icon";
-        icon.textContent = meal.icon;
+    const text = document.createElement("span");
+    text.textContent = meal.label;
 
-        const text = document.createElement("span");
-        text.textContent = meal.type;
+    mealTypeLabel.appendChild(icon);
+    mealTypeLabel.appendChild(text);
+    plannerGrid.appendChild(mealTypeLabel);
 
-        mealTypeLabel.appendChild(icon);
-        mealTypeLabel.appendChild(text);
-        plannerGrid.appendChild(mealTypeLabel);
-        
-        // loop through each day
-        for(let i = 0; i < 7; i++){
-            const grid = document.createElement("div");
-            grid.className = "grid-cell";
-            
-            const dateForDay = new Date(startOfWeek);
-            dateForDay.setDate(startOfWeek.getDate() + i);
-            const dayEnum = WEEKDAY_ENUM[dateForDay.getDay()];
+    for (let i = 0; i < 7; i++) {
+      const grid = document.createElement("div");
+      grid.className = "grid-cell";
 
-            const item = mealPlanItems.find(e =>
-                e.meal_type === meal.type &&
-                e.day_of_week === dayEnum
-            );
+      const dateForDay = new Date(startOfWeek);
+      dateForDay.setDate(startOfWeek.getDate() + i);
+      const dayEnum = WEEKDAY_ENUM[dateForDay.getDay()];
 
-            if(item){
-                const recipeResponse  = await fetch(`/api/recipes/${item.recipeId}`);
-                const recipe = await recipeResponse.json();
+      const item = mealPlanItems.find(e =>
+        e.meal_type === meal.type &&
+        e.day_of_week === dayEnum
+      );
 
-                const cellFilled = document.createElement("div");
-                cellFilled.className = "cell-filled";
-
-                const recipeName = document.createElement("div");
-                recipeName.className = "cell-recipe-name";
-                recipeName.textContent = recipe.name;
-
-                const recipeMeta = document.createElement("div");
-                recipeMeta.className = "cell-recipe-meta";
-                recipeMeta.textContent = `${recipe.prep_time} mins · ${recipe.difficulty}`;
-
-                const actions = document.createElement("div");
-                actions.className = "cell-filled-actions";
-
-                const editBtn = document.createElement("button");
-                editBtn.className = "cell-action-btn cell-btn-edit";
-                editBtn.textContent = "✏️ Edit";
-
-                const removeBtn = document.createElement("button");
-                removeBtn.className = "cell-action-btn cell-btn-remove";
-                removeBtn.textContent = "✕";
-
-                actions.appendChild(editBtn);
-                actions.appendChild(removeBtn);
-
-                cellFilled.appendChild(recipeName);
-                cellFilled.appendChild(recipeMeta);
-                cellFilled.appendChild(actions);
-
-                grid.appendChild(cellFilled);
+    if (item) {
+        try {
+          const recipeResponse = await fetch(`${API_BASE_URL}/recipes/${item.recipeId}`, {
+            headers: {
+              'Authorization': `Bearer ${getToken()}`
             }
-            else {
-                grid.classname = "grid-cell empty";
-                grid.innerHTML = `
-                    <a href="add-meal.html" class="cell-add-btn">
-                            <span class="add-icon">＋</span>
-                            <span>Add ${meal.type}</span>
-                    </a>
-                `;
-            }
-          plannerGrid.appendChild(grid);
+          });
+          const recipe = await recipeResponse.json();
+
+          const cellFilled = document.createElement("div");
+          cellFilled.className = "cell-filled";
+
+          const recipeName = document.createElement("div");
+          recipeName.className = "cell-recipe-name";
+          recipeName.textContent = recipe.name;
+
+          const recipeMeta = document.createElement("div");
+          recipeMeta.className = "cell-recipe-meta";
+          recipeMeta.textContent = `⏱️ ${recipe.prep_time} min · ${recipe.difficulty}`;
+
+          const actions = document.createElement("div");
+          actions.className = "cell-filled-actions";
+
+          const editBtn = document.createElement("button");
+          editBtn.className = "cell-action-btn cell-btn-edit";
+          editBtn.type = "button";
+          editBtn.textContent = "✏️ Edit";
+
+          const removeBtn = document.createElement("button");
+          removeBtn.className = "cell-action-btn cell-btn-remove";
+          removeBtn.type = "button";
+          removeBtn.textContent = "✕";
+
+          actions.appendChild(editBtn);
+          actions.appendChild(removeBtn);
+
+          cellFilled.appendChild(recipeName);
+          cellFilled.appendChild(recipeMeta);
+          cellFilled.appendChild(actions);
+
+          grid.appendChild(cellFilled);
+        } catch (error) {
+          console.error("Error loading recipe details:", error);
         }
-    }
-};
+      } else {
+        grid.className = "grid-cell empty";
 
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.className = "cell-add-btn";
+        addBtn.innerHTML = `
+          <span class="add-icon">＋</span>
+          <span>Add ${meal.label}</span>
+        `;
+
+        addBtn.addEventListener("click", () => {
+          if (!mealPlan || !mealPlan.id) {
+            alert("No meal plan exists for this week yet.");
+            return;
+          }
+
+          if (!dayEnum || !meal.type) {
+            alert("Missing meal slot information.");
+            return;
+          }
+
+          saveSelectedMealSlot({
+            mealPlanId: mealPlan.id,
+            day_of_week: dayEnum,
+            meal_type: meal.type
+          });
+
+          window.location.href = "add-meal.html";
+        });
+
+        grid.appendChild(addBtn);
+      }
+
+      plannerGrid.appendChild(grid);
+    }
+  }
+}
+
+// Function to create a new meal plan item
+async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, notes = "") {
+  try {
+    if (!getToken()) {
+      return { success: false, error: "You must be logged in." };
+    }
+
+    if (!mealPlanId || Number.isNaN(parseInt(mealPlanId, 10))) {
+      return { success: false, error: "Invalid meal plan ID." };
+    }
+
+    if (!recipeId || Number.isNaN(parseInt(recipeId, 10))) {
+      return { success: false, error: "Invalid recipe selected." };
+    }
+
+    if (!day_of_week || !meal_type) {
+      return { success: false, error: "Missing meal assignment details." };
+    }
+
+    const response = await fetch(`${API_BASE_URL}/mealPlan/item`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        mealPlanId: parseInt(mealPlanId, 10),
+        recipeId: parseInt(recipeId, 10),
+        day_of_week,
+        meal_type,
+        notes
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.message || "Failed to create meal plan item."
+      };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error creating meal plan item:", error);
+    return { success: false, error: "Something went wrong while assigning the meal." };
+  }
+}
+
+async function loadRecipesForAddMealPage() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipes`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+
+    const recipes = await response.json();
+    const container = document.getElementById("addMealRecipesContainer");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    recipes.forEach((recipe) => {
+      const card = document.createElement("a");
+      card.href = "#";
+      card.className = "recipe-card";
+      card.dataset.recipeId = recipe.id;
+
+      card.innerHTML = `
+        <div class="recipe-image">🍽️</div>
+        <div class="recipe-info">
+          <h4>${recipe.name}</h4>
+          <div class="recipe-details">
+            <span>⏱️ ${recipe.prep_time} min</span>
+            <span>${recipe.difficulty}</span>
+            <span>💰 ${recipe.cost}</span>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+  } catch (error) {
+    console.error("Error loading recipes for add meal page:", error);
+  }
+}
+
+function validateSelectedMealSlot(slot) {
+  const validDays = [
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+    "SUNDAY"
+  ];
+
+  const validMealTypes = [
+    "BREAKFAST",
+    "LUNCH",
+    "DINNER",
+    "SNACK"
+  ];
+
+  if (!slot) {
+    return { valid: false, message: "No meal slot selected." };
+  }
+
+  if (!slot.mealPlanId || Number.isNaN(parseInt(slot.mealPlanId, 10))) {
+    return { valid: false, message: "Invalid meal plan selected." };
+  }
+
+  if (!slot.day_of_week || !validDays.includes(slot.day_of_week)) {
+    return { valid: false, message: "Invalid day selected." };
+  }
+
+  if (!slot.meal_type || !validMealTypes.includes(slot.meal_type)) {
+    return { valid: false, message: "Invalid meal type selected." };
+  }
+
+  return { valid: true };
+}
+
+// Initialize add meal page 
+async function initAddMealPage() {
+  if (!isAuthenticated()) {
+    window.location.href = 'login-page.html';
+    return;
+  }
+
+  const slot = getSelectedMealSlot();
+  const slotValidation = validateSelectedMealSlot(slot);
+
+  if (!slotValidation.valid) {
+    alert(slotValidation.message);
+    window.location.href = 'meal-planner.html';
+    return;
+  }
+
+  await loadRecipesForAddMealPage();
+
+  const recipeCards = document.querySelectorAll('.recipe-card[data-recipe-id]');
+
+  if (!recipeCards.length) {
+    console.warn("No recipe cards found on add-meal page.");
+  }
+
+  recipeCards.forEach(card => {
+    const recipeId = card.dataset.recipeId;
+
+    if (!recipeId || Number.isNaN(parseInt(recipeId, 10))) {
+      return;
+    }
+
+    card.style.cursor = 'pointer';
+
+    card.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      card.style.pointerEvents = 'none';
+
+      const result = await createMealPlanItem(
+        slot.mealPlanId,
+        recipeId,
+        slot.day_of_week,
+        slot.meal_type
+      );
+
+      if (result.success) {
+        clearSelectedMealSlot();
+        alert('Meal added successfully!');
+        window.location.href = 'meal-planner.html';
+      } else {
+        card.style.pointerEvents = 'auto';
+        alert(result.error || 'Failed to add meal.');
+      }
+    });
+  });
+
+  const logoutLink = document.querySelector('.nav-link.logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearToken();
+      window.location.href = 'login-page.html';
+    });
+  }
+}
+
+
+//Helper functions to manage selected meal slot in localStorage for editing
+function saveSelectedMealSlot(slotData) {
+  localStorage.setItem('selectedMealSlot', JSON.stringify(slotData));
+}
+
+function getSelectedMealSlot() {
+  const raw = localStorage.getItem('selectedMealSlot');
+  return raw ? JSON.parse(raw) : null;
+}
+
+function clearSelectedMealSlot() {
+  localStorage.removeItem('selectedMealSlot');
+}
+
+console.log("initMealPlannerPage called");
+
+// Initialize meal planner page 
+function initMealPlannerPage() {
+  if (!isAuthenticated()) {
+    window.location.href = 'login-page.html';
+    return;
+  }
+
+  const weekPicker = document.getElementById('weekPicker');
+  if (weekPicker) {
+    setTodayDate();
+
+    weekPicker.addEventListener('change', () => {
+      mealPlannerDate();
+    });
+  }
+
+  const weekButtons = document.querySelectorAll('.week-nav-btn');
+  if (weekButtons.length >= 2) {
+    weekButtons[0].addEventListener('click', () => mealPlannerWeek('prev'));
+    weekButtons[1].addEventListener('click', () => mealPlannerWeek('next'));
+  }
+
+  const logoutLink = document.querySelector('.nav-link.logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearToken();
+      window.location.href = 'login-page.html';
+    });
+  }
+}
 
 // PAGE INITIALIZATION FUNCTIONS
 
@@ -1917,7 +2195,16 @@ document.addEventListener('DOMContentLoaded', () => {
       initEditRecipePage();
       break;
 
+    case 'meal-planner.html':
+      initMealPlannerPage();
+      break;
+
+    case 'add-meal.html':
+      initAddMealPage();
+      break;
+
     default:
       console.log('Page not recognized for auto-initialization');
   }
+  
 });
