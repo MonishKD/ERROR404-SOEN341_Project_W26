@@ -1261,6 +1261,8 @@ function mealPlannerWeek(input) {
     mealPlannerDate();
 }
 
+console.log("weeklyMeals called");
+
 // Load meal plan for the week and populate the grid
 async function weeklyMeals(currentDate) {
   const plannerGrid = document.getElementsByClassName("planner-grid")[0];
@@ -1656,6 +1658,8 @@ function getSelectedMealSlot() {
 function clearSelectedMealSlot() {
   localStorage.removeItem('selectedMealSlot');
 }
+
+console.log("initMealPlannerPage called");
 
 // Initialize meal planner page 
 function initMealPlannerPage() {
