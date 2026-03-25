@@ -1,0 +1,103 @@
+/*Visibility toggle*/
+.visibility-toggle-wrapper {
+    background: white;
+    border-radius: 18px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    margin-bottom: 30px;
+}
+
+.visibility-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 16px 0;
+}
+
+.visibility-toggle {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+/*Visibility option card*/
+.visibility-card {
+    flex: 1;
+    min-width: 200px;
+    cursor: pointer;
+    position: relative;
+}
+
+.visibility-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.visibility-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 22px;
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    background: #f9fafb;
+    transition: all 0.2s ease;
+}
+
+.visibility-card:hover .visibility-content {
+    border-color: #9dd4b3;
+    background: #f0f9f4;
+}
+
+/*Public selected state*/
+.visibility-card input[value="public"]:checked + .visibility-content {
+    border-color: #0e9c50;
+    background: #e6f4ec;
+    box-shadow: 0 4px 12px rgba(14, 156, 80, 0.15);
+}
+
+/*Private selected state*/
+.visibility-card input[value="private"]:checked + .visibility-content {
+    border-color: #f59e0b;
+    background: #fffbf0;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+.visibility-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.visibility-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.visibility-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #222;
+}
+
+.visibility-desc {
+    font-size: 12px;
+    color: #888;
+}
+
+/*Search bar spacing for add-recipe page*/
+.search-bar-container {
+    margin-bottom: 28px;
+}
+
+/*Tab section add button*/
+.tab-add-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 2px dashed #e6f4ec;
+}
+

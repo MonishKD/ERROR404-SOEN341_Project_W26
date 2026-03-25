@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MealMajor - Add a Meal</title>
+    <title>MealMajor - Add a Recipe</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="user-profile-styles.css">
     <link rel="stylesheet" href="home-styles.css">
     <link rel="stylesheet" href="profile-styles.css">
     <link rel="stylesheet" href="recipe-styles.css">
     <link rel="stylesheet" href="planner-styles.css">
+    <link rel="stylesheet" href="add-recipe-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="script.js" defer></script>
 </head>
 <body>
-
+    
     <!--Navigation bar-->
     <nav class="navbar">
         <div class="nav-container">
@@ -24,8 +24,8 @@
             </a>
             <div class="nav-links">
                 <a href="home-page.html" class="nav-link">Home</a>
-                <a href="recipes.html" class="nav-link">Recipes</a>
-                <a href="meal-planner.html" class="nav-link active">Meal Planner</a>
+                <a href="recipes.html" class="nav-link active">Recipes</a>
+                <a href="meal-planner.html" class="nav-link">Meal Planner</a>
                 <a href="edit-profile.html" class="nav-link">Profile</a>
                 <a href="user-profile.html" class="nav-link nav-avatar">
                     <div class="avatar-circle">JD</div>
@@ -33,14 +33,45 @@
                 <a href="login-page.html" class="nav-link logout">Logout</a>
             </div>
         </div>
-    </nav>   
+    </nav>
+
     
     <div class="profile-container">
 
         <!--Page header-->
         <div class="profile-header">
-            <h1>🍽️ Add a Meal</h1>
-            <p>Pick a recipe to add to your meal plan</p>
+            <h1>📖 Add a Recipe</h1>
+            <p>Fill in the details and choose who can see your recipe</p>
+        </div>
+
+        <!--Visibility toggle-->
+        <div class="visibility-toggle-wrapper">
+            <p class="visibility-label">Who can see this recipe?</p>
+            <div class="visibility-toggle">
+
+                <label class="visibility-card">
+                    <input type="radio" name="visibility" value="public" checked>
+                    <span class="visibility-content">
+                        <span class="visibility-icon">🌍</span>
+                        <span class="visibility-text">
+                            <span class="visibility-title">Public</span>
+                            <span class="visibility-desc">Visible to everyone on MealMajor</span>
+                        </span>
+                    </span>
+                </label>
+
+                <label class="visibility-card">
+                    <input type="radio" name="visibility" value="private">
+                    <span class="visibility-content">
+                        <span class="visibility-icon">🔒</span>
+                        <span class="visibility-text">
+                            <span class="visibility-title">Private</span>
+                            <span class="visibility-desc">Only visible to you</span>
+                        </span>
+                    </span>
+                </label>
+
+            </div>
         </div>
 
         <!--Search bar-->
@@ -55,7 +86,7 @@
         <!--Recipe grid-->
         <div class="recipes-grid">
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🥞</div>
                 <div class="recipe-info">
                     <h4>Pancakes</h4>
@@ -67,7 +98,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🥣</div>
                 <div class="recipe-info">
                     <h4>Oatmeal Bowl</h4>
@@ -79,7 +110,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🍳</div>
                 <div class="recipe-info">
                     <h4>Scrambled Eggs</h4>
@@ -91,7 +122,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🥗</div>
                 <div class="recipe-info">
                     <h4>Greek Salad</h4>
@@ -103,7 +134,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🌯</div>
                 <div class="recipe-info">
                     <h4>Chickpea Wrap</h4>
@@ -115,7 +146,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🍚</div>
                 <div class="recipe-info">
                     <h4>Fried Rice</h4>
@@ -127,7 +158,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🥙</div>
                 <div class="recipe-info">
                     <h4>Chicken Shawarma</h4>
@@ -139,7 +170,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🍝</div>
                 <div class="recipe-info">
                     <h4>Shrimp Pasta</h4>
@@ -151,7 +182,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🥘</div>
                 <div class="recipe-info">
                     <h4>Beef Chili</h4>
@@ -163,7 +194,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🐟</div>
                 <div class="recipe-info">
                     <h4>Baked Salmon</h4>
@@ -175,7 +206,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🍕</div>
                 <div class="recipe-info">
                     <h4>Homemade Pizza</h4>
@@ -187,7 +218,7 @@
                 </div>
             </a>
 
-            <a href="meal-planner.html" class="recipe-card">
+            <a href="user-profile.html" class="recipe-card">
                 <div class="recipe-image">🥐</div>
                 <div class="recipe-info">
                     <h4>Croissant &amp; Fruit</h4>
@@ -201,12 +232,12 @@
 
         </div>
 
-        <!--Cancel-->
+        <!--Back button-->
         <div>
-            <a href="meal-planner.html" class="view-full-plan">← Back to Meal Planner</a>
+            <a href="user-profile.html" class="view-full-plan">← Back to My Profile</a>
         </div>
 
-    </div>    
-    
+    </div>
+
 </body>
 </html>
