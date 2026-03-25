@@ -731,16 +731,19 @@ app.post('/api/mealPlan/item', authMiddleware, async (req, res) => {
 
 // GET mealPlan for the week
 app.get('/api/mealPlan/week/:startDate', authMiddleware, async (req, res) => {
-  try{
+  try {
     const { startDate } = req.params;
-    const ownerId = parseInt(req.user.userId);
-    console.log(startDate, ownerId);
+    const ownerId = parseInt(req.user.userId, 10);
 
-    const startOfDay = new Date(startDate);
-    startOfDay.setHours(0, 0, 0, 0);
+    // Parse YYYY-MM-DD as LOCAL date, not UTC
+    const [year, month, day] = startDate.split('-').map(Number);
 
-    const endOfDay = new Date(startDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+    console.log("Requested startDate:", startDate);
+    console.log("Query startOfDay:", startOfDay);
+    console.log("Query endOfDay:", endOfDay);
 
     const mealPlan = await prisma.mealPlan.findFirst({
       where: {
@@ -754,7 +757,7 @@ app.get('/api/mealPlan/week/:startDate', authMiddleware, async (req, res) => {
 
     if (!mealPlan) return res.json(null);
     return res.json(mealPlan);
-  }catch (error) {
+  } catch (error) {
     console.error('Error fetching mealPlan by date:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }

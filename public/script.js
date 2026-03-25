@@ -1339,14 +1339,20 @@ async function weeklyMeals(currentDate) {
   }
 
   // get meal plan for the week
-  const mondayStr = monday.toISOString().split("T")[0];
+  const mondayStr = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+  console.log("mondayStr being requested:", mondayStr);
+
   const mealPlanResponse = await fetch(`${API_BASE_URL}/mealPlan/week/${mondayStr}`, {
     headers: {
       'Authorization': `Bearer ${getToken()}`
     }
   });
 
+  console.log("mealPlanResponse status:", mealPlanResponse.status);
+
   const mealPlan = await mealPlanResponse.json();
+  console.log("mealPlan data:", mealPlan)
+  
   let mealPlanItems = [];
 
   if (mealPlan) {
@@ -1355,7 +1361,12 @@ async function weeklyMeals(currentDate) {
         'Authorization': `Bearer ${getToken()}`
       }
     });
+
+    console.log("itemsResponse status:", itemsResponse.status);
+
     mealPlanItems = await itemsResponse.json();
+
+    console.log("mealPlanItems data:", mealPlanItems);
   }
 
   const MEAL_TYPES = [
