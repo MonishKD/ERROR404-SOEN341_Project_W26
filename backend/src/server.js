@@ -790,6 +790,51 @@ app.get('/api/mealPlan/:id/items', authMiddleware, async (req, res) => {
   }
 });
 
+// CREATE mealPlan for a week if it does not exist
+app.post('/api/mealPlan', authMiddleware, async (req, res) => {
+  try {
+    const ownerId = parseInt(req.user.userId, 10);
+    const { week_start_date, week_end_date, name } = req.body;
+
+    if (!week_start_date || !week_end_date) {
+      return res.status(400).json({ message: 'week_start_date and week_end_date are required' });
+    }
+
+    const startDate = new Date(week_start_date);
+    const endDate = new Date(week_end_date);
+
+    const existingMealPlan = await prisma.mealPlan.findFirst({
+      where: {
+        ownerId,
+        week_start_date: startDate
+      }
+    });
+
+    if (existingMealPlan) {
+      return res.status(200).json(existingMealPlan);
+    }
+
+    const newMealPlan = await prisma.mealPlan.create({
+      data: {
+        name: name || 'Weekly Meal Plan',
+        week_start_date: startDate,
+        week_end_date: endDate,
+        ownerId
+      }
+    });
+
+    return res.status(201).json(newMealPlan);
+  } catch (error) {
+    console.error('Error creating meal plan:', error);
+
+    if (error.code === 'P2002') {
+      return res.status(409).json({ message: 'Meal plan already exists for this week' });
+    }
+
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 /*** Error handling ***/
 
 // 404 handler for undefined routes

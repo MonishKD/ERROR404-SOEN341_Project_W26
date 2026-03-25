@@ -265,6 +265,34 @@ async function fetchRecipes(ownerId = null) {
   }
 }
 
+// MEAL PLAN FUNCTIONS
+async function createMealPlanForWeek(weekStartDate, weekEndDate) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/mealPlan`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        week_start_date: weekStartDate,
+        week_end_date: weekEndDate,
+        name: 'Weekly Meal Plan'
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create meal plan');
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
 
 // PROFILE FUNCTIONS
 /**
@@ -1423,25 +1451,35 @@ async function weeklyMeals(currentDate) {
           <span>Add ${meal.label}</span>
         `;
 
-        addBtn.addEventListener("click", () => {
-          if (!mealPlan || !mealPlan.id) {
-            alert("No meal plan exists for this week yet.");
+      addBtn.addEventListener("click", async () => {
+        let currentMealPlan = mealPlan;
+
+        if (!currentMealPlan) {
+          const weekStart = new Date(monday);
+          const weekEnd = new Date(monday);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+
+          const result = await createMealPlanForWeek(
+            weekStart.toISOString(),
+            weekEnd.toISOString()
+          );
+
+          if (!result.success) {
+            alert(result.error || "Failed to create meal plan.");
             return;
           }
 
-          if (!dayEnum || !meal.type) {
-            alert("Missing meal slot information.");
-            return;
-          }
+          currentMealPlan = result.data;
+        }
 
-          saveSelectedMealSlot({
-            mealPlanId: mealPlan.id,
-            day_of_week: dayEnum,
-            meal_type: meal.type
-          });
-
-          window.location.href = "add-meal.html";
+        saveSelectedMealSlot({
+          mealPlanId: currentMealPlan.id,
+          day_of_week: dayEnum,
+          meal_type: meal.type
         });
+
+        window.location.href = "add-meal.html";
+      });
 
         grid.appendChild(addBtn);
       }
