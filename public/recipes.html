@@ -283,7 +283,7 @@
             <div id="generalRecipesGrid" class="recipe-cards-grid">
 
                 <!-- ── Card 1: Spaghetti Carbonara ── -->
-                <details class="recipe-card-full public-recipe-card">
+                <details class="recipe-card-full public-recipe-card" data-recipe-id="1">
                     <summary class="recipe-card-top">
                         <span class="recipe-card-emoji">🍝</span>
                         <div class="recipe-card-summary">
@@ -297,7 +297,6 @@
                                 <span>⏱️ 30 min</span>
                                 <span>👤 2 servings</span>
                             </div>
-                            <!-- Author + rating in the summary -->
                             <div class="recipe-card-author-row">
                                 <div class="recipe-author-avatar">SM</div>
                                 <span class="recipe-author-name">@sofia.m</span>
@@ -309,7 +308,6 @@
                                 <span class="recipe-rating-count">(24)</span>
                             </div>
                         </div>
-                        <!-- Favourite button -->
                         <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
                             aria-label="Add to favourites" title="Add to favourites">♡</button>
                         <span class="recipe-card-chevron">▼</span>
@@ -372,12 +370,31 @@
                             </div>
                         </div>
 
+                        <!-- Rating & Comment input -->
+                        <div class="recipe-rate-comment">
+                            <h4>⭐ Rate & 💬 Comment</h4>
+                            <div class="stars-input">
+                                <input type="radio" id="star5-1" name="rating-1" value="5"><label
+                                    for="star5-1">★</label>
+                                <input type="radio" id="star4-1" name="rating-1" value="4"><label
+                                    for="star4-1">★</label>
+                                <input type="radio" id="star3-1" name="rating-1" value="3"><label
+                                    for="star3-1">★</label>
+                                <input type="radio" id="star2-1" name="rating-1" value="2"><label
+                                    for="star2-1">★</label>
+                                <input type="radio" id="star1-1" name="rating-1" value="1"><label
+                                    for="star1-1">★</label>
+                            </div>
+                            <textarea class="comment-input" placeholder="Add a comment..." rows="2"></textarea>
+                            <button class="btn-submit-comment">Submit</button>
+                        </div>
+
                         <button class="btn-save-recipe">+ Save to My Recipes</button>
                     </div>
                 </details>
 
                 <!-- ── Card 2: Avocado Toast ── -->
-                <details class="recipe-card-full public-recipe-card">
+                <details class="recipe-card-full public-recipe-card" data-recipe-id="2">
                     <summary class="recipe-card-top">
                         <span class="recipe-card-emoji">🥑</span>
                         <div class="recipe-card-summary">
@@ -452,34 +469,53 @@
                             </div>
                         </div>
 
+                        <!-- Rating & Comment input -->
+                        <div class="recipe-rate-comment">
+                            <h4>⭐ Rate & 💬 Comment</h4>
+                            <div class="stars-input">
+                                <input type="radio" id="star5-2" name="rating-2" value="5"><label
+                                    for="star5-2">★</label>
+                                <input type="radio" id="star4-2" name="rating-2" value="4"><label
+                                    for="star4-2">★</label>
+                                <input type="radio" id="star3-2" name="rating-2" value="3"><label
+                                    for="star3-2">★</label>
+                                <input type="radio" id="star2-2" name="rating-2" value="2"><label
+                                    for="star2-2">★</label>
+                                <input type="radio" id="star1-2" name="rating-2" value="1"><label
+                                    for="star1-2">★</label>
+                            </div>
+                            <textarea class="comment-input" placeholder="Add a comment..." rows="2"></textarea>
+                            <button class="btn-submit-comment">Submit</button>
+                        </div>
+
                         <button class="btn-save-recipe">+ Save to My Recipes</button>
                     </div>
                 </details>
 
                 <!-- ── Card 3: Chicken Tikka Masala ── -->
-                <details class="recipe-card-full public-recipe-card">
+                <details class="recipe-card-full public-recipe-card" data-recipe-id="3">
                     <summary class="recipe-card-top">
                         <span class="recipe-card-emoji">🍛</span>
                         <div class="recipe-card-summary">
                             <div class="recipe-card-tags">
-                                <span class="tag tag-hard">Hard</span>
-                                <span class="tag tag-cost">💰💰 Medium</span>
-                                <span class="tag tag-diet">🕌 Halal</span>
+                                <span class="tag tag-medium">Medium</span>
+                                <span class="tag tag-cost">💰 Medium</span>
+                                <span class="tag tag-diet">🐔 Contains Meat</span>
                             </div>
                             <h3 class="recipe-card-title">Chicken Tikka Masala</h3>
                             <div class="recipe-card-meta">
-                                <span>⏱️ 60 min</span>
+                                <span>⏱️ 45 min</span>
                                 <span>👤 4 servings</span>
                             </div>
                             <div class="recipe-card-author-row">
-                                <div class="recipe-author-avatar">RP</div>
-                                <span class="recipe-author-name">@raj.p</span>
-                                <div class="recipe-star-rating" aria-label="4 out of 5 stars">
+                                <div class="recipe-author-avatar">RA</div>
+                                <span class="recipe-author-name">@rashid.a</span>
+                                <div class="recipe-star-rating" aria-label="4.8 out of 5 stars">
                                     <span class="star full">★</span><span class="star full">★</span><span
                                         class="star full">★</span><span class="star full">★</span><span
-                                        class="star empty">★</span>
+                                        class="star half">★</span>
                                 </div>
-                                <span class="recipe-rating-count">(37)</span>
+                                <span class="recipe-rating-count">(53)</span>
                             </div>
                         </div>
                         <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
@@ -490,118 +526,17 @@
                     <div class="recipe-card-details">
                         <div class="recipe-card-ingredients">
                             <strong>🛒 Ingredients</strong><br>
-                            700g chicken breast · 400ml coconut cream · 2 onions · 4 cloves garlic · 1 tbsp ginger ·
-                            Tikka paste · Cumin · Coriander · Garam masala · Tomato purée · Fresh coriander
+                            500g chicken breast · 1 cup yogurt · 2 tbsp tikka masala paste · 1 onion · 2 cloves garlic ·
+                            1 tsp ginger · 400g canned tomatoes · 1/2 cup cream · Salt & pepper
                         </div>
                         <div class="recipe-card-steps">
                             <strong>📋 Steps</strong>
                             <ol>
-                                <li>Marinate chicken in tikka paste and yoghurt for at least 30 min.</li>
-                                <li>Grill or pan-fry chicken until charred; set aside.</li>
-                                <li>Sauté onions, garlic, and ginger until golden. Add spices and tomato purée.</li>
-                                <li>Pour in coconut cream, simmer for 15 minutes.</li>
-                                <li>Add chicken to the sauce, simmer 10 more minutes. Garnish and serve with rice.</li>
-                            </ol>
-                        </div>
-
-                        <div class="recipe-comments">
-                            <h4 class="comments-heading">💬 Comments <span class="comments-count">4</span></h4>
-                            <div class="comments-list">
-                                <div class="comment-item">
-                                    <div class="comment-avatar">CL</div>
-                                    <div class="comment-body">
-                                        <div class="comment-header">
-                                            <span class="comment-username">@claire.l</span>
-                                            <span class="comment-time">3 days ago</span>
-                                        </div>
-                                        <p class="comment-text">Best tikka masala I've ever made at home. The marinade
-                                            makes all the difference!</p>
-                                    </div>
-                                </div>
-                                <div class="comment-item">
-                                    <div class="comment-avatar">OS</div>
-                                    <div class="comment-body">
-                                        <div class="comment-header">
-                                            <span class="comment-username">@omar.s</span>
-                                            <span class="comment-time">6 days ago</span>
-                                        </div>
-                                        <p class="comment-text">Authentic flavours! I let the chicken marinate overnight
-                                            and it was incredibly tender.</p>
-                                    </div>
-                                </div>
-                                <div class="comment-item">
-                                    <div class="comment-avatar">HG</div>
-                                    <div class="comment-body">
-                                        <div class="comment-header">
-                                            <span class="comment-username">@hannah.g</span>
-                                            <span class="comment-time">1 week ago</span>
-                                        </div>
-                                        <p class="comment-text">Used this for a dinner party and got so many
-                                            compliments. Will definitely make again.</p>
-                                    </div>
-                                </div>
-                                <div class="comment-item">
-                                    <div class="comment-avatar">MB</div>
-                                    <div class="comment-body">
-                                        <div class="comment-header">
-                                            <span class="comment-username">@marco.b</span>
-                                            <span class="comment-time">2 weeks ago</span>
-                                        </div>
-                                        <p class="comment-text">Great recipe, though I reduced the garam masala a bit.
-                                            Kids loved it!</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button class="btn-save-recipe">+ Save to My Recipes</button>
-                    </div>
-                </details>
-
-                <!-- ── Card 4: Banana Pancakes ── -->
-                <details class="recipe-card-full public-recipe-card">
-                    <summary class="recipe-card-top">
-                        <span class="recipe-card-emoji">🥞</span>
-                        <div class="recipe-card-summary">
-                            <div class="recipe-card-tags">
-                                <span class="tag tag-easy">Easy</span>
-                                <span class="tag tag-cost">💰 Low</span>
-                                <span class="tag tag-diet">🥗 Vegetarian</span>
-                            </div>
-                            <h3 class="recipe-card-title">2-Ingredient Banana Pancakes</h3>
-                            <div class="recipe-card-meta">
-                                <span>⏱️ 10 min</span>
-                                <span>👤 1 serving</span>
-                            </div>
-                            <div class="recipe-card-author-row">
-                                <div class="recipe-author-avatar">EL</div>
-                                <span class="recipe-author-name">@emma.l</span>
-                                <div class="recipe-star-rating" aria-label="4 out of 5 stars">
-                                    <span class="star full">★</span><span class="star full">★</span><span
-                                        class="star full">★</span><span class="star full">★</span><span
-                                        class="star empty">★</span>
-                                </div>
-                                <span class="recipe-rating-count">(58)</span>
-                            </div>
-                        </div>
-                        <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
-                            aria-label="Add to favourites" title="Add to favourites">♡</button>
-                        <span class="recipe-card-chevron">▼</span>
-                    </summary>
-
-                    <div class="recipe-card-details">
-                        <div class="recipe-card-ingredients">
-                            <strong>🛒 Ingredients</strong><br>
-                            1 ripe banana · 2 eggs · Pinch of cinnamon (optional) · Butter for the pan
-                        </div>
-                        <div class="recipe-card-steps">
-                            <strong>📋 Steps</strong>
-                            <ol>
-                                <li>Mash the banana thoroughly in a bowl.</li>
-                                <li>Add eggs and cinnamon; mix until combined.</li>
-                                <li>Heat butter in a non-stick pan over medium-low heat.</li>
-                                <li>Pour small circles of batter and cook 2 min per side until golden.</li>
-                                <li>Serve with maple syrup or fresh berries.</li>
+                                <li>Marinate chicken in yogurt and tikka masala paste for at least 30 mins.</li>
+                                <li>Sauté onion, garlic, and ginger until soft.</li>
+                                <li>Add marinated chicken and cook until sealed.</li>
+                                <li>Add tomatoes and simmer 15–20 mins.</li>
+                                <li>Stir in cream and serve with rice or naan.</li>
                             </ol>
                         </div>
 
@@ -609,58 +544,76 @@
                             <h4 class="comments-heading">💬 Comments <span class="comments-count">2</span></h4>
                             <div class="comments-list">
                                 <div class="comment-item">
-                                    <div class="comment-avatar">KJ</div>
+                                    <div class="comment-avatar">SV</div>
                                     <div class="comment-body">
                                         <div class="comment-header">
-                                            <span class="comment-username">@kim.j</span>
-                                            <span class="comment-time">4 days ago</span>
+                                            <span class="comment-username">@sam.v</span>
+                                            <span class="comment-time">3 days ago</span>
                                         </div>
-                                        <p class="comment-text">Such a clever recipe! My kids devour these every
-                                            weekend. Adding a tiny bit of vanilla extract is a great touch.</p>
+                                        <p class="comment-text">This is my favorite takeout at home. The marination step
+                                            makes a huge difference!</p>
                                     </div>
                                 </div>
                                 <div class="comment-item">
-                                    <div class="comment-avatar">FN</div>
+                                    <div class="comment-avatar">KA</div>
                                     <div class="comment-body">
                                         <div class="comment-header">
-                                            <span class="comment-username">@felix.n</span>
+                                            <span class="comment-username">@katie.a</span>
                                             <span class="comment-time">1 week ago</span>
                                         </div>
-                                        <p class="comment-text">Perfect for when you have overripe bananas. Super easy
-                                            and surprisingly filling.</p>
+                                        <p class="comment-text">Spices are perfect, everyone loved it. Will make again!
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Rating & Comment input -->
+                        <div class="recipe-rate-comment">
+                            <h4>⭐ Rate & 💬 Comment</h4>
+                            <div class="stars-input">
+                                <input type="radio" id="star5-3" name="rating-3" value="5"><label
+                                    for="star5-3">★</label>
+                                <input type="radio" id="star4-3" name="rating-3" value="4"><label
+                                    for="star4-3">★</label>
+                                <input type="radio" id="star3-3" name="rating-3" value="3"><label
+                                    for="star3-3">★</label>
+                                <input type="radio" id="star2-3" name="rating-3" value="2"><label
+                                    for="star2-3">★</label>
+                                <input type="radio" id="star1-3" name="rating-3" value="1"><label
+                                    for="star1-3">★</label>
+                            </div>
+                            <textarea class="comment-input" placeholder="Add a comment..." rows="2"></textarea>
+                            <button class="btn-submit-comment">Submit</button>
+                        </div>
+
                         <button class="btn-save-recipe">+ Save to My Recipes</button>
                     </div>
                 </details>
-
-                <!-- ── Card 5: Greek Salad ── -->
-                <details class="recipe-card-full public-recipe-card">
+                <!-- ── Card 4: Greek Salad ── -->
+                <details class="recipe-card-full public-recipe-card" data-recipe-id="4">
                     <summary class="recipe-card-top">
                         <span class="recipe-card-emoji">🥗</span>
                         <div class="recipe-card-summary">
                             <div class="recipe-card-tags">
                                 <span class="tag tag-easy">Easy</span>
                                 <span class="tag tag-cost">💰 Low</span>
-                                <span class="tag tag-diet">🥗 Vegetarian</span>
+                                <span class="tag tag-diet">🌱 Vegetarian</span>
                             </div>
-                            <h3 class="recipe-card-title">Classic Greek Salad</h3>
+                            <h3 class="recipe-card-title">Greek Salad</h3>
                             <div class="recipe-card-meta">
                                 <span>⏱️ 10 min</span>
                                 <span>👤 2 servings</span>
                             </div>
                             <div class="recipe-card-author-row">
-                                <div class="recipe-author-avatar">DC</div>
-                                <span class="recipe-author-name">@dina.c</span>
-                                <div class="recipe-star-rating" aria-label="4.5 out of 5 stars">
+                                <div class="recipe-author-avatar">EL</div>
+                                <span class="recipe-author-name">@elena.l</span>
+                                <div class="recipe-star-rating" aria-label="4.2 out of 5 stars">
                                     <span class="star full">★</span><span class="star full">★</span><span
                                         class="star full">★</span><span class="star full">★</span><span
-                                        class="star half">★</span>
+                                        class="star empty">★</span>
                                 </div>
-                                <span class="recipe-rating-count">(19)</span>
+                                <span class="recipe-rating-count">(18)</span>
                             </div>
                         </div>
                         <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
@@ -671,17 +624,16 @@
                     <div class="recipe-card-details">
                         <div class="recipe-card-ingredients">
                             <strong>🛒 Ingredients</strong><br>
-                            3 tomatoes · 1 cucumber · 1 red onion · 100g Kalamata olives · 150g feta cheese · Olive oil
-                            · Dried oregano · Salt
+                            2 tomatoes · 1 cucumber · 1 red onion · 100g feta cheese · 10 olives · 2 tbsp olive oil · 1
+                            tbsp red wine vinegar · Oregano · Salt & pepper
                         </div>
                         <div class="recipe-card-steps">
                             <strong>📋 Steps</strong>
                             <ol>
-                                <li>Chop tomatoes, cucumber, and red onion into large chunks.</li>
-                                <li>Combine in a bowl with olives.</li>
-                                <li>Drizzle generously with olive oil and season with salt.</li>
-                                <li>Top with a whole slab of feta and sprinkle oregano on top.</li>
-                                <li>Serve immediately — do not toss.</li>
+                                <li>Chop tomatoes, cucumber, and red onion into bite-sized pieces.</li>
+                                <li>Add olives and crumbled feta cheese.</li>
+                                <li>Drizzle with olive oil and red wine vinegar.</li>
+                                <li>Sprinkle oregano, salt, and pepper to taste and toss gently.</li>
                             </ol>
                         </div>
 
@@ -689,44 +641,162 @@
                             <h4 class="comments-heading">💬 Comments <span class="comments-count">1</span></h4>
                             <div class="comments-list">
                                 <div class="comment-item">
-                                    <div class="comment-avatar">YT</div>
+                                    <div class="comment-avatar">MK</div>
                                     <div class="comment-body">
                                         <div class="comment-header">
-                                            <span class="comment-username">@yuki.t</span>
-                                            <span class="comment-time">5 days ago</span>
+                                            <span class="comment-username">@maria.k</span>
+                                            <span class="comment-time">2 days ago</span>
                                         </div>
-                                        <p class="comment-text">The tip about not tossing is key! The whole feta slab on
-                                            top is so authentic. Reminded me of my trip to Santorini.</p>
+                                        <p class="comment-text">Fresh, simple, and perfect for summer. Loved it!</p>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Rating & Comment input -->
+                        <div class="recipe-rate-comment">
+                            <h4>⭐ Rate & 💬 Comment</h4>
+                            <div class="stars-input">
+                                <input type="radio" id="star5-4" name="rating-4" value="5"><label
+                                    for="star5-4">★</label>
+                                <input type="radio" id="star4-4" name="rating-4" value="4"><label
+                                    for="star4-4">★</label>
+                                <input type="radio" id="star3-4" name="rating-4" value="3"><label
+                                    for="star3-4">★</label>
+                                <input type="radio" id="star2-4" name="rating-4" value="2"><label
+                                    for="star2-4">★</label>
+                                <input type="radio" id="star1-4" name="rating-4" value="1"><label
+                                    for="star1-4">★</label>
+                            </div>
+                            <textarea class="comment-input" placeholder="Add a comment..." rows="2"></textarea>
+                            <button class="btn-submit-comment">Submit</button>
                         </div>
 
                         <button class="btn-save-recipe">+ Save to My Recipes</button>
                     </div>
                 </details>
 
-                <!-- ── Card 6: Beef Tacos ── -->
-                <details class="recipe-card-full public-recipe-card">
+                <!-- ── Card 5: Pancakes ── -->
+                <details class="recipe-card-full public-recipe-card" data-recipe-id="5">
                     <summary class="recipe-card-top">
-                        <span class="recipe-card-emoji">🌮</span>
+                        <span class="recipe-card-emoji">🥞</span>
                         <div class="recipe-card-summary">
                             <div class="recipe-card-tags">
                                 <span class="tag tag-easy">Easy</span>
-                                <span class="tag tag-cost">💰💰 Medium</span>
+                                <span class="tag tag-cost">💰 Low</span>
+                                <span class="tag tag-diet">🥛 Contains Dairy</span>
                             </div>
-                            <h3 class="recipe-card-title">Crispy Beef Street Tacos</h3>
+                            <h3 class="recipe-card-title">Fluffy Pancakes</h3>
                             <div class="recipe-card-meta">
-                                <span>⏱️ 25 min</span>
-                                <span>👤 3 servings</span>
+                                <span>⏱️ 20 min</span>
+                                <span>👤 2 servings</span>
                             </div>
                             <div class="recipe-card-author-row">
-                                <div class="recipe-author-avatar">MV</div>
-                                <span class="recipe-author-name">@miguel.v</span>
-                                <div class="recipe-star-rating" aria-label="5 out of 5 stars">
+                                <div class="recipe-author-avatar">SR</div>
+                                <span class="recipe-author-name">@sophie.r</span>
+                                <div class="recipe-star-rating" aria-label="4.7 out of 5 stars">
                                     <span class="star full">★</span><span class="star full">★</span><span
                                         class="star full">★</span><span class="star full">★</span><span
-                                        class="star full">★</span>
+                                        class="star half">★</span>
+                                </div>
+                                <span class="recipe-rating-count">(36)</span>
+                            </div>
+                        </div>
+                        <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
+                            aria-label="Add to favourites" title="Add to favourites">♡</button>
+                        <span class="recipe-card-chevron">▼</span>
+                    </summary>
+
+                    <div class="recipe-card-details">
+                        <div class="recipe-card-ingredients">
+                            <strong>🛒 Ingredients</strong><br>
+                            150g all-purpose flour · 1 tbsp sugar · 1 tsp baking powder · 1/2 tsp baking soda · 1/4 tsp
+                            salt · 200ml milk · 1 egg · 30g melted butter
+                        </div>
+                        <div class="recipe-card-steps">
+                            <strong>📋 Steps</strong>
+                            <ol>
+                                <li>Mix dry ingredients in a bowl.</li>
+                                <li>Whisk milk, egg, and melted butter separately.</li>
+                                <li>Combine wet and dry ingredients until smooth.</li>
+                                <li>Cook pancakes on a lightly greased pan until bubbles form, flip and cook another 1–2
+                                    min.</li>
+                                <li>Serve warm with syrup or fresh fruits.</li>
+                            </ol>
+                        </div>
+
+                        <div class="recipe-comments">
+                            <h4 class="comments-heading">💬 Comments <span class="comments-count">2</span></h4>
+                            <div class="comments-list">
+                                <div class="comment-item">
+                                    <div class="comment-avatar">LH</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@lisa.h</span>
+                                            <span class="comment-time">4 days ago</span>
+                                        </div>
+                                        <p class="comment-text">Light and fluffy, just like in cafes! My kids loved
+                                            them.</p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">JN</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@john.n</span>
+                                            <span class="comment-time">1 week ago</span>
+                                        </div>
+                                        <p class="comment-text">Perfect texture, followed the recipe exactly. 10/10!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rating & Comment input -->
+                        <div class="recipe-rate-comment">
+                            <h4>⭐ Rate & 💬 Comment</h4>
+                            <div class="stars-input">
+                                <input type="radio" id="star5-5" name="rating-5" value="5"><label
+                                    for="star5-5">★</label>
+                                <input type="radio" id="star4-5" name="rating-5" value="4"><label
+                                    for="star4-5">★</label>
+                                <input type="radio" id="star3-5" name="rating-5" value="3"><label
+                                    for="star3-5">★</label>
+                                <input type="radio" id="star2-5" name="rating-5" value="2"><label
+                                    for="star2-5">★</label>
+                                <input type="radio" id="star1-5" name="rating-5" value="1"><label
+                                    for="star1-5">★</label>
+                            </div>
+                            <textarea class="comment-input" placeholder="Add a comment..." rows="2"></textarea>
+                            <button class="btn-submit-comment">Submit</button>
+                        </div>
+
+                        <button class="btn-save-recipe">+ Save to My Recipes</button>
+                    </div>
+                </details>
+
+                <!-- ── Card 6: Chocolate Brownies ── -->
+                <details class="recipe-card-full public-recipe-card" data-recipe-id="6">
+                    <summary class="recipe-card-top">
+                        <span class="recipe-card-emoji">🍫</span>
+                        <div class="recipe-card-summary">
+                            <div class="recipe-card-tags">
+                                <span class="tag tag-medium">Medium</span>
+                                <span class="tag tag-cost">💰 Medium</span>
+                                <span class="tag tag-diet">🥛 Contains Dairy</span>
+                            </div>
+                            <h3 class="recipe-card-title">Chocolate Fudge Brownies</h3>
+                            <div class="recipe-card-meta">
+                                <span>⏱️ 35 min</span>
+                                <span>👤 8 servings</span>
+                            </div>
+                            <div class="recipe-card-author-row">
+                                <div class="recipe-author-avatar">CM</div>
+                                <span class="recipe-author-name">@carl.m</span>
+                                <div class="recipe-star-rating" aria-label="4.9 out of 5 stars">
+                                    <span class="star full">★</span><span class="star full">★</span><span
+                                        class="star full">★</span><span class="star full">★</span><span
+                                        class="star half">★</span>
                                 </div>
                                 <span class="recipe-rating-count">(62)</span>
                             </div>
@@ -739,17 +809,17 @@
                     <div class="recipe-card-details">
                         <div class="recipe-card-ingredients">
                             <strong>🛒 Ingredients</strong><br>
-                            500g beef mince · 6 small corn tortillas · 1 white onion · Fresh coriander · Lime · Cumin ·
-                            Smoked paprika · Garlic powder · Salsa verde · Sour cream
+                            200g dark chocolate · 150g butter · 200g sugar · 3 eggs · 100g flour · 30g cocoa powder · 1
+                            tsp vanilla extract · Pinch of salt
                         </div>
                         <div class="recipe-card-steps">
                             <strong>📋 Steps</strong>
                             <ol>
-                                <li>Season beef with cumin, smoked paprika, garlic powder, salt.</li>
-                                <li>Cook beef in a hot pan, breaking it up until crispy and caramelised.</li>
-                                <li>Warm tortillas directly on the gas flame for 30 seconds each side.</li>
-                                <li>Load tortillas with beef, diced onion, and coriander.</li>
-                                <li>Finish with salsa verde, sour cream, and a squeeze of lime.</li>
+                                <li>Melt chocolate and butter together until smooth.</li>
+                                <li>Whisk in sugar, then eggs one at a time.</li>
+                                <li>Add flour, cocoa powder, salt, and vanilla. Mix gently.</li>
+                                <li>Pour into a lined baking tray and bake at 180°C for 20–25 mins.</li>
+                                <li>Cool completely before cutting into squares.</li>
                             </ol>
                         </div>
 
@@ -757,39 +827,56 @@
                             <h4 class="comments-heading">💬 Comments <span class="comments-count">3</span></h4>
                             <div class="comments-list">
                                 <div class="comment-item">
-                                    <div class="comment-avatar">BH</div>
+                                    <div class="comment-avatar">EB</div>
                                     <div class="comment-body">
                                         <div class="comment-header">
-                                            <span class="comment-username">@ben.h</span>
-                                            <span class="comment-time">1 day ago</span>
+                                            <span class="comment-username">@emma.b</span>
+                                            <span class="comment-time">2 days ago</span>
                                         </div>
-                                        <p class="comment-text">The crispy beef is everything. I've made this three
-                                            times this week already!</p>
+                                        <p class="comment-text">Rich and fudgy, just like I love them!</p>
                                     </div>
                                 </div>
                                 <div class="comment-item">
-                                    <div class="comment-avatar">ZA</div>
+                                    <div class="comment-avatar">JS</div>
                                     <div class="comment-body">
                                         <div class="comment-header">
-                                            <span class="comment-username">@zara.a</span>
+                                            <span class="comment-username">@jess.s</span>
                                             <span class="comment-time">4 days ago</span>
                                         </div>
-                                        <p class="comment-text">The flame-charred tortilla tip is a must. Don't skip it!
+                                        <p class="comment-text">Perfect texture, easy to follow, family-approved!</p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">TM</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@tom.m</span>
+                                            <span class="comment-time">1 week ago</span>
+                                        </div>
+                                        <p class="comment-text">My go-to brownie recipe now, always turns out amazing.
                                         </p>
                                     </div>
                                 </div>
-                                <div class="comment-item">
-                                    <div class="comment-avatar">IR</div>
-                                    <div class="comment-body">
-                                        <div class="comment-header">
-                                            <span class="comment-username">@ivan.r</span>
-                                            <span class="comment-time">1 week ago</span>
-                                        </div>
-                                        <p class="comment-text">Incredibly easy and so flavourful. Added some pickled
-                                            jalapeños and it was perfect.</p>
-                                    </div>
-                                </div>
                             </div>
+                        </div>
+
+                        <!-- Rating & Comment input -->
+                        <div class="recipe-rate-comment">
+                            <h4>⭐ Rate & 💬 Comment</h4>
+                            <div class="stars-input">
+                                <input type="radio" id="star5-6" name="rating-6" value="5"><label
+                                    for="star5-6">★</label>
+                                <input type="radio" id="star4-6" name="rating-6" value="4"><label
+                                    for="star4-6">★</label>
+                                <input type="radio" id="star3-6" name="rating-6" value="3"><label
+                                    for="star3-6">★</label>
+                                <input type="radio" id="star2-6" name="rating-6" value="2"><label
+                                    for="star2-6">★</label>
+                                <input type="radio" id="star1-6" name="rating-6" value="1"><label
+                                    for="star1-6">★</label>
+                            </div>
+                            <textarea class="comment-input" placeholder="Add a comment..." rows="2"></textarea>
+                            <button class="btn-submit-comment">Submit</button>
                         </div>
 
                         <button class="btn-save-recipe">+ Save to My Recipes</button>
