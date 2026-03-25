@@ -222,6 +222,7 @@ app.get("/api/recipes", authMiddleware, async (req, res) => {
     console.log("✅ /api/recipes route HIT", req.query);
 
     const q = (req.query.q || "").trim();
+  const ownerId = parseInt(req.user.userId, 10);
 
     // allow single value OR comma-separated list (ex: time=under-15,15-30)
     const normalize = (v) =>
@@ -238,6 +239,9 @@ app.get("/api/recipes", authMiddleware, async (req, res) => {
     const allergyVals = normalize(req.query.allergies); // nut-free, dairy-free, etc.
 
     const AND = [];
+
+     //Only return recipes that belong to the logged-in user
+     AND.push({ ownerId });
 
     // Search across fields
     if (q) {
@@ -318,6 +322,7 @@ app.get("/api/recipes", authMiddleware, async (req, res) => {
       }
       if (allergyOR.length) AND.push({ OR: allergyOR });  // Recipe has any of these allergens
     }
+
 
     const where = AND.length ? { AND } : undefined;
     const recipes = await getAllRecipes(where);

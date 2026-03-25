@@ -1366,46 +1366,50 @@ async function weeklyMeals(currentDate) {
         e.day_of_week === dayEnum
       );
 
-      if (item) {
-        const recipeResponse = await fetch(`${API_BASE_URL}/recipes/${item.recipeId}`, {
-          headers: {
-            'Authorization': `Bearer ${getToken()}`
-          }
-        });
-        const recipe = await recipeResponse.json();
+    if (item) {
+        try {
+          const recipeResponse = await fetch(`${API_BASE_URL}/recipes/${item.recipeId}`, {
+            headers: {
+              'Authorization': `Bearer ${getToken()}`
+            }
+          });
+          const recipe = await recipeResponse.json();
 
-        const cellFilled = document.createElement("div");
-        cellFilled.className = "cell-filled";
+          const cellFilled = document.createElement("div");
+          cellFilled.className = "cell-filled";
 
-        const recipeName = document.createElement("div");
-        recipeName.className = "cell-recipe-name";
-        recipeName.textContent = recipe.name;
+          const recipeName = document.createElement("div");
+          recipeName.className = "cell-recipe-name";
+          recipeName.textContent = recipe.name;
 
-        const recipeMeta = document.createElement("div");
-        recipeMeta.className = "cell-recipe-meta";
-        recipeMeta.textContent = `⏱️ ${recipe.prep_time} min · ${recipe.difficulty}`;
+          const recipeMeta = document.createElement("div");
+          recipeMeta.className = "cell-recipe-meta";
+          recipeMeta.textContent = `⏱️ ${recipe.prep_time} min · ${recipe.difficulty}`;
 
-        const actions = document.createElement("div");
-        actions.className = "cell-filled-actions";
+          const actions = document.createElement("div");
+          actions.className = "cell-filled-actions";
 
-        const editBtn = document.createElement("button");
-        editBtn.className = "cell-action-btn cell-btn-edit";
-        editBtn.type = "button";
-        editBtn.textContent = "✏️ Edit";
+          const editBtn = document.createElement("button");
+          editBtn.className = "cell-action-btn cell-btn-edit";
+          editBtn.type = "button";
+          editBtn.textContent = "✏️ Edit";
 
-        const removeBtn = document.createElement("button");
-        removeBtn.className = "cell-action-btn cell-btn-remove";
-        removeBtn.type = "button";
-        removeBtn.textContent = "✕";
+          const removeBtn = document.createElement("button");
+          removeBtn.className = "cell-action-btn cell-btn-remove";
+          removeBtn.type = "button";
+          removeBtn.textContent = "✕";
 
-        actions.appendChild(editBtn);
-        actions.appendChild(removeBtn);
+          actions.appendChild(editBtn);
+          actions.appendChild(removeBtn);
 
-        cellFilled.appendChild(recipeName);
-        cellFilled.appendChild(recipeMeta);
-        cellFilled.appendChild(actions);
+          cellFilled.appendChild(recipeName);
+          cellFilled.appendChild(recipeMeta);
+          cellFilled.appendChild(actions);
 
-        grid.appendChild(cellFilled);
+          grid.appendChild(cellFilled);
+        } catch (error) {
+          console.error("Error loading recipe details:", error);
+        }
       } else {
         grid.className = "grid-cell empty";
 
@@ -1470,6 +1474,46 @@ async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, 
   }
 }
 
+async function loadRecipesForAddMealPage() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipes`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+
+    const recipes = await response.json();
+    const container = document.getElementById("addMealRecipesContainer");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    recipes.forEach((recipe) => {
+      const card = document.createElement("a");
+      card.href = "#";
+      card.className = "recipe-card";
+      card.dataset.recipeId = recipe.id;
+
+      card.innerHTML = `
+        <div class="recipe-image">🍽️</div>
+        <div class="recipe-info">
+          <h4>${recipe.name}</h4>
+          <div class="recipe-details">
+            <span>⏱️ ${recipe.prep_time} min</span>
+            <span>${recipe.difficulty}</span>
+            <span>💰 ${recipe.cost}</span>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+  } catch (error) {
+    console.error("Error loading recipes for add meal page:", error);
+  }
+}
+
 // Initialize add meal page 
 async function initAddMealPage() {
   if (!isAuthenticated()) {
@@ -1485,7 +1529,9 @@ async function initAddMealPage() {
     return;
   }
 
-  const recipeCards = document.querySelectorAll('.recipe-card-full, .meal-card, .recipe-card, [data-recipe-id]');
+  await loadRecipesForAddMealPage();
+
+    const recipeCards = document.querySelectorAll('.recipe-card[data-recipe-id]');
 
   recipeCards.forEach(card => {
     const recipeId =
