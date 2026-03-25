@@ -1422,8 +1422,13 @@ async function weeklyMeals(currentDate) {
         `;
 
         addBtn.addEventListener("click", () => {
-          if (!mealPlan) {
+          if (!mealPlan || !mealPlan.id) {
             alert("No meal plan exists for this week yet.");
+            return;
+          }
+
+          if (!dayEnum || !meal.type) {
+            alert("Missing meal slot information.");
             return;
           }
 
@@ -1447,6 +1452,22 @@ async function weeklyMeals(currentDate) {
 // Function to create a new meal plan item
 async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, notes = "") {
   try {
+    if (!getToken()) {
+      return { success: false, error: "You must be logged in." };
+    }
+
+    if (!mealPlanId || Number.isNaN(parseInt(mealPlanId, 10))) {
+      return { success: false, error: "Invalid meal plan ID." };
+    }
+
+    if (!recipeId || Number.isNaN(parseInt(recipeId, 10))) {
+      return { success: false, error: "Invalid recipe selected." };
+    }
+
+    if (!day_of_week || !meal_type) {
+      return { success: false, error: "Missing meal assignment details." };
+    }
+
     const response = await fetch(`${API_BASE_URL}/mealPlan/item`, {
       method: 'POST',
       headers: {
@@ -1454,8 +1475,8 @@ async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, 
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        mealPlanId,
-        recipeId,
+        mealPlanId: parseInt(mealPlanId, 10),
+        recipeId: parseInt(recipeId, 10),
         day_of_week,
         meal_type,
         notes
@@ -1465,12 +1486,16 @@ async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to create meal plan item');
+      return {
+        success: false,
+        error: data.message || "Failed to create meal plan item."
+      };
     }
 
     return { success: true, data };
   } catch (error) {
-    return { success: false, error: error.message };
+    console.error("Error creating meal plan item:", error);
+    return { success: false, error: "Something went wrong while assigning the meal." };
   }
 }
 
@@ -1514,6 +1539,43 @@ async function loadRecipesForAddMealPage() {
   }
 }
 
+function validateSelectedMealSlot(slot) {
+  const validDays = [
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+    "SUNDAY"
+  ];
+
+  const validMealTypes = [
+    "BREAKFAST",
+    "LUNCH",
+    "DINNER",
+    "SNACK"
+  ];
+
+  if (!slot) {
+    return { valid: false, message: "No meal slot selected." };
+  }
+
+  if (!slot.mealPlanId || Number.isNaN(parseInt(slot.mealPlanId, 10))) {
+    return { valid: false, message: "Invalid meal plan selected." };
+  }
+
+  if (!slot.day_of_week || !validDays.includes(slot.day_of_week)) {
+    return { valid: false, message: "Invalid day selected." };
+  }
+
+  if (!slot.meal_type || !validMealTypes.includes(slot.meal_type)) {
+    return { valid: false, message: "Invalid meal type selected." };
+  }
+
+  return { valid: true };
+}
+
 // Initialize add meal page 
 async function initAddMealPage() {
   if (!isAuthenticated()) {
@@ -1522,32 +1584,39 @@ async function initAddMealPage() {
   }
 
   const slot = getSelectedMealSlot();
+  const slotValidation = validateSelectedMealSlot(slot);
 
-  if (!slot) {
-    alert('No meal slot selected.');
+  if (!slotValidation.valid) {
+    alert(slotValidation.message);
     window.location.href = 'meal-planner.html';
     return;
   }
 
   await loadRecipesForAddMealPage();
 
-    const recipeCards = document.querySelectorAll('.recipe-card[data-recipe-id]');
+  const recipeCards = document.querySelectorAll('.recipe-card[data-recipe-id]');
+
+  if (!recipeCards.length) {
+    console.warn("No recipe cards found on add-meal page.");
+  }
 
   recipeCards.forEach(card => {
-    const recipeId =
-      card.dataset.recipeId ||
-      card.getAttribute('data-id') ||
-      card.getAttribute('data-recipe');
+    const recipeId = card.dataset.recipeId;
 
-    if (!recipeId) return;
+    if (!recipeId || Number.isNaN(parseInt(recipeId, 10))) {
+      return;
+    }
 
     card.style.cursor = 'pointer';
 
     card.addEventListener('click', async (e) => {
-    e.preventDefault();
+      e.preventDefault();
+
+      card.style.pointerEvents = 'none';
+
       const result = await createMealPlanItem(
         slot.mealPlanId,
-        parseInt(recipeId, 10),
+        recipeId,
         slot.day_of_week,
         slot.meal_type
       );
@@ -1557,6 +1626,7 @@ async function initAddMealPage() {
         alert('Meal added successfully!');
         window.location.href = 'meal-planner.html';
       } else {
+        card.style.pointerEvents = 'auto';
         alert(result.error || 'Failed to add meal.');
       }
     });
