@@ -1,0 +1,292 @@
+/*Navbar avatar circle*/
+.nav-avatar {
+    padding: 4px 8px !important;
+}
+
+.avatar-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #e6f4ec;
+    color: #1b8c4f;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #9dd4b3;
+    flex-shrink: 0;
+}
+
+.nav-avatar:hover .avatar-circle,
+.nav-avatar.active .avatar-circle {
+    background: #0e9c50;
+    color: white;
+    border-color: #0e9c50;
+}
+
+
+/*Profile*/
+.user-profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    background: white;
+    border-radius: 20px;
+    padding: 32px 36px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 32px;
+}
+
+.avatar-large {
+    width: 80px;
+    height: 80px;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.user-hero-info {
+    flex: 1;
+}
+
+.user-display-name {
+    margin: 0 0 4px 0;
+    font-size: 26px;
+    color: #222;
+}
+
+.user-handle {
+    margin: 0 0 18px 0;
+    color: #999;
+    font-size: 14px;
+}
+
+.user-hero-stats {
+    display: flex;
+    gap: 28px;
+}
+
+.hero-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.hero-stat-num {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1b8c4f;
+    line-height: 1;
+}
+
+.hero-stat-label {
+    font-size: 12px;
+    color: #999;
+}
+
+
+/*Tabs*/
+.profile-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 28px;
+}
+
+.profile-tab {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #888;
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.profile-tab:hover {
+    color: #333;
+}
+
+.profile-tab:target,
+.profile-tab:focus {
+    color: #0e9c50;
+    border-bottom-color: #0e9c50;
+}
+
+
+/*Tab sections*/
+.tab-section {
+    margin-bottom: 50px;
+}
+
+
+/*Private note*/
+.private-note {
+    background: #fffbf0;
+    border: 1.5px solid #fcd34d;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 14px;
+    color: #92400e;
+    margin-bottom: 24px;
+}
+
+
+/*Rating display*/
+.recipe-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.stars-display {
+    color: #f59e0b;
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+.rating-score {
+    font-weight: 700;
+    font-size: 13px;
+    color: #333;
+}
+
+.rating-count {
+    font-size: 12px;
+    color: #aaa;
+}
+
+
+/*Star rating form*/
+.star-rating-form {
+    border-top: 1.5px solid #f0f0f0;
+    padding-top: 14px;
+    margin-top: 8px;
+}
+
+.rate-prompt {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: #666;
+}
+
+.stars-input {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 2px;
+    width: fit-content;
+    margin-bottom: 10px;
+}
+
+.stars-input input[type="radio"] {
+    display: none;
+}
+
+.stars-input label {
+    font-size: 30px;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: color 0.1s;
+    margin-bottom: 0;
+    font-weight: 400;
+    display: block;
+}
+
+.stars-input label:hover,
+.stars-input label:hover ~ label,
+.stars-input input[type="radio"]:checked ~ label {
+    color: #f59e0b;
+}
+
+.btn-rate {
+    background: #0e9c50;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.2s;
+}
+
+.btn-rate:hover {
+    background: #0d8a47;
+}
+
+
+/*Video upload*/
+.video-upload-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.video-upload-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.video-upload-label:hover {
+    border-color: #0e9c50;
+    color: #0e9c50;
+    background: #f0f9f4;
+}
+
+.recipe-video {
+    width: 100%;
+    max-height: 300px;
+    border-radius: 10px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+
+/*Private tag*/
+.tag-private {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+
+/*Make public button*/
+.btn-make-public {
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: 2px solid #0e9c50;
+    background: white;
+    color: #0e9c50;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-make-public:hover {
+    background: #0e9c50;
+    color: white;
+}
+
+
+/*Tab section add button*/
+.tab-add-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 2px dashed #e6f4ec;
+}
+
