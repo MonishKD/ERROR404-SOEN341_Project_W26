@@ -1434,11 +1434,47 @@ async function weeklyMeals(currentDate) {
           editBtn.className = "cell-action-btn cell-btn-edit";
           editBtn.type = "button";
           editBtn.textContent = "✏️ Edit";
+          editBtn.addEventListener("click", () => {
+            saveSelectedMealSlot({
+              itemId: item.id,
+              mealPlanId: item.mealPlanId,
+              day_of_week: item.day_of_week,
+              meal_type: item.meal_type,
+              notes: item.notes || ""
+            });
+
+            window.location.href = "add-meal.html";
+          });
 
           const removeBtn = document.createElement("button");
           removeBtn.className = "cell-action-btn cell-btn-remove";
           removeBtn.type = "button";
           removeBtn.textContent = "✕";
+          removeBtn.addEventListener("click", async () => {
+            const confirmed = confirm("Remove this meal assignment?");
+            if (!confirmed) return;
+
+            try {
+              const response = await fetch(`${API_BASE_URL}/mealPlan/items/${item.id}`, {
+                method: "DELETE",
+                headers: {
+                  "Authorization": `Bearer ${getToken()}`
+                }
+              });
+
+              const data = await response.json();
+
+              if (!response.ok) {
+                alert(data.message || "Failed to delete meal assignment.");
+                return;
+              }
+
+              await weeklyMeals(currentDate);
+            } catch (error) {
+              console.error("Error deleting meal assignment:", error);
+              alert("Something went wrong while deleting the meal.");
+            }
+          });
 
           actions.appendChild(editBtn);
           actions.appendChild(removeBtn);
@@ -1550,6 +1586,54 @@ async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, 
   }
 }
 
+async function updateMealPlanItem(itemId, recipeId, day_of_week, meal_type, notes = "") {
+  try {
+    if (!getToken()) {
+      return { success: false, error: "You must be logged in." };
+    }
+
+    if (!itemId || Number.isNaN(parseInt(itemId, 10))) {
+      return { success: false, error: "Invalid meal assignment ID." };
+    }
+
+    if (!recipeId || Number.isNaN(parseInt(recipeId, 10))) {
+      return { success: false, error: "Invalid recipe selected." };
+    }
+
+    if (!day_of_week || !meal_type) {
+      return { success: false, error: "Missing meal assignment details." };
+    }
+
+    const response = await fetch(`${API_BASE_URL}/mealPlan/items/${parseInt(itemId, 10)}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        recipeId: parseInt(recipeId, 10),
+        day_of_week,
+        meal_type,
+        notes
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.message || "Failed to update meal assignment."
+      };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error updating meal plan item:", error);
+    return { success: false, error: "Something went wrong while updating the meal." };
+  }
+}
+
 async function loadRecipesForAddMealPage() {
   try {
     const response = await fetch(`${API_BASE_URL}/recipes`, {
@@ -1636,11 +1720,16 @@ async function initAddMealPage() {
 
   const slot = getSelectedMealSlot();
   const slotValidation = validateSelectedMealSlot(slot);
+  const header = document.querySelector('.profile-header h1');
 
   if (!slotValidation.valid) {
     alert(slotValidation.message);
     window.location.href = 'meal-planner.html';
     return;
+  }
+
+  if (header && slot?.itemId) {
+    header.textContent = '✏️ Edit Meal';
   }
 
   await loadRecipesForAddMealPage();
@@ -1665,20 +1754,28 @@ async function initAddMealPage() {
 
       card.style.pointerEvents = 'none';
 
-      const result = await createMealPlanItem(
-        slot.mealPlanId,
-        recipeId,
-        slot.day_of_week,
-        slot.meal_type
-      );
+      const result = slot.itemId
+        ? await updateMealPlanItem(
+            slot.itemId,
+            recipeId,
+            slot.day_of_week,
+            slot.meal_type,
+            slot.notes || ""
+          )
+        : await createMealPlanItem(
+            slot.mealPlanId,
+            recipeId,
+            slot.day_of_week,
+            slot.meal_type
+          );
 
       if (result.success) {
         clearSelectedMealSlot();
-        alert('Meal added successfully!');
+        alert(slot.itemId ? 'Meal updated successfully!' : 'Meal added successfully!');
         window.location.href = 'meal-planner.html';
       } else {
         card.style.pointerEvents = 'auto';
-        alert(result.error || 'Failed to add meal.');
+        alert(result.error || (slot.itemId ? 'Failed to update meal.' : 'Failed to add meal.'));
       }
     });
   });
