@@ -198,7 +198,6 @@
                             <span class="checkbox-label">Peanuts</span>
                         </span>
                     </label>
-
                     <label class="checkbox-card filter-card allergen-filter">
                         <input type="checkbox" name="allergy" value="tree-nuts">
                         <span class="checkbox-content">
@@ -257,7 +256,6 @@
         </div>
 
         <!--My recipes-->
-
         <section class="section">
             <div class="section-header">
                 <h2>👨‍🍳 My Recipes</h2>
@@ -275,19 +273,545 @@
             <div id="myRecipesGrid" class="recipe-cards-grid"></div>
         </section>
 
-        <!--General recipes-->
+        <!--Explore Public Recipes - Hardcoded for now!! -->
         <section class="section">
             <div class="section-header">
-                <h2>🌍 General Recipes</h2>
+                <h2>🌍 Explore Public Recipes</h2>
                 <p class="section-subtitle">Click any card to see full details</p>
             </div>
 
-            <!-- Recipes will be injected here by script.js -->
-            <div id="generalRecipesGrid" class="recipe-cards-grid"></div>
+            <div id="generalRecipesGrid" class="recipe-cards-grid">
+
+                <!-- ── Card 1: Spaghetti Carbonara ── -->
+                <details class="recipe-card-full public-recipe-card">
+                    <summary class="recipe-card-top">
+                        <span class="recipe-card-emoji">🍝</span>
+                        <div class="recipe-card-summary">
+                            <div class="recipe-card-tags">
+                                <span class="tag tag-medium">Medium</span>
+                                <span class="tag tag-cost">💰💰 Medium</span>
+                                <span class="tag tag-diet">🥛 Contains Dairy</span>
+                            </div>
+                            <h3 class="recipe-card-title">Spaghetti Carbonara</h3>
+                            <div class="recipe-card-meta">
+                                <span>⏱️ 30 min</span>
+                                <span>👤 2 servings</span>
+                            </div>
+                            <!-- Author + rating in the summary -->
+                            <div class="recipe-card-author-row">
+                                <div class="recipe-author-avatar">SM</div>
+                                <span class="recipe-author-name">@sofia.m</span>
+                                <div class="recipe-star-rating" aria-label="4.5 out of 5 stars">
+                                    <span class="star full">★</span><span class="star full">★</span><span
+                                        class="star full">★</span><span class="star full">★</span><span
+                                        class="star half">★</span>
+                                </div>
+                                <span class="recipe-rating-count">(24)</span>
+                            </div>
+                        </div>
+                        <!-- Favourite button -->
+                        <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
+                            aria-label="Add to favourites" title="Add to favourites">♡</button>
+                        <span class="recipe-card-chevron">▼</span>
+                    </summary>
+
+                    <div class="recipe-card-details">
+                        <div class="recipe-card-ingredients">
+                            <strong>🛒 Ingredients</strong><br>
+                            200g spaghetti · 100g pancetta · 2 large eggs · 50g Pecorino Romano · 50g Parmesan · 2
+                            cloves garlic · Black pepper · Salt
+                        </div>
+                        <div class="recipe-card-steps">
+                            <strong>📋 Steps</strong>
+                            <ol>
+                                <li>Cook spaghetti in salted boiling water until al dente.</li>
+                                <li>Fry pancetta with garlic until crispy, then remove garlic.</li>
+                                <li>Whisk eggs with grated cheeses and plenty of black pepper.</li>
+                                <li>Off the heat, toss hot pasta with pancetta, then quickly stir in egg mixture.</li>
+                                <li>Add pasta water to loosen the sauce. Serve immediately.</li>
+                            </ol>
+                        </div>
+
+                        <!-- Comments section -->
+                        <div class="recipe-comments">
+                            <h4 class="comments-heading">💬 Comments <span class="comments-count">3</span></h4>
+                            <div class="comments-list">
+                                <div class="comment-item">
+                                    <div class="comment-avatar">LK</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@luca.k</span>
+                                            <span class="comment-time">2 days ago</span>
+                                        </div>
+                                        <p class="comment-text">Tried this last night — absolutely perfect. The tip
+                                            about removing the pan from heat before adding the egg mix saved my
+                                            carbonara from scrambling!</p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">NR</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@nadia.r</span>
+                                            <span class="comment-time">5 days ago</span>
+                                        </div>
+                                        <p class="comment-text">Classic recipe, love it. I used guanciale instead of
+                                            pancetta and it was even better!</p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">TW</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@tom.w</span>
+                                            <span class="comment-time">1 week ago</span>
+                                        </div>
+                                        <p class="comment-text">My go-to weeknight dinner now. So quick and so good.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-save-recipe">+ Save to My Recipes</button>
+                    </div>
+                </details>
+
+                <!-- ── Card 2: Avocado Toast ── -->
+                <details class="recipe-card-full public-recipe-card">
+                    <summary class="recipe-card-top">
+                        <span class="recipe-card-emoji">🥑</span>
+                        <div class="recipe-card-summary">
+                            <div class="recipe-card-tags">
+                                <span class="tag tag-easy">Easy</span>
+                                <span class="tag tag-cost">💰 Low</span>
+                                <span class="tag tag-diet">🌱 Vegan</span>
+                            </div>
+                            <h3 class="recipe-card-title">Avocado Toast with Poached Egg</h3>
+                            <div class="recipe-card-meta">
+                                <span>⏱️ 15 min</span>
+                                <span>👤 1 serving</span>
+                            </div>
+                            <div class="recipe-card-author-row">
+                                <div class="recipe-author-avatar">JB</div>
+                                <span class="recipe-author-name">@jake.b</span>
+                                <div class="recipe-star-rating" aria-label="5 out of 5 stars">
+                                    <span class="star full">★</span><span class="star full">★</span><span
+                                        class="star full">★</span><span class="star full">★</span><span
+                                        class="star full">★</span>
+                                </div>
+                                <span class="recipe-rating-count">(41)</span>
+                            </div>
+                        </div>
+                        <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
+                            aria-label="Add to favourites" title="Add to favourites">♡</button>
+                        <span class="recipe-card-chevron">▼</span>
+                    </summary>
+
+                    <div class="recipe-card-details">
+                        <div class="recipe-card-ingredients">
+                            <strong>🛒 Ingredients</strong><br>
+                            2 slices sourdough bread · 1 ripe avocado · 2 eggs · Lemon juice · Chilli flakes · Salt &
+                            pepper · Fresh parsley
+                        </div>
+                        <div class="recipe-card-steps">
+                            <strong>📋 Steps</strong>
+                            <ol>
+                                <li>Toast the sourdough until golden and crisp.</li>
+                                <li>Mash avocado with lemon juice, salt, and pepper.</li>
+                                <li>Poach eggs in simmering water with a splash of vinegar for 3 minutes.</li>
+                                <li>Spread avocado on toast, top with poached egg.</li>
+                                <li>Garnish with chilli flakes and fresh parsley.</li>
+                            </ol>
+                        </div>
+
+                        <div class="recipe-comments">
+                            <h4 class="comments-heading">💬 Comments <span class="comments-count">2</span></h4>
+                            <div class="comments-list">
+                                <div class="comment-item">
+                                    <div class="comment-avatar">AM</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@anna.m</span>
+                                            <span class="comment-time">1 day ago</span>
+                                        </div>
+                                        <p class="comment-text">Simple and delicious. I added a sprinkle of everything
+                                            bagel seasoning on top — game changer!</p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">PD</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@priya.d</span>
+                                            <span class="comment-time">3 days ago</span>
+                                        </div>
+                                        <p class="comment-text">Made this for brunch, everyone loved it. The poached egg
+                                            instructions were spot on.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-save-recipe">+ Save to My Recipes</button>
+                    </div>
+                </details>
+
+                <!-- ── Card 3: Chicken Tikka Masala ── -->
+                <details class="recipe-card-full public-recipe-card">
+                    <summary class="recipe-card-top">
+                        <span class="recipe-card-emoji">🍛</span>
+                        <div class="recipe-card-summary">
+                            <div class="recipe-card-tags">
+                                <span class="tag tag-hard">Hard</span>
+                                <span class="tag tag-cost">💰💰 Medium</span>
+                                <span class="tag tag-diet">🕌 Halal</span>
+                            </div>
+                            <h3 class="recipe-card-title">Chicken Tikka Masala</h3>
+                            <div class="recipe-card-meta">
+                                <span>⏱️ 60 min</span>
+                                <span>👤 4 servings</span>
+                            </div>
+                            <div class="recipe-card-author-row">
+                                <div class="recipe-author-avatar">RP</div>
+                                <span class="recipe-author-name">@raj.p</span>
+                                <div class="recipe-star-rating" aria-label="4 out of 5 stars">
+                                    <span class="star full">★</span><span class="star full">★</span><span
+                                        class="star full">★</span><span class="star full">★</span><span
+                                        class="star empty">★</span>
+                                </div>
+                                <span class="recipe-rating-count">(37)</span>
+                            </div>
+                        </div>
+                        <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
+                            aria-label="Add to favourites" title="Add to favourites">♡</button>
+                        <span class="recipe-card-chevron">▼</span>
+                    </summary>
+
+                    <div class="recipe-card-details">
+                        <div class="recipe-card-ingredients">
+                            <strong>🛒 Ingredients</strong><br>
+                            700g chicken breast · 400ml coconut cream · 2 onions · 4 cloves garlic · 1 tbsp ginger ·
+                            Tikka paste · Cumin · Coriander · Garam masala · Tomato purée · Fresh coriander
+                        </div>
+                        <div class="recipe-card-steps">
+                            <strong>📋 Steps</strong>
+                            <ol>
+                                <li>Marinate chicken in tikka paste and yoghurt for at least 30 min.</li>
+                                <li>Grill or pan-fry chicken until charred; set aside.</li>
+                                <li>Sauté onions, garlic, and ginger until golden. Add spices and tomato purée.</li>
+                                <li>Pour in coconut cream, simmer for 15 minutes.</li>
+                                <li>Add chicken to the sauce, simmer 10 more minutes. Garnish and serve with rice.</li>
+                            </ol>
+                        </div>
+
+                        <div class="recipe-comments">
+                            <h4 class="comments-heading">💬 Comments <span class="comments-count">4</span></h4>
+                            <div class="comments-list">
+                                <div class="comment-item">
+                                    <div class="comment-avatar">CL</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@claire.l</span>
+                                            <span class="comment-time">3 days ago</span>
+                                        </div>
+                                        <p class="comment-text">Best tikka masala I've ever made at home. The marinade
+                                            makes all the difference!</p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">OS</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@omar.s</span>
+                                            <span class="comment-time">6 days ago</span>
+                                        </div>
+                                        <p class="comment-text">Authentic flavours! I let the chicken marinate overnight
+                                            and it was incredibly tender.</p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">HG</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@hannah.g</span>
+                                            <span class="comment-time">1 week ago</span>
+                                        </div>
+                                        <p class="comment-text">Used this for a dinner party and got so many
+                                            compliments. Will definitely make again.</p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">MB</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@marco.b</span>
+                                            <span class="comment-time">2 weeks ago</span>
+                                        </div>
+                                        <p class="comment-text">Great recipe, though I reduced the garam masala a bit.
+                                            Kids loved it!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-save-recipe">+ Save to My Recipes</button>
+                    </div>
+                </details>
+
+                <!-- ── Card 4: Banana Pancakes ── -->
+                <details class="recipe-card-full public-recipe-card">
+                    <summary class="recipe-card-top">
+                        <span class="recipe-card-emoji">🥞</span>
+                        <div class="recipe-card-summary">
+                            <div class="recipe-card-tags">
+                                <span class="tag tag-easy">Easy</span>
+                                <span class="tag tag-cost">💰 Low</span>
+                                <span class="tag tag-diet">🥗 Vegetarian</span>
+                            </div>
+                            <h3 class="recipe-card-title">2-Ingredient Banana Pancakes</h3>
+                            <div class="recipe-card-meta">
+                                <span>⏱️ 10 min</span>
+                                <span>👤 1 serving</span>
+                            </div>
+                            <div class="recipe-card-author-row">
+                                <div class="recipe-author-avatar">EL</div>
+                                <span class="recipe-author-name">@emma.l</span>
+                                <div class="recipe-star-rating" aria-label="4 out of 5 stars">
+                                    <span class="star full">★</span><span class="star full">★</span><span
+                                        class="star full">★</span><span class="star full">★</span><span
+                                        class="star empty">★</span>
+                                </div>
+                                <span class="recipe-rating-count">(58)</span>
+                            </div>
+                        </div>
+                        <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
+                            aria-label="Add to favourites" title="Add to favourites">♡</button>
+                        <span class="recipe-card-chevron">▼</span>
+                    </summary>
+
+                    <div class="recipe-card-details">
+                        <div class="recipe-card-ingredients">
+                            <strong>🛒 Ingredients</strong><br>
+                            1 ripe banana · 2 eggs · Pinch of cinnamon (optional) · Butter for the pan
+                        </div>
+                        <div class="recipe-card-steps">
+                            <strong>📋 Steps</strong>
+                            <ol>
+                                <li>Mash the banana thoroughly in a bowl.</li>
+                                <li>Add eggs and cinnamon; mix until combined.</li>
+                                <li>Heat butter in a non-stick pan over medium-low heat.</li>
+                                <li>Pour small circles of batter and cook 2 min per side until golden.</li>
+                                <li>Serve with maple syrup or fresh berries.</li>
+                            </ol>
+                        </div>
+
+                        <div class="recipe-comments">
+                            <h4 class="comments-heading">💬 Comments <span class="comments-count">2</span></h4>
+                            <div class="comments-list">
+                                <div class="comment-item">
+                                    <div class="comment-avatar">KJ</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@kim.j</span>
+                                            <span class="comment-time">4 days ago</span>
+                                        </div>
+                                        <p class="comment-text">Such a clever recipe! My kids devour these every
+                                            weekend. Adding a tiny bit of vanilla extract is a great touch.</p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">FN</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@felix.n</span>
+                                            <span class="comment-time">1 week ago</span>
+                                        </div>
+                                        <p class="comment-text">Perfect for when you have overripe bananas. Super easy
+                                            and surprisingly filling.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-save-recipe">+ Save to My Recipes</button>
+                    </div>
+                </details>
+
+                <!-- ── Card 5: Greek Salad ── -->
+                <details class="recipe-card-full public-recipe-card">
+                    <summary class="recipe-card-top">
+                        <span class="recipe-card-emoji">🥗</span>
+                        <div class="recipe-card-summary">
+                            <div class="recipe-card-tags">
+                                <span class="tag tag-easy">Easy</span>
+                                <span class="tag tag-cost">💰 Low</span>
+                                <span class="tag tag-diet">🥗 Vegetarian</span>
+                            </div>
+                            <h3 class="recipe-card-title">Classic Greek Salad</h3>
+                            <div class="recipe-card-meta">
+                                <span>⏱️ 10 min</span>
+                                <span>👤 2 servings</span>
+                            </div>
+                            <div class="recipe-card-author-row">
+                                <div class="recipe-author-avatar">DC</div>
+                                <span class="recipe-author-name">@dina.c</span>
+                                <div class="recipe-star-rating" aria-label="4.5 out of 5 stars">
+                                    <span class="star full">★</span><span class="star full">★</span><span
+                                        class="star full">★</span><span class="star full">★</span><span
+                                        class="star half">★</span>
+                                </div>
+                                <span class="recipe-rating-count">(19)</span>
+                            </div>
+                        </div>
+                        <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
+                            aria-label="Add to favourites" title="Add to favourites">♡</button>
+                        <span class="recipe-card-chevron">▼</span>
+                    </summary>
+
+                    <div class="recipe-card-details">
+                        <div class="recipe-card-ingredients">
+                            <strong>🛒 Ingredients</strong><br>
+                            3 tomatoes · 1 cucumber · 1 red onion · 100g Kalamata olives · 150g feta cheese · Olive oil
+                            · Dried oregano · Salt
+                        </div>
+                        <div class="recipe-card-steps">
+                            <strong>📋 Steps</strong>
+                            <ol>
+                                <li>Chop tomatoes, cucumber, and red onion into large chunks.</li>
+                                <li>Combine in a bowl with olives.</li>
+                                <li>Drizzle generously with olive oil and season with salt.</li>
+                                <li>Top with a whole slab of feta and sprinkle oregano on top.</li>
+                                <li>Serve immediately — do not toss.</li>
+                            </ol>
+                        </div>
+
+                        <div class="recipe-comments">
+                            <h4 class="comments-heading">💬 Comments <span class="comments-count">1</span></h4>
+                            <div class="comments-list">
+                                <div class="comment-item">
+                                    <div class="comment-avatar">YT</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@yuki.t</span>
+                                            <span class="comment-time">5 days ago</span>
+                                        </div>
+                                        <p class="comment-text">The tip about not tossing is key! The whole feta slab on
+                                            top is so authentic. Reminded me of my trip to Santorini.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-save-recipe">+ Save to My Recipes</button>
+                    </div>
+                </details>
+
+                <!-- ── Card 6: Beef Tacos ── -->
+                <details class="recipe-card-full public-recipe-card">
+                    <summary class="recipe-card-top">
+                        <span class="recipe-card-emoji">🌮</span>
+                        <div class="recipe-card-summary">
+                            <div class="recipe-card-tags">
+                                <span class="tag tag-easy">Easy</span>
+                                <span class="tag tag-cost">💰💰 Medium</span>
+                            </div>
+                            <h3 class="recipe-card-title">Crispy Beef Street Tacos</h3>
+                            <div class="recipe-card-meta">
+                                <span>⏱️ 25 min</span>
+                                <span>👤 3 servings</span>
+                            </div>
+                            <div class="recipe-card-author-row">
+                                <div class="recipe-author-avatar">MV</div>
+                                <span class="recipe-author-name">@miguel.v</span>
+                                <div class="recipe-star-rating" aria-label="5 out of 5 stars">
+                                    <span class="star full">★</span><span class="star full">★</span><span
+                                        class="star full">★</span><span class="star full">★</span><span
+                                        class="star full">★</span>
+                                </div>
+                                <span class="recipe-rating-count">(62)</span>
+                            </div>
+                        </div>
+                        <button class="btn-favourite" onclick="toggleFavourite(this); event.preventDefault();"
+                            aria-label="Add to favourites" title="Add to favourites">♡</button>
+                        <span class="recipe-card-chevron">▼</span>
+                    </summary>
+
+                    <div class="recipe-card-details">
+                        <div class="recipe-card-ingredients">
+                            <strong>🛒 Ingredients</strong><br>
+                            500g beef mince · 6 small corn tortillas · 1 white onion · Fresh coriander · Lime · Cumin ·
+                            Smoked paprika · Garlic powder · Salsa verde · Sour cream
+                        </div>
+                        <div class="recipe-card-steps">
+                            <strong>📋 Steps</strong>
+                            <ol>
+                                <li>Season beef with cumin, smoked paprika, garlic powder, salt.</li>
+                                <li>Cook beef in a hot pan, breaking it up until crispy and caramelised.</li>
+                                <li>Warm tortillas directly on the gas flame for 30 seconds each side.</li>
+                                <li>Load tortillas with beef, diced onion, and coriander.</li>
+                                <li>Finish with salsa verde, sour cream, and a squeeze of lime.</li>
+                            </ol>
+                        </div>
+
+                        <div class="recipe-comments">
+                            <h4 class="comments-heading">💬 Comments <span class="comments-count">3</span></h4>
+                            <div class="comments-list">
+                                <div class="comment-item">
+                                    <div class="comment-avatar">BH</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@ben.h</span>
+                                            <span class="comment-time">1 day ago</span>
+                                        </div>
+                                        <p class="comment-text">The crispy beef is everything. I've made this three
+                                            times this week already!</p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">ZA</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@zara.a</span>
+                                            <span class="comment-time">4 days ago</span>
+                                        </div>
+                                        <p class="comment-text">The flame-charred tortilla tip is a must. Don't skip it!
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="comment-item">
+                                    <div class="comment-avatar">IR</div>
+                                    <div class="comment-body">
+                                        <div class="comment-header">
+                                            <span class="comment-username">@ivan.r</span>
+                                            <span class="comment-time">1 week ago</span>
+                                        </div>
+                                        <p class="comment-text">Incredibly easy and so flavourful. Added some pickled
+                                            jalapeños and it was perfect.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-save-recipe">+ Save to My Recipes</button>
+                    </div>
+                </details>
+
+            </div>
+
             <p id="noRecipesMessage" class="no-recipes-message" hidden>No recipes match the selected filters.</p>
         </section>
 
     </div>
+
+    <!-- Inline JS for favourite toggle -->
+    <script>
+        function toggleFavourite(btn) {
+            const isFavourited = btn.classList.toggle('favourited');
+            btn.textContent = isFavourited ? '♥' : '♡';
+            btn.title = isFavourited ? 'Remove from favourites' : 'Add to favourites';
+            btn.setAttribute('aria-label', isFavourited ? 'Remove from favourites' : 'Add to favourites');
+        }
+    </script>
 
 </body>
 

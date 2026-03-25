@@ -636,53 +636,53 @@ async function loadMyRecipes() {
 /**
  * Load General Recipes
  */
-async function loadGeneralRecipes() {
+// async function loadGeneralRecipes() {
 
-  const generalGrid = document.getElementById('generalRecipesGrid');
-  if (!generalGrid) return;
+//   const generalGrid = document.getElementById('generalRecipesGrid');
+//   if (!generalGrid) return;
 
-  try {
-    // Fetch all recipes
-    const result = await fetchRecipes();
+//   try {
+//     // Fetch all recipes
+//     const result = await fetchRecipes();
 
-    if (result.success) {
-      // Filter to ONLY show recipes with ownerId = 1 (seed recipes)
-      let recipes = result.data.filter(recipe => recipe.ownerId === 1);
+//     if (result.success) {
+//       // Filter to ONLY show recipes with ownerId = 1 (seed recipes)
+//       let recipes = result.data.filter(recipe => recipe.ownerId === 1);
 
-      // Assign emojis based on recipe names
-      recipes = recipes.map(recipe => {
-        // Create a copy of the recipe with an emoji
-        const recipeWithEmoji = { ...recipe };
+//       // Assign emojis based on recipe names
+//       recipes = recipes.map(recipe => {
+//         // Create a copy of the recipe with an emoji
+//         const recipeWithEmoji = { ...recipe };
 
-        // Assign emoji based on name
-        if (recipe.name.includes("Chickpea")) recipeWithEmoji.emoji = "🌯";
-        else if (recipe.name.includes("Shrimp")) recipeWithEmoji.emoji = "🍝";
-        else if (recipe.name.includes("Fried Rice")) recipeWithEmoji.emoji = "🍚";
-        else if (recipe.name.includes("Beef Chili")) recipeWithEmoji.emoji = "🥘";
-        else if (recipe.name.includes("Salmon")) recipeWithEmoji.emoji = "🐟";
-        else if (recipe.name.includes("Shawarma")) recipeWithEmoji.emoji = "🥙";
-        else recipeWithEmoji.emoji = "🍽️"; // Default emoji
+//         // Assign emoji based on name
+//         if (recipe.name.includes("Chickpea")) recipeWithEmoji.emoji = "🌯";
+//         else if (recipe.name.includes("Shrimp")) recipeWithEmoji.emoji = "🍝";
+//         else if (recipe.name.includes("Fried Rice")) recipeWithEmoji.emoji = "🍚";
+//         else if (recipe.name.includes("Beef Chili")) recipeWithEmoji.emoji = "🥘";
+//         else if (recipe.name.includes("Salmon")) recipeWithEmoji.emoji = "🐟";
+//         else if (recipe.name.includes("Shawarma")) recipeWithEmoji.emoji = "🥙";
+//         else recipeWithEmoji.emoji = "🍽️"; // Default emoji
 
-        return recipeWithEmoji;
-      });
+//         return recipeWithEmoji;
+//       });
 
-      console.log('General recipes fetched (ownerId=1):', recipes.length);
+//       console.log('General recipes fetched (ownerId=1):', recipes.length);
 
-      // Store in global variable for filtering
-      allRecipes = recipes;
+//       // Store in global variable for filtering
+//       allRecipes = recipes;
 
-      // Clear and populate grid
-      generalGrid.innerHTML = '';
+//       // Clear and populate grid
+//       generalGrid.innerHTML = '';
 
-      recipes.forEach(recipe => {
-        const card = createRecipeCard(recipe, false);
-        generalGrid.appendChild(card);
-      });
-    }
-  } catch (error) {
-    console.error('Error in loadGeneralRecipes:', error);
-  }
-}
+//       recipes.forEach(recipe => {
+//         const card = createRecipeCard(recipe, false);
+//         generalGrid.appendChild(card);
+//       });
+//     }
+//   } catch (error) {
+//     console.error('Error in loadGeneralRecipes:', error);
+//   }
+// }
 
 /**
  * Filter recipes by search term
@@ -937,7 +937,7 @@ async function deleteRecipe(id) {
         // Reload recipes
         loadMyRecipes();
         loadAllRecipes();
-        loadGeneralRecipes();
+        //loadGeneralRecipes();
       } else {
         alert('Failed to delete recipe');
       }
@@ -1995,7 +1995,7 @@ function initRecipesPage() {
   loadMyRecipes();
 
   // Load General Recipes
-  loadGeneralRecipes();
+  //loadGeneralRecipes();
 
   // Setup logout functionality
   const logoutLink = document.querySelector('.nav-link.logout');
