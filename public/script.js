@@ -105,8 +105,9 @@ async function getInitials() {
       },
     });
 
-  const user = response.json();
-  return user.firstName[0] + user.lastName[0];
+  const user = await response.json();
+  const avatar = document.getElementById("avatarNav");
+  avatar.textContent = user.firstName[0] + user.lastName[0];
 }
 
 // VALIDATION FUNCTIONS
@@ -1734,7 +1735,7 @@ async function showUserProfile() {
       },
     });
 
-  const user = response.json();
+  const user = await response.json();
   
   const responseRecipes = await fetch(`/api/recipes`, {
     method: 'GET',
@@ -1747,9 +1748,9 @@ async function showUserProfile() {
   const privateRecipes = userRecipes.filter(e => e.is_private == true);
 
   container.innerHTML = `
-    <div class="avatar-circle avatar-large">${user.firstName[0]}${user.lastName[0]}</div>
+    <div class="avatar-circle avatar-large">${user.firstName[0] + user.lastName[0]}</div>
       <div class="user-hero-info">
-        <h1 class="user-display-name">${user.fullName}</h1>
+        <h1 class="user-display-name">${user.firstName + " " + user.lastName}</h1>
         <p class="user-handle">@${user.email.substring(0, user.email.lastIndexOf('@'))}</p>
         <div class="user-hero-stats">
           <div class="hero-stat">
@@ -1792,7 +1793,6 @@ async function showPublicRecipes() {
     recipeCard.className = "recipe-card-full";
 
     recipeCard.innerHTML = `
-      <div class="recipe-card-full">
         <details>
           <summary class="recipe-card-top">
             <span class="recipe-card-emoji">🍽️</span>
@@ -1841,11 +1841,10 @@ async function showPublicRecipes() {
             </div>
 
             <div class="recipe-card-actions">
-                <button type="button" class="btn-make-public" onclick="changePrivacy(this, true)">🌍 Make Private</button>
+                <button type="button" class="btn-make-public" onclick="changePrivacy(${e.id}, true)">🌍 Make Private</button>
             </div>
           </div>
         </details>
-      </div>
 
     `;
     container.appendChild(recipeCard);
@@ -1872,11 +1871,10 @@ async function showPrivateRecipes() {
   const privateRecipes = userRecipes.filter(e => e.is_private == true);
 
   for (const e of privateRecipes){
-    const recipeCard = document.createElement("details");
+    const recipeCard = document.createElement("div");
     recipeCard.className = "recipe-card-full";
     
     recipeCard.innerHTML = `
-      <div class="recipe-card-full">
         <details>
           <summary class="recipe-card-top">
             <span class="recipe-card-emoji">🍽️</span>
@@ -1907,11 +1905,10 @@ async function showPrivateRecipes() {
             <div class="recipe-card-actions">
                 <a href="edit-recipe.html?id=p1" class="btn-edit-recipe">✏️ Edit</a>
                 <button type="button" class="btn-delete-recipe">🗑️ Delete</button>
-                <button type="button" class="btn-make-public" onclick="changePrivacy(this, false)">🌍 Make Public</button>
+                <button type="button" class="btn-make-public" onclick="changePrivacy(${e.id}, false)">🌍 Make Public</button>
             </div>
           </div>
         </details>
-      </div>
 
     `;
     container.appendChild(recipeCard);
@@ -1919,14 +1916,14 @@ async function showPrivateRecipes() {
 }
 
 //changes privacy
-async function changePrivacy(recipe, privacy) {
-  const response = await fetch(`/api/recipes/privacy/${recipe.id}`, {
+async function changePrivacy(recipeId, privacy) {
+  const response = await fetch(`/api/recipes/privacy/${recipeId}`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${getToken()}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ isPrivate: privacy })
+    body: JSON.stringify({ is_private: privacy })
   });
 
   showPublicRecipes();
@@ -2556,45 +2553,55 @@ document.addEventListener('DOMContentLoaded', () => {
     case 'login-page.html':
     case 'login':
     case '':
+      getInitials();
       initLoginPage();
       break;
 
     case 'sign-up-page.html':
     case 'signup':
+      getInitials();
       initSignupPage();
       break;
 
     case 'home-page.html':
     case 'home':
+      getInitials();
       initHomePage();
       break;
 
     case 'edit-profile.html':
     case 'profile':
+      getInitials();
       initEditProfilePage();
       break;
 
     case 'recipes.html':
+      getInitials();
       initRecipesPage();
       break;
 
     case 'create-recipe.html':
+      getInitials();
       initCreateRecipePage();
       break;
 
     case 'edit-recipe.html':
+      getInitials();
       initEditRecipePage();
       break;
 
     case 'meal-planner.html':
+      getInitials();
       initMealPlannerPage();
       break;
 
     case 'add-meal.html':
+      getInitials();
       initAddMealPage();
       break;
     
     case 'user-profile.html':
+      getInitials();
       initUserProfile();
       break;
 
