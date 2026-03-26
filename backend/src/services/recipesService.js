@@ -89,3 +89,16 @@ export async function deleteRecipe(recipeId) {
     throw error; // re-throw to be handled by route handler
   }
 }
+
+// get recipe ratings by ID
+export async function recipeRatings(id) {
+  try {
+    const ratings = await prisma.RecipeRating.findMany({
+      where: { recipeId: id }
+    });
+
+    return ratings;
+  } catch (error) {
+    throw error;
+  }
+}

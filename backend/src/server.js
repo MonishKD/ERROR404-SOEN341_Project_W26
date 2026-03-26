@@ -18,7 +18,8 @@ import {
   getAllRecipes,
   getRecipeById,
   updateRecipe,
-  deleteRecipe
+  deleteRecipe,
+  recipeRatings
 } from "./services/recipesService.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -563,6 +564,46 @@ app.delete("/api/recipes/:id", authMiddleware, checkRecipeOwner, async (req, res
   }
 });
 
+// UPDATE recipe privacy
+app.put("/api/recipes/privacy/:id", authMiddleware, async (req, res) => {
+  try{
+    const { is_private } = req.body;
+
+    const updateData = {
+      is_private
+    };
+
+    const updatedRecipe = await updateRecipe(parseInt(req.params.id), updateData);
+    res.json(updatedRecipe);
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// get all ratings for specific recipe
+app.get("/api/recipeRatings/:recipeId", async (req, res) => {
+  try{
+    const ratings = await recipeRatings(parseInt(req.params.recipeId));
+    
+    res.json(ratings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//get the average rating for specific recipe
+app.get("/api/averageRating/:recipeId", async (req, res) => {
+  try{
+    const ratings = await recipeRatings(parseInt(req.params.recipeId));
+
+    const average = ratings.length > 0 ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length: 0;
+    
+    res.json(average);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 /*** Password reset routes ***/
 
