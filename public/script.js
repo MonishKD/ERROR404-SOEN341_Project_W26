@@ -1795,9 +1795,8 @@ async function showPublicRecipes() {
 
   for (const e of publicRecipes) {
     //ratings
-    const responseRatings = await fetch(`/api/recipeRatings/${e.id}`);
-    const recipeRatings = await responseRatings.json();
-    const avg = recipeRatings.length > 0 ? recipeRatings.reduce((sum, r) => sum + r, 0) / recipeRatings.length: 0;
+    const responseRating = await fetch(`/api/averageRating/${e.id}`);
+    const avg = await responseRating.json();
     const rounded = Math.round(avg);
     // Build stars string
     const stars = '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
