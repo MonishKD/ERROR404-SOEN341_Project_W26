@@ -1801,6 +1801,14 @@ async function showPublicRecipes() {
     // Build stars string
     const stars = '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
 
+    //number of ratings
+    const responseRatings = await fetch(`/api/recipeRatings/${e.id}`);
+    let numberOfRatings = responseRatings.json().length;
+    if(!numberOfRatings){
+      numberOfRatings = 0;
+    }
+
+
     const recipeCard = document.createElement("div");
     recipeCard.className = "recipe-card-full";
 
@@ -1819,7 +1827,7 @@ async function showPublicRecipes() {
                       <span class="recipe-rating">
                           <span class="stars-display">${stars}</span>
                           <span class="rating-score">${avg.toFixed(1)}</span>
-                          <span class="rating-count">(${recipeRatings.length})</span>
+                          <span class="rating-count">(${numberOfRatings} ratings)</span>
                       </span>
                 </div>
             </div>
@@ -1841,7 +1849,7 @@ async function showPublicRecipes() {
             <div class="recipe-rating">
                 <span class="stars-display">${stars}</span>
                 <span class="rating-score">${avg.toFixed(1)}</span>
-                <span class="rating-count">(${recipeRatings.length})</span>
+                <span class="rating-count">(${numberOfRatings} ratings)</span>
             </div>
 
             <div class="video-upload-form">
@@ -1849,7 +1857,7 @@ async function showPublicRecipes() {
                     🎥 Add a video
                     <input type="file" name="video" accept="video/*">
                 </label>
-                <button type="button" class="btn-secondary">Upload</button>
+                <button type="button" class="btn-secondary" onclick="uploadVideo(${e.id})">Upload</button>
             </div>
 
             <div class="recipe-card-actions">
@@ -1926,6 +1934,44 @@ async function showPrivateRecipes() {
     container.appendChild(recipeCard);
   };
 }
+
+async function uploadVideo(id) {
+  document.getElementById("uploadVideoBtn");
+  const fileInput = document.getElementById("videoInput");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Please select a video first.");
+    return;
+  }
+
+  const recipeId = id;
+
+  const formData = new FormData();
+  formData.append("video", file);
+
+  try {
+    const response = await fetch(`/api/recipes/${recipeId}/video`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      },
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Upload failed");
+    }
+
+    console.log("Upload success:", data);
+    alert("Video uploaded successfully!");
+
+  } catch (error) {
+    alert("Error uploading video");
+  }
+};
 
 //changes privacy
 async function changePrivacy(recipeId, privacy) {
