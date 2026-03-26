@@ -10,6 +10,10 @@ const TOKEN_KEY = 'mealmajor_token';
 // Global variable to store all recipes for filtering
 let allRecipes = [];
 
+// Variables for undo delete meal plan
+let lastDeletedMeal = null;
+let undoTimeout = null;
+
 
 // UTILITY FUNCTIONS
 /**
@@ -1421,12 +1425,8 @@ async function weeklyMeals(currentDate) {
 
     if (item) {
         try {
-          const recipeResponse = await fetch(`${API_BASE_URL}/recipes/${item.recipeId}`, {
-            headers: {
-              'Authorization': `Bearer ${getToken()}`
-            }
-          });
-          const recipe = await recipeResponse.json();
+          // Fetch recipe details for the assigned meal
+          const recipe = item.recipe;
 
           const cellFilled = document.createElement("div");
           cellFilled.className = "cell-filled";
@@ -1462,9 +1462,20 @@ async function weeklyMeals(currentDate) {
           removeBtn.className = "cell-action-btn cell-btn-remove";
           removeBtn.type = "button";
           removeBtn.textContent = "✕";
-          removeBtn.addEventListener("click", async () => {
-            const confirmed = confirm("Remove this meal assignment?");
+
+          // Add confirmation before deletion
+            removeBtn.addEventListener("click", async () => {
+            const confirmed = confirm(`Are you sure you want to remove "${recipe.name}" from your planner?`);
             if (!confirmed) return;
+
+          // Store details of the deleted meal for potential undo functionality
+              lastDeletedMeal = {
+              mealPlanId: item.mealPlanId,
+              recipeId: item.recipeId,
+              day_of_week: item.day_of_week,
+              meal_type: item.meal_type,
+              notes: item.notes || ""
+            };
 
             try {
               const response = await fetch(`${API_BASE_URL}/mealPlan/items/${item.id}`, {
@@ -1480,8 +1491,10 @@ async function weeklyMeals(currentDate) {
                 alert(data.message || "Failed to delete meal assignment.");
                 return;
               }
-
+              // Refresh the meal plan grid after deletion
               await weeklyMeals(currentDate);
+              showUndoBanner(); // Show undo option after deletion
+              
             } catch (error) {
               console.error("Error deleting meal assignment:", error);
               alert("Something went wrong while deleting the meal.");
@@ -2026,6 +2039,123 @@ function clearSelectedMealSlot() {
 }
 
 console.log("initMealPlannerPage called");
+
+// Undo functionality for meal deletion
+function showUndoBanner() {
+  let banner = document.getElementById("undoBanner");
+
+  if (!banner) {
+    banner = document.createElement("div");
+    banner.id = "undoBanner";
+    document.body.appendChild(banner);
+  }
+
+  banner.style.position = "fixed";
+  banner.style.bottom = "24px";
+  banner.style.right = "24px";
+  banner.style.background = "#ffffff";
+  banner.style.border = "1px solid #e5e7eb";
+  banner.style.borderLeft = "4px solid #16a34a";
+  banner.style.padding = "18px 22px";
+  banner.style.borderRadius = "12px";
+  banner.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)";
+  banner.style.zIndex = "9999";
+  banner.style.display = "flex";
+  banner.style.alignItems = "center";
+  banner.style.gap = "12px";
+  banner.style.minWidth = "300px";
+  banner.style.fontSize = "16px";
+  banner.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+
+  banner.style.transform = "translateY(20px)";
+  banner.style.opacity = "0"; 
+
+  setTimeout(() => {
+  banner.style.opacity = "1";
+  banner.style.transform = "translateY(0)";
+}, 10);
+
+
+
+  banner.innerHTML = `
+  <span style="font-weight: 600; color: #111827;">
+    Meal removed — But not too late to undo
+  </span>
+  <button id="undoDeleteBtn" style="
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  ">
+    Undo
+  </button>
+`;
+
+  const undoBtn = document.getElementById("undoDeleteBtn");
+
+  undoBtn.onmouseover = () => {
+    undoBtn.style.opacity = "0.9";
+  };
+
+  undoBtn.onmouseout = () => {
+    undoBtn.style.opacity = "1";
+  };
+
+  undoBtn.onclick = async () => {
+    if (!lastDeletedMeal) return;
+
+    const result = await createMealPlanItem(
+      lastDeletedMeal.mealPlanId,
+      lastDeletedMeal.recipeId,
+      lastDeletedMeal.day_of_week,
+      lastDeletedMeal.meal_type,
+      lastDeletedMeal.notes || ""
+    );
+
+    if (result.success) {
+      lastDeletedMeal = null;
+      banner.style.display = "none";
+      mealPlannerDate();
+    } else {
+      alert(result.error || "Failed to restore meal.");
+    }
+  };
+
+  if (undoTimeout) clearTimeout(undoTimeout);
+
+  undoTimeout = setTimeout(() => {
+    banner.style.opacity = "0";
+    banner.style.transform = "translateY(10px)";
+
+    setTimeout(() => {
+      banner.style.display = "none";
+      banner.style.opacity = "1";
+      banner.style.transform = "translateY(0)";
+      lastDeletedMeal = null;
+    }, 300);
+  }, 5000);
+
+  banner.onmouseenter = () => {
+  if (undoTimeout) clearTimeout(undoTimeout);
+};
+
+banner.onmouseleave = () => {
+  undoTimeout = setTimeout(() => {
+    banner.style.opacity = "0";
+    banner.style.transform = "translateY(10px)";
+
+    setTimeout(() => {
+      banner.style.display = "none";
+      lastDeletedMeal = null;
+    }, 300);
+  }, 3000);
+};
+
+}
 
 // Initialize meal planner page 
 function initMealPlannerPage() {
