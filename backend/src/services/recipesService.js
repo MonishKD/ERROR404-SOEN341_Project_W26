@@ -94,10 +94,34 @@ export async function deleteRecipe(recipeId) {
 export async function recipeRatings(id) {
   try {
     const ratings = await prisma.RecipeRating.findMany({
-      where: { recipeId: id }
+      where: { recipeId: id },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        }
+      }
     });
 
     return ratings;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function videoRecipe(videoData){
+  try{
+    const newVideo = await prisma.video.upsert({
+      where: {
+        recipeId: recipeId,
+      },
+      update: videoData,
+      create: videoData,
+    });
+    return newVideo;
   } catch (error) {
     throw error;
   }

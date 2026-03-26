@@ -2,6 +2,7 @@
 // Main server file to set up Express app, routes, and middleware
 import dotenv from 'dotenv';
 import express from "express";
+import multer from 'multer';
 import path from "path";
 import { fileURLToPath } from 'url';
 
@@ -19,7 +20,8 @@ import {
   getRecipeById,
   updateRecipe,
   deleteRecipe,
-  recipeRatings
+  recipeRatings,
+  videoRecipe
 } from "./services/recipesService.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -601,6 +603,96 @@ app.get("/api/averageRating/:recipeId", async (req, res) => {
     
     res.json(average);
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const upload = multer({ storage: multer.memoryStorage()  });
+
+//upload video file
+app.post("/api/recipes/:id/video/upload",authMiddleware, upload.single("video"), async (req, res) => {
+    try {
+      const recipeId = parseInt(req.params.id);
+
+      if (!req.file) {
+        return res.status(400).json({ error: "No video uploaded" });
+      }
+
+      const data = {
+        recipeId,
+        videoData: req.file.buffer,
+        videoType: "LOCAL",
+        fileSize: req.file.size,
+        fileType: req.file.mimetype,
+        title: req.file.originalname
+      }
+      
+      const newVideo =  await videoRecipe(data);
+
+      res.json(newVideo);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+);
+
+//save video url
+app.post("/api/recipes/:id/video/url", authMiddleware, async (req, res) => {
+    try {
+      const recipeId = parseInt(req.params.id);
+      const { videoUrl } = req.body;
+
+      if (!videoUrl) {
+        return res.status(400).json({ error: "Video URL required" });
+      }
+
+      const data = {
+          recipeId,
+          videoUrl,
+        }
+      
+      const newVideo = await videoRecipe(data);
+
+      res.json(newVideo);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+);
+
+// get video
+app.get("/api/recipes/:id/video", async (req, res) => {
+  try {
+    const recipeId = parseInt(req.params.id);
+
+    const video = await prisma.video.findFirst({
+      where: { recipeId }
+    });
+
+    if (!video) {
+      return res.status(404).json({ error: "No video found" });
+    }
+
+    // stored video
+    if (video.videoBytes) {
+      res.set("Content-Type", video.fileType || "video/mp4");
+      return res.send(video.videoBytes);
+    }
+
+    // external URL
+    if (video.videoUrl) {
+      return res.json({
+        type: "url",
+        videoUrl: video.videoUrl
+      });
+    }
+
+    return res.status(404).json({ error: "No valid video data" });
+
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
