@@ -565,9 +565,9 @@ app.delete("/api/recipes/:id", authMiddleware, checkRecipeOwner, async (req, res
 });
 
 // UPDATE recipe privacy
-app.put("/api/recipes/privacy/:id", authMiddleware, checkRecipeOwner, async (req, res) => {
+app.put("/api/recipes/privacy/:id", authMiddleware, async (req, res) => {
   try{
-    const { privacy } = req.body;
+    const { is_private } = req.body;
 
     const updateData = {
       is_private

@@ -97,6 +97,17 @@ function setButtonLoading(button, isLoading) {
   }
 }
 
+async function getInitials() {
+  const response = await fetch(`/api/profile`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+
+  const user = response.json();
+  return user.firstName[0] + user.lastName[0];
+}
 
 // VALIDATION FUNCTIONS
 /**
