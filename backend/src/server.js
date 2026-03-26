@@ -18,7 +18,8 @@ import {
   getAllRecipes,
   getRecipeById,
   updateRecipe,
-  deleteRecipe
+  deleteRecipe,
+  recipeRatings
 } from "./services/recipesService.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -563,6 +564,33 @@ app.delete("/api/recipes/:id", authMiddleware, checkRecipeOwner, async (req, res
   }
 });
 
+// UPDATE recipe privacy
+app.put("/api/recipes/privacy/:id", authMiddleware, checkRecipeOwner, async (req, res) => {
+  try{
+    const { privacy } = req.body;
+
+    const updateData = {
+      is_private
+    };
+
+    const updatedRecipe = await updateRecipe(parseInt(req.params.id), updateData);
+    res.json(updatedRecipe);
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// get ratings for specific recipe
+app.get("/api/recipeRatings/:recipeId", async (req, res) => {
+  try{
+    const ratings = await recipeRatings(parseInt(req.params.recipeId));
+    
+    res.json(ratings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 /*** Password reset routes ***/
 

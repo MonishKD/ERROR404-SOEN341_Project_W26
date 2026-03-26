@@ -1711,6 +1711,218 @@ function validateSelectedMealSlot(slot) {
   return { valid: true };
 }
 
+// PERSONAL FEATURE FUNCTIONS
+async function showUserProfile() {
+  const container = document.getElementById("userProfileHero");
+  container.innerHTML = "";
+
+  const response = await fetch(`/api/profile`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+
+  const user = response.json();
+  
+  const responseRecipes = await fetch(`/api/recipes`, {
+    method: 'GET',
+    headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+  });
+  const userRecipes = await responseRecipes.json();
+  const publicRecipes = userRecipes.filter(e => e.is_private == false);
+  const privateRecipes = userRecipes.filter(e => e.is_private == true);
+
+  container.innerHTML = `
+    <div class="avatar-circle avatar-large">${user.firstName[0]}${user.lastName[0]}</div>
+      <div class="user-hero-info">
+        <h1 class="user-display-name">${user.fullName}</h1>
+        <p class="user-handle">@${user.email.substring(0, user.email.lastIndexOf('@'))}</p>
+        <div class="user-hero-stats">
+          <div class="hero-stat">
+              <span class="hero-stat-num">${publicRecipes.length}</span>
+              <span class="hero-stat-label">Public Recipes</span>
+          </div>
+          <div class="hero-stat">
+              <span class="hero-stat-num">${privateRecipes.length}</span>
+              <span class="hero-stat-label">Private Recipes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+async function showPublicRecipes() {
+  const container = document.getElementById("tab-public");
+  container.innerHTML = "";
+
+  const responseRecipes = await fetch(`/api/recipes`, {
+    method: 'GET',
+    headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+  });
+
+  const userRecipes = await responseRecipes.json();
+  const publicRecipes = userRecipes.filter(e => e.is_private == false);
+
+  for (const e of publicRecipes) {
+    //ratings
+    const responseRatings = await fetch(`/api/recipeRatings/${e.id}`);
+    const recipeRatings = await responseRatings.json();
+    const avg = recipeRatings.length > 0 ? recipeRatings.reduce((sum, r) => sum + r, 0) / recipeRatings.length: 0;
+    const rounded = Math.round(avg);
+    // Build stars string
+    const stars = '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
+
+    const recipeCard = document.createElement("div");
+    recipeCard.className = "recipe-card-full";
+
+    recipeCard.innerHTML = `
+      <div class="recipe-card-full">
+        <details>
+          <summary class="recipe-card-top">
+            <span class="recipe-card-emoji">🍽️</span>
+            <div class="recipe-card-summary">
+                <h3 class="recipe-card-title">${e.name}</h3>
+                <div class="recipe-card-tags">
+                    <span class="tag tag-${e.difficulty.toLowerCase()}">${e.difficulty}</span>
+                    <span class="tag tag-cost">💰 ${e.cost}</span>
+                </div>
+                <div class="recipe-card-meta">
+                    <span>⏱️ ${e.prep_time} min</span>
+                      <span class="recipe-rating">
+                          <span class="stars-display">${stars}</span>
+                          <span class="rating-score">${avg.toFixed(1)}</span>
+                          <span class="rating-count">(${recipeRatings.length})</span>
+                      </span>
+                </div>
+            </div>
+            <span class="recipe-card-chevron">▼</span>
+        </summary>
+        <div class="recipe-card-details">
+            <div class="recipe-card-ingredients">
+                <strong>Ingredients:</strong><br>
+                ${e.ingredients.join(' · ')}
+            </div>
+            <div class="recipe-card-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    ${e.prep_steps.map(step => `<li>${step}</li>`).join('')}
+                </ol>
+            </div>
+
+            <p class="rate-prompt">Your recipe's ratings</p>
+            <div class="recipe-rating">
+                <span class="stars-display">${stars}</span>
+                <span class="rating-score">${avg.toFixed(1)}</span>
+                <span class="rating-count">(${recipeRatings.length})</span>
+            </div>
+
+            <div class="video-upload-form">
+                <label class="video-upload-label">
+                    🎥 Add a video
+                    <input type="file" name="video" accept="video/*">
+                </label>
+                <button type="button" class="btn-secondary">Upload</button>
+            </div>
+
+            <div class="recipe-card-actions">
+                <button type="button" class="btn-make-public" onclick="changePrivacy(this, true)">🌍 Make Private</button>
+            </div>
+          </div>
+        </details>
+      </div>
+
+    `;
+    container.appendChild(recipeCard);
+  };
+}
+
+async function showPrivateRecipes() {
+  const container = document.getElementById("tab-private");
+  container.innerHTML = "";
+
+  const note = document.createElement("p");
+  note.className = "private-note";
+  note.textContent = "🔒 Only you can see these recipes. They are automatically added after creating a recipe."
+  container.appendChild(note);
+
+  const responseRecipes = await fetch(`/api/recipes`, {
+    method: 'GET',
+    headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+  });
+
+  const userRecipes = await responseRecipes.json();
+  const privateRecipes = userRecipes.filter(e => e.is_private == true);
+
+  for (const e of privateRecipes){
+    const recipeCard = document.createElement("details");
+    recipeCard.className = "recipe-card-full";
+    
+    recipeCard.innerHTML = `
+      <div class="recipe-card-full">
+        <details>
+          <summary class="recipe-card-top">
+            <span class="recipe-card-emoji">🍽️</span>
+            <div class="recipe-card-summary">
+                <h3 class="recipe-card-title">${e.name}</h3>
+                <div class="recipe-card-tags">
+                    <span class="tag tag-${e.difficulty.toLowerCase()}">${e.difficulty}</span>
+                    <span class="tag tag-cost">💰 ${e.cost}</span>
+                    <span class="tag tag-private">🔒 Private</span>
+                </div>
+                <div class="recipe-card-meta">
+                    <span>⏱️ ${e.prep_time} min</span>
+                </div>
+            </div>
+            <span class="recipe-card-chevron">▼</span>
+        </summary>
+        <div class="recipe-card-details">
+            <div class="recipe-card-ingredients">
+                <strong>Ingredients:</strong><br>
+                ${e.ingredients.join(' · ')}
+            </div>
+            <div class="recipe-card-steps">
+                <strong>Steps:</strong>
+                <ol>
+                    ${e.prep_steps.map(step => `<li>${step}</li>`).join('')}
+                </ol>
+            </div>
+            <div class="recipe-card-actions">
+                <a href="edit-recipe.html?id=p1" class="btn-edit-recipe">✏️ Edit</a>
+                <button type="button" class="btn-delete-recipe">🗑️ Delete</button>
+                <button type="button" class="btn-make-public" onclick="changePrivacy(this, false)">🌍 Make Public</button>
+            </div>
+          </div>
+        </details>
+      </div>
+
+    `;
+    container.appendChild(recipeCard);
+  };
+}
+
+//changes privacy
+async function changePrivacy(recipe, privacy) {
+  const response = await fetch(`/api/recipes/privacy/${recipe.id}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${getToken()}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ isPrivate: privacy })
+  });
+
+  showPublicRecipes();
+  showPrivateRecipes();
+  showUserProfile()
+}
+
 // Initialize add meal page 
 async function initAddMealPage() {
   if (!isAuthenticated()) {
@@ -2297,6 +2509,28 @@ async function initEditRecipePage() {
   }
 }
 
+function initUserProfile() {
+  // Check authentication
+  if (!isAuthenticated()) {
+    window.location.href = 'login-page.html';
+    return;
+  }
+
+  showUserProfile()
+  showPublicRecipes();
+  showPrivateRecipes();
+
+  // Setup logout functionality
+  const logoutLink = document.querySelector('.nav-link.logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearToken();
+      window.location.href = 'login-page.html';
+    });
+  }
+}
+
 
 // AUTO-INITIALIZATION ON PAGE LOAD
 document.addEventListener('DOMContentLoaded', () => {
@@ -2347,6 +2581,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     case 'add-meal.html':
       initAddMealPage();
+      break;
+    
+    case 'user-profile.html':
+      initUserProfile();
       break;
 
     default:

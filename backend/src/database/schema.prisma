@@ -58,7 +58,7 @@ model recipes {
   created_at   DateTime   @default(now())
   updated_at   DateTime   @default(now()) @updatedAt
   ownerId      Int
-  privacy      Boolean    @default(false)   // false = private, true = public
+  is_private   Boolean    @default(true)   // false = public, true = false
 
   // Relationship: A recipe belongs to a user
   owner        users      @relation(fields: [ownerId], references:[id])

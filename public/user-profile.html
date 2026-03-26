@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="user-profile-styles.css">
     <link rel="stylesheet" href="add-recipe-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="script.js" defer></script>
 </head>
 
 <body>
@@ -39,7 +40,7 @@
     <div class="profile-container">
 
         <!--Profile-->
-        <div class="user-profile-hero">
+        <div class="user-profile-hero" id="userProfileHero">
             <div class="avatar-circle avatar-large">JD</div>
             <div class="user-hero-info">
                 <h1 class="user-display-name">John Doe</h1>
@@ -180,16 +181,16 @@
             </div>
 
             <!--Add recipe button-->
-            <div class="tab-add-btn-wrapper">
+            <!-- <div class="tab-add-btn-wrapper">
                 <a href="add-recipe.html?visibility=public" class="btn-green">+ Add Public Recipe</a>
-            </div>
+            </div> -->
 
         </section>
 
         <!--Private recipes-->
         <section id="tab-private" class="tab-section">
 
-            <p class="private-note">🔒 Only you can see these recipes.</p>
+            <p class="private-note">🔒 Only you can see these recipes. They are automatically added after creating a recipe.</p>
 
             <!--Recipe card 1-->
             <div class="recipe-card-full">
@@ -232,9 +233,9 @@
             </div>
 
             <!-- Add recipe button-->
-            <div class="tab-add-btn-wrapper">
+           <!-- <div class="tab-add-btn-wrapper">
                 <a href="add-recipe.html?visibility=private" class="btn-green">+ Add Private Recipe</a>
-            </div>
+            </div> -->
 
         </section>
 
