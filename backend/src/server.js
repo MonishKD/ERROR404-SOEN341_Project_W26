@@ -834,7 +834,6 @@ app.put('/api/mealPlan/items/:itemId', authMiddleware, async (req, res) => {
           }
         },
         select: {
-          id: true,
           day_of_week: true,
           meal_type: true
         }
