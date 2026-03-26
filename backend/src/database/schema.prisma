@@ -166,3 +166,8 @@ enum MealType {
   DINNER
   SNACK
 }
+
+enum VideoType {
+  EXTERNAL  // YouTube
+  UPLOADED  // Local file upload
+}
