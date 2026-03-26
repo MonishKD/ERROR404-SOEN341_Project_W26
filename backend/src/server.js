@@ -634,8 +634,20 @@ app.post('/api/mealPlan/item', authMiddleware, async (req, res) => {
   console.log('HIT /api/mealPlan/item route');
   try {
     const ownerId = parseInt(req.user.userId, 10);
-    const { mealPlanId, recipeId, day_of_week, meal_type, notes, allowDuplicate } = req.body;
+    let { mealPlanId, recipeId, day_of_week, meal_type, notes, allowDuplicate } = req.body;
 
+    if (typeof allowDuplicate === 'string') {
+      const normalizedAllowDuplicate = allowDuplicate.trim().toLowerCase();
+      if (normalizedAllowDuplicate === 'true') {
+        allowDuplicate = true;
+      } else if (normalizedAllowDuplicate === 'false') {
+        allowDuplicate = false;
+      } else if (normalizedAllowDuplicate !== '') {
+        return res.status(400).json({ message: 'Invalid value for allowDuplicate' });
+      }
+    } else if (typeof allowDuplicate !== 'boolean' && typeof allowDuplicate !== 'undefined') {
+      return res.status(400).json({ message: 'Invalid value for allowDuplicate' });
+    }
     const validDays = [
       'MONDAY',
       'TUESDAY',
