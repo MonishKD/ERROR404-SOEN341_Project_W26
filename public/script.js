@@ -1655,7 +1655,7 @@ async function updateMealPlanItem(itemId, recipeId, day_of_week, meal_type, note
 // Helper function to format duplicate meal assignment locations for user confirmation
 function formatDuplicateMealAssignments(duplicates = []) {
   if (!Array.isArray(duplicates) || duplicates.length === 0) {
-    return "another slot this week";
+    return "another slot";
   }
 // Map the duplicate assignments to user-friendly strings and join them with commas
   return duplicates
