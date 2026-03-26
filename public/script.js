@@ -1409,12 +1409,8 @@ async function weeklyMeals(currentDate) {
 
     if (item) {
         try {
-          const recipeResponse = await fetch(`${API_BASE_URL}/recipes/${item.recipeId}`, {
-            headers: {
-              'Authorization': `Bearer ${getToken()}`
-            }
-          });
-          const recipe = await recipeResponse.json();
+          // Fetch recipe details for the assigned meal
+          const recipe = item.recipe;
 
           const cellFilled = document.createElement("div");
           cellFilled.className = "cell-filled";
@@ -1450,8 +1446,10 @@ async function weeklyMeals(currentDate) {
           removeBtn.className = "cell-action-btn cell-btn-remove";
           removeBtn.type = "button";
           removeBtn.textContent = "✕";
-          removeBtn.addEventListener("click", async () => {
-            const confirmed = confirm("Remove this meal assignment?");
+
+          // Add confirmation before deletion
+            removeBtn.addEventListener("click", async () => {
+            const confirmed = confirm(`Are you sure you want to remove "${recipe.name}" from your planner?`);
             if (!confirmed) return;
 
             try {
@@ -1468,8 +1466,9 @@ async function weeklyMeals(currentDate) {
                 alert(data.message || "Failed to delete meal assignment.");
                 return;
               }
-
+              // Refresh the meal plan grid after deletion
               await weeklyMeals(currentDate);
+              
             } catch (error) {
               console.error("Error deleting meal assignment:", error);
               alert("Something went wrong while deleting the meal.");
