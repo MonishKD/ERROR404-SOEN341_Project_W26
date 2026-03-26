@@ -717,7 +717,6 @@ app.post('/api/mealPlan/item', authMiddleware, async (req, res) => {
         recipeId: parseInt(recipeId, 10)
       },
       select: {
-        id: true,
         day_of_week: true,
         meal_type: true
       }
