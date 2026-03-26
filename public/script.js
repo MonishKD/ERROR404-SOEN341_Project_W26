@@ -1845,25 +1845,35 @@ function showUndoBanner() {
   banner.style.gap = "12px";
   banner.style.minWidth = "300px";
   banner.style.fontSize = "16px";
-  banner.style.opacity = "1";
   banner.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+
+  banner.style.transform = "translateY(20px)";
+  banner.style.opacity = "0"; 
+
+  setTimeout(() => {
+  banner.style.opacity = "1";
   banner.style.transform = "translateY(0)";
+}, 10);
+
+
 
   banner.innerHTML = `
-    <span style="font-weight: 600; color: #111827; font-size: 16px;">Meal removed</span>
-    <button id="undoDeleteBtn" style="
-      background: #16a34a;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-    ">
-      Undo
-    </button>
-  `;
+  <span style="font-weight: 600; color: #111827;">
+    Meal removed — But not too late to undo
+  </span>
+  <button id="undoDeleteBtn" style="
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  ">
+    Undo
+  </button>
+`;
 
   const undoBtn = document.getElementById("undoDeleteBtn");
 
@@ -1908,6 +1918,23 @@ function showUndoBanner() {
       lastDeletedMeal = null;
     }, 300);
   }, 5000);
+
+  banner.onmouseenter = () => {
+  if (undoTimeout) clearTimeout(undoTimeout);
+};
+
+banner.onmouseleave = () => {
+  undoTimeout = setTimeout(() => {
+    banner.style.opacity = "0";
+    banner.style.transform = "translateY(10px)";
+
+    setTimeout(() => {
+      banner.style.display = "none";
+      lastDeletedMeal = null;
+    }, 300);
+  }, 3000);
+};
+
 }
 
 // Initialize meal planner page 
