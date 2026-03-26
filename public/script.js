@@ -1827,11 +1827,59 @@ async function showPublicRecipes() {
 
     //number of ratings
     const responseRatings = await fetch(`/api/recipeRatings/${e.id}`);
-    let numberOfRatings = responseRatings.json().length;
+    const ratings = await responseRatings.json();
+    let numberOfRatings = ratings.length;
     if(!numberOfRatings){
       numberOfRatings = 0;
     }
+    //comments
+    const comments = ratings.filter(r => r.comment && r.comment.trim() !== "");
+    const commentsHTML = comments.map(r => `
+      <div class="comment-item">
+        <div class="comment-avatar">
+          ${r.user?.firstName ? r.user.firstName[0] : "?"}
+        </div>
+        <div class="comment-body">
+          <div class="comment-header">
+            <span class="comment-username">
+              @${r.user?.email ? r.user.email.substring(0, r.user.email.lastIndexOf('@')) : "unknown"}
+            </span>
+            <span class="comment-time">${new Date(r.updated_at).toLocaleDateString()}</span>
+          </div>
+          <p class="comment-text">${r.comment}</p>
+        </div>
+      </div>
+    `).join("");
 
+    //video
+    const res = await fetch(`/api/recipes/${e.id}/video`);
+
+    let videoHTML = `<p>No video available.</p>`;
+
+    const contentType = res.headers.get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+      const data = await res.json();
+
+      if (data.videoUrl) {
+        videoHTML = `
+          <a href="${data.videoUrl}" target="_blank" class="video-link">
+            ▶️ Watch Video
+          </a>
+        `;
+      }
+    }
+    else if (contentType.startsWith("video")) {
+      const blob = await res.blob();
+      const videoUrl = URL.createObjectURL(blob);
+
+      videoHTML = `
+        <video controls width="300">
+          <source src="${videoUrl}" type="${contentType}">
+          Your browser does not support video.
+        </video>
+      `;
+    }
 
     const recipeCard = document.createElement("div");
     recipeCard.className = "recipe-card-full";
@@ -1858,6 +1906,10 @@ async function showPublicRecipes() {
             <span class="recipe-card-chevron">▼</span>
         </summary>
         <div class="recipe-card-details">
+            <div class="recipe-video">
+              <h4>🎥 Video</h4>
+              ${videoHTML}
+            </div>
             <div class="recipe-card-ingredients">
                 <strong>Ingredients:</strong><br>
                 ${e.ingredients.join(' · ')}
@@ -1876,11 +1928,24 @@ async function showPublicRecipes() {
                 <span class="rating-count">(${numberOfRatings} ratings)</span>
             </div>
 
+            <div class="recipe-comments">
+              <h4 class="comments-heading">
+                💬 Comments <span class="comments-count">${comments.length}</span>
+              </h4>
+
+              <div class="comments-list">
+                ${commentsHTML || "<p>No comments yet.</p>"}
+              </div>
+            </div>
+
             <div class="video-upload-form">
                 <label class="video-upload-label">
-                    🎥 Add a video
-                    <input type="file" name="video" accept="video/*">
+                    🎥 Add a video or a link to a URL
+                    <input type="file" id = "videoInput" name="video" accept="video/*">
                 </label>
+                <div class="video-url-section">
+                  <input type="text" id="urlInput" placeholder="Paste video URL (YouTube, etc.)">
+                </div>
                 <button type="button" class="btn-secondary" onclick="uploadVideo(${e.id})">Upload</button>
             </div>
 
@@ -1962,39 +2027,79 @@ async function showPrivateRecipes() {
 async function uploadVideo(id) {
   document.getElementById("uploadVideoBtn");
   const fileInput = document.getElementById("videoInput");
+  const urlInput = document.getElementById("urlInput");
   const file = fileInput.files[0];
-
-  if (!file) {
+  const url = urlInput.value.trim();
+  if (!file && !url) {
     alert("Please select a video first.");
     return;
   }
-
   const recipeId = id;
 
-  const formData = new FormData();
-  formData.append("video", file);
+  if (file) {
+    const sizeMB = file.size / (1024 * 1024);
 
-  try {
-    const response = await fetch(`/api/recipes/${recipeId}/video`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${getToken()}`
-      },
-      body: formData
-    });
+    if (sizeMB > MAX_SIZE_MB) {
+      alert("File is too large! Max is 50MB.");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("video", file);
+  
+    try {
+      const response = await fetch(`/api/recipes/${recipeId}/video/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        },
+        body: formData
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Upload failed");
+      }
+  
+      alert("Video uploaded successfully!");
+  
+    } catch (error) {
+      alert("Error uploading video");
+    }
+  }
 
-    const data = await response.json();
+  if (url) {
 
-    if (!response.ok) {
-      throw new Error(data.error || "Upload failed");
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch (err) {
+      alert("Invalid url");
     }
 
-    console.log("Upload success:", data);
-    alert("Video uploaded successfully!");
-
-  } catch (error) {
-    alert("Error uploading video");
+    try {
+      const response = await fetch(`/api/recipes/${recipeId}/video/url`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+      },
+        body: JSON.stringify({ videoUrl: url })
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Upload failed");
+      }
+  
+      alert("Video URL saved!");
+  
+    } catch (error) {
+      alert("Error uploading video");
+    }
   }
+
 };
 
 //changes privacy

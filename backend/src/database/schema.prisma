@@ -93,8 +93,9 @@ model RecipeRating {
 
 model Video {
   id               Int            @id @default(autoincrement())
-  recipeId         Int
+  recipeId         Int            @unique
   videoUrl         String         @db.VarChar(500)    // URL to video (e.g.: YouTube)
+  videoData        Bytes?
   videoType        VideoType      @default(EXTERNAL)
   thumbnailUrl     String?        @db.VarChar(500)    // Path to thumbnail image
   title            String?        @db.VarChar(255)
