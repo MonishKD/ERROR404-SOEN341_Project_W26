@@ -1550,7 +1550,7 @@ async function weeklyMeals(currentDate) {
 }
 
 // Function to create a new meal plan item
-async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, notes = "") {
+async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, notes = "", allowDuplicate = false) {
   try {
     if (!getToken()) {
       return { success: false, error: "You must be logged in." };
@@ -1579,7 +1579,8 @@ async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, 
         recipeId: parseInt(recipeId, 10),
         day_of_week,
         meal_type,
-        notes
+        notes,
+        allowDuplicate
       })
     });
 
@@ -1588,7 +1589,9 @@ async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, 
     if (!response.ok) {
       return {
         success: false,
-        error: data.message || "Failed to create meal plan item."
+        error: data.message || "Failed to create meal plan item.",
+        code: data.code,
+        duplicates: data.duplicates
       };
     }
 
@@ -1599,7 +1602,7 @@ async function createMealPlanItem(mealPlanId, recipeId, day_of_week, meal_type, 
   }
 }
 
-async function updateMealPlanItem(itemId, recipeId, day_of_week, meal_type, notes = "") {
+async function updateMealPlanItem(itemId, recipeId, day_of_week, meal_type, notes = "", allowDuplicate = false) {
   try {
     if (!getToken()) {
       return { success: false, error: "You must be logged in." };
@@ -1627,7 +1630,8 @@ async function updateMealPlanItem(itemId, recipeId, day_of_week, meal_type, note
         recipeId: parseInt(recipeId, 10),
         day_of_week,
         meal_type,
-        notes
+        notes,
+        allowDuplicate
       })
     });
 
@@ -1636,7 +1640,9 @@ async function updateMealPlanItem(itemId, recipeId, day_of_week, meal_type, note
     if (!response.ok) {
       return {
         success: false,
-        error: data.message || "Failed to update meal assignment."
+        error: data.message || "Failed to update meal assignment.",
+        code: data.code,
+        duplicates: data.duplicates
       };
     }
 
@@ -1645,6 +1651,24 @@ async function updateMealPlanItem(itemId, recipeId, day_of_week, meal_type, note
     console.error("Error updating meal plan item:", error);
     return { success: false, error: "Something went wrong while updating the meal." };
   }
+}
+// Helper function to format duplicate meal assignment locations for user confirmation
+function formatDuplicateMealAssignments(duplicates = []) {
+  if (!Array.isArray(duplicates) || duplicates.length === 0) {
+    return "another slot";
+  }
+  // Map the duplicate assignments to user-friendly strings and join them with commas
+  return duplicates
+    .map(({ day_of_week, meal_type }) => {
+      const prettyDay = day_of_week
+        ? day_of_week.charAt(0) + day_of_week.slice(1).toLowerCase()
+        : "Unknown day";
+      const prettyMeal = meal_type
+        ? meal_type.charAt(0) + meal_type.slice(1).toLowerCase()
+        : "Unknown meal";
+      return `${prettyDay} ${prettyMeal}`;
+    })
+    .join(", ");
 }
 
 async function loadRecipesForAddMealPage() {
@@ -1767,7 +1791,7 @@ async function initAddMealPage() {
 
       card.style.pointerEvents = 'none';
 
-      const result = slot.itemId
+      let result = slot.itemId
         ? await updateMealPlanItem(
             slot.itemId,
             recipeId,
@@ -1781,6 +1805,33 @@ async function initAddMealPage() {
             slot.day_of_week,
             slot.meal_type
           );
+      // If the API returns a duplicate recipe error, prompt the user for confirmation to allow duplicates
+      if (!result.success && result.code === 'DUPLICATE_RECIPE_IN_WEEK') {
+        const duplicateLocations = formatDuplicateMealAssignments(result.duplicates);
+        const confirmed = confirm(
+          `This recipe is already used this week in ${duplicateLocations}. Do you want to use it again?`
+        );
+        // If the user confirms, retry the API call with allowDuplicate set to true
+        if (confirmed) {
+          result = slot.itemId
+            ? await updateMealPlanItem(
+                slot.itemId,
+                recipeId,
+                slot.day_of_week,
+                slot.meal_type,
+                slot.notes || "", // for empty notes
+                true
+              )
+            : await createMealPlanItem(
+                slot.mealPlanId,
+                recipeId,
+                slot.day_of_week,
+                slot.meal_type,
+                "", // for empty notes
+                true
+              );
+        }
+      }
 
       if (result.success) {
         clearSelectedMealSlot();

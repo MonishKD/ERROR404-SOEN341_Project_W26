@@ -634,8 +634,20 @@ app.post('/api/mealPlan/item', authMiddleware, async (req, res) => {
   console.log('HIT /api/mealPlan/item route');
   try {
     const ownerId = parseInt(req.user.userId, 10);
-    const { mealPlanId, recipeId, day_of_week, meal_type, notes } = req.body;
+    let { mealPlanId, recipeId, day_of_week, meal_type, notes, allowDuplicate } = req.body;
 
+    if (typeof allowDuplicate === 'string') {
+      const normalizedAllowDuplicate = allowDuplicate.trim().toLowerCase();
+      if (normalizedAllowDuplicate === 'true') {
+        allowDuplicate = true;
+      } else if (normalizedAllowDuplicate === 'false') {
+        allowDuplicate = false;
+      } else if (normalizedAllowDuplicate !== '') {
+        return res.status(400).json({ message: 'Invalid value for allowDuplicate' });
+      }
+    } else if (typeof allowDuplicate !== 'boolean' && typeof allowDuplicate !== 'undefined') {
+      return res.status(400).json({ message: 'Invalid value for allowDuplicate' });
+    }
     const validDays = [
       'MONDAY',
       'TUESDAY',
@@ -697,6 +709,26 @@ app.post('/api/mealPlan/item', authMiddleware, async (req, res) => {
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found' });
     }
+    // for CREATE
+    // Check for duplicate recipe assignment in the same week (unless allowDuplicate is true)
+    const duplicateAssignments = await prisma.mealPlanItem.findMany({
+      where: {
+        mealPlanId: parseInt(mealPlanId, 10),
+        recipeId: parseInt(recipeId, 10)
+      },
+      select: {
+        day_of_week: true,
+        meal_type: true
+      }
+    });
+    // If allowDuplicate is not true and there are existing assignments of the same recipe in the week, return an error with details about the duplicates
+    if (duplicateAssignments.length > 0 && allowDuplicate !== true) {
+      return res.status(409).json({
+        code: 'DUPLICATE_RECIPE_IN_WEEK',
+        message: 'This recipe is already assigned in this week.',
+        duplicates: duplicateAssignments
+      });
+    }
 
     const mealPlanItem = await prisma.mealPlanItem.create({
       data: {
@@ -734,7 +766,7 @@ app.put('/api/mealPlan/items/:itemId', authMiddleware, async (req, res) => {
   try {
     const itemId = parseInt(req.params.itemId, 10);
     const ownerId = parseInt(req.user.userId, 10);
-    const { recipeId, day_of_week, meal_type, notes } = req.body;
+    const { recipeId, day_of_week, meal_type, notes, allowDuplicate } = req.body;
 
     const validDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
     const validMealTypes = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
@@ -790,6 +822,29 @@ app.put('/api/mealPlan/items/:itemId', authMiddleware, async (req, res) => {
 
       if (!recipe) {
         return res.status(404).json({ message: 'Recipe not found' });
+      }
+      // for UPDATE
+      // Check for duplicate recipe assignment in the same week (unless allowDuplicate is true)
+      const duplicateAssignments = await prisma.mealPlanItem.findMany({
+        where: {
+          mealPlanId: item.mealPlanId,
+          recipeId: parsedRecipeId,
+          NOT: {
+            id: itemId
+          }
+        },
+        select: {
+          day_of_week: true,
+          meal_type: true
+        }
+      });
+      // If allowDuplicate is not true and there are existing assignments of the same recipe in the week (other than the current item), return an error with details about the duplicates
+      if (duplicateAssignments.length > 0 && allowDuplicate !== true) {
+        return res.status(409).json({
+          code: 'DUPLICATE_RECIPE_IN_WEEK',
+          message: 'This recipe is already assigned in this week.',
+          duplicates: duplicateAssignments
+        });
       }
 
       updateData.recipeId = parsedRecipeId;
