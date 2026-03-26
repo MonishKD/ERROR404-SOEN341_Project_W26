@@ -61,13 +61,16 @@ model recipes {
   is_private   Boolean    @default(true)   // false = public, true = private
 
   // Relationship: A recipe belongs to a user
-  owner        users      @relation(fields: [ownerId], references:[id])
+  owner         users      @relation(fields: [ownerId], references:[id])
   
   // Back relation to MealPlanItem
   mealPlanItems MealPlanItem[]
 
   // Ratings relation
-  ratings RecipeRating[]
+  ratings       RecipeRating[]
+
+  // Videos relation
+  videos        Video[]
   
   @@map("recipes")
 }
@@ -86,6 +89,26 @@ model RecipeRating {
   user             users          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([recipeId, userId])    // Prevent duplicate ratings from same user
+}
+
+model Video {
+  id               Int            @id @default(autoincrement())
+  recipeId         Int
+  videoUrl         String         @db.VarChar(500)    // URL to video (e.g.: YouTube)
+  videoType        VideoType      @default(EXTERNAL)
+  thumbnailUrl     String?        @db.VarChar(500)    // Path to thumbnail image
+  title            String?        @db.VarChar(255)
+  duration         Int?                               // In seconds
+  fileSize         Int?                               // File size in bytes
+  fileType         String?        @db.VarChar(50)     // mp4, mov, etc.
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  // Relationship
+  recipe           recipes        @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@map("recipe_videos")
 }
 
 model MealPlan {
@@ -141,4 +164,9 @@ enum MealType {
   LUNCH
   DINNER
   SNACK
+}
+
+enum VideoType {
+  EXTERNAL  // YouTube
+  UPLOADED  // Local file upload
 }
