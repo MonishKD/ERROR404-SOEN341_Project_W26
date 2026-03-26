@@ -1657,7 +1657,7 @@ function formatDuplicateMealAssignments(duplicates = []) {
   if (!Array.isArray(duplicates) || duplicates.length === 0) {
     return "another slot";
   }
-// Map the duplicate assignments to user-friendly strings and join them with commas
+  // Map the duplicate assignments to user-friendly strings and join them with commas
   return duplicates
     .map(({ day_of_week, meal_type }) => {
       const prettyDay = day_of_week
