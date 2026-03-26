@@ -101,7 +101,6 @@ model Video {
   duration         Int?                               // In seconds
   fileSize         Int?                               // File size in bytes
   fileType         String?        @db.VarChar(50)     // mp4, mov, etc.
-  is_primary       Boolean        @default(false)     // Main video for recipe
   created_at       DateTime       @default(now())
   updated_at       DateTime       @updatedAt
 
