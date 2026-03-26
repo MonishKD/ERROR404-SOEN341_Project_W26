@@ -69,7 +69,7 @@ model recipes {
   // Ratings relation
   ratings       RecipeRating[]
 
-  // videos
+  // Videos relation
   videos        Video[]
   
   @@map("recipes")
