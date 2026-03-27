@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { beforeAll, beforeEach, afterEach, afterAll, describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, waitFor } from "@testing-library/dom";
 import "@testing-library/jest-dom";
