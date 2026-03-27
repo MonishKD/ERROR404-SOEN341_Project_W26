@@ -33,16 +33,19 @@ export async function checkRecipeOwner(req, res, next) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
-    const recipeId = req.params.id;
-    const userId = req.user.userId;
+    const recipeId = parseInt(req.params.id, 10);
+    const userId = parseInt(req.user.userId, 10);
 
-    // Validate recipeId
-    if (!recipeId) {
-      return res.status(400).json({ message: "Recipe ID is required" });
+    if (Number.isNaN(userId)) {
+      return res.status(401).json({ message: "Invalid user token" });
+    }
+
+    if (Number.isNaN(recipeId)) {
+      return res.status(400).json({ message: "Invalid recipe ID" });
     }
 
     const recipe = await prisma.recipes.findUnique({
-      where: { id: parseInt(recipeId) },
+      where: { id: recipeId },
       select: { ownerId: true }
     });
 

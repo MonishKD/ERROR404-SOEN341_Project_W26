@@ -21,7 +21,9 @@ import {
   updateRecipe,
   deleteRecipe,
   recipeRatings,
-  videoRecipe
+  createOrUpdateRecipeRating, 
+  videoRecipe,
+  getExploreRecipes
 } from "./services/recipesService.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -449,6 +451,18 @@ app.post("/api/recipes", authMiddleware, async (req, res) => {
   }
 });
 
+// Get public recipes for Explore Page
+app.get("/api/recipes/explore", authMiddleware, async (req, res) => {
+  try {
+    const currentUserId = parseInt(req.user.userId, 10);
+    const recipes = await getExploreRecipes(currentUserId);
+    return res.json(recipes);
+  } catch (error) {
+    console.error("Error fetching explore recipes:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Get recipe by ID with owner info
 app.get("/api/recipes/:id", async (req, res) => {
   try {
@@ -567,7 +581,7 @@ app.delete("/api/recipes/:id", authMiddleware, checkRecipeOwner, async (req, res
 });
 
 // UPDATE recipe privacy
-app.put("/api/recipes/privacy/:id", authMiddleware, async (req, res) => {
+app.put("/api/recipes/privacy/:id", authMiddleware, checkRecipeOwner, async (req, res) => {
   try{
     const { is_private } = req.body;
 
@@ -609,8 +623,55 @@ app.get("/api/averageRating/:recipeId", async (req, res) => {
 
 const upload = multer({ storage: multer.memoryStorage()  });
 
+// Create or update recipe rating/comment
+app.post("/api/recipeRatings", authMiddleware, async (req, res) => {
+  try {
+    const userId = parseInt(req.user.userId, 10);
+    const { recipeId, rating, comment } = req.body;
+
+    if (!recipeId || Number.isNaN(parseInt(recipeId, 10))) {
+      return res.status(400).json({ message: "Valid recipeId is required" });
+    }
+
+    const parsedRecipeId = parseInt(recipeId, 10);
+
+    if (rating === null || rating === undefined) {
+      return res.status(400).json({ message: "Rating is required" });
+    }
+
+    let parsedRating = null;
+    if (rating !== null && rating !== undefined) {
+      parsedRating = parseInt(rating, 10);
+
+      if (Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+        return res.status(400).json({ message: "Rating must be between 1 and 5" });
+      }
+    }
+
+    const recipe = await prisma.recipes.findUnique({
+      where: { id: parsedRecipeId }
+    });
+
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+
+    const savedRating = await createOrUpdateRecipeRating(
+      parsedRecipeId,
+      userId,
+      parsedRating,
+      comment?.trim() || null
+    );
+
+    res.status(200).json(savedRating);
+  } catch (error) {
+    console.error("Error saving recipe rating/comment:", error);
+    res.status(500).json({ message: error.message || "Failed to save rating/comment" });
+  }
+});
+
 //upload video file
-app.post("/api/recipes/:id/video/upload",authMiddleware, upload.single("video"), async (req, res) => {
+app.post("/api/recipes/:id/video/upload", authMiddleware, checkRecipeOwner, upload.single("video"), async (req, res) => {
     try {
       const recipeId = parseInt(req.params.id);
 
@@ -619,16 +680,15 @@ app.post("/api/recipes/:id/video/upload",authMiddleware, upload.single("video"),
       }
 
       const data = {
-        recipeId,
         videoData: req.file.buffer,
-        videoType: "LOCAL",
+        videoType: "UPLOADED",
         fileSize: req.file.size,
         fileType: req.file.mimetype,
         title: req.file.originalname
-      }
-      
-      const newVideo =  await videoRecipe(data);
+      };
 
+      const newVideo = await videoRecipe(recipeId, data);
+      
       res.json(newVideo);
     } catch (error) {
       console.error(error);
@@ -638,7 +698,7 @@ app.post("/api/recipes/:id/video/upload",authMiddleware, upload.single("video"),
 );
 
 //save video url
-app.post("/api/recipes/:id/video/url", authMiddleware, async (req, res) => {
+app.post("/api/recipes/:id/video/url", authMiddleware, checkRecipeOwner, async (req, res) => {
     try {
       const recipeId = parseInt(req.params.id);
       const { videoUrl } = req.body;
@@ -648,11 +708,11 @@ app.post("/api/recipes/:id/video/url", authMiddleware, async (req, res) => {
       }
 
       const data = {
-          recipeId,
-          videoUrl,
-        }
-      
-      const newVideo = await videoRecipe(data);
+        videoUrl,
+        videoType: "EXTERNAL"
+      };
+
+      const newVideo = await videoRecipe(recipeId, data);
 
       res.json(newVideo);
     } catch (error) {
@@ -676,9 +736,9 @@ app.get("/api/recipes/:id/video", async (req, res) => {
     }
 
     // stored video
-    if (video.videoBytes) {
+    if (video.videoData) {
       res.set("Content-Type", video.fileType || "video/mp4");
-      return res.send(video.videoBytes);
+      return res.send(video.videoData);
     }
 
     // external URL
