@@ -6,7 +6,7 @@ import request from "supertest";
  * User story:
  * As a logged-in user, I should see a list of my recipes whenever I navigate to the Recipes page.
  *
- * This test verifies the backend endpoint used by the Recipes page:
+ * This test verifies the backend endpoint used by the Recipes page: /api/recipes
  */
 
 // Mock multer because server.js imports it for video upload routes
