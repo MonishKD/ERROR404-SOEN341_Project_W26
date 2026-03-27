@@ -14,6 +14,7 @@ jobs:
         working-directory: backend
 
     env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       NODE_ENV: test
       
