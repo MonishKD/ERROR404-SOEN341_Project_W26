@@ -6,6 +6,7 @@
 // CONFIGURATION
 const API_BASE_URL = 'http://localhost:4002/api';
 const TOKEN_KEY = 'mealmajor_token';
+const MAX_SIZE_MB = 50; // max video upload size
 
 // Global variable to store all recipes for filtering
 let allRecipes = [];
@@ -102,6 +103,9 @@ function setButtonLoading(button, isLoading) {
 }
 
 async function getInitials() {
+  // If not authenticated, skip
+  if (!isAuthenticated()) return;
+  
   const response = await fetch(`/api/profile`, {
       method: 'GET',
       headers: {
@@ -111,7 +115,9 @@ async function getInitials() {
 
   const user = await response.json();
   const avatar = document.getElementById("avatarNav");
+  if (avatar && user.firstName && user.lastName) {
   avatar.textContent = user.firstName[0] + user.lastName[0];
+  }
 }
 
 // VALIDATION FUNCTIONS
@@ -677,6 +683,39 @@ async function loadMyRecipes() {
   }
 }
 
+// Load Explore Recipes (all recipes with pagination)
+async function loadExploreRecipes() {
+  console.log("🌍 Loading explore recipes...");
+
+  const grid = document.getElementById("generalRecipesGrid");
+  if (!grid) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipes/explore`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch explore recipes");
+
+    const recipes = await response.json();
+
+    console.log("Explore recipes:", recipes.length);
+
+    allRecipes = recipes;
+    grid.innerHTML = "";
+
+    for (const recipe of recipes) {
+      const card = await createPublicRecipeCard(recipe);
+      grid.appendChild(card);
+    }
+
+  } catch (error) {
+    console.error("Error loading explore recipes:", error);
+  }
+}
+
 /**
  * Load General Recipes
  */
@@ -731,7 +770,7 @@ async function loadMyRecipes() {
 /**
  * Filter recipes by search term
  */
-function filterRecipesBySearch(searchTerm) {
+async function filterRecipesBySearch(searchTerm) {
   console.log('Searching for:', searchTerm);
 
   const generalGrid = document.querySelector('.section:last-child .recipe-cards-grid');
@@ -739,7 +778,7 @@ function filterRecipesBySearch(searchTerm) {
 
   // If search is empty, show all recipes
   if (!searchTerm || searchTerm === '') {
-    displayFilteredRecipes(allRecipes);
+    await displayFilteredRecipes(allRecipes);
     return;
   }
 
@@ -756,7 +795,7 @@ function filterRecipesBySearch(searchTerm) {
   if (filtered.length === 0) {
     generalGrid.innerHTML = '<p class="no-results">No recipes match your search</p>';
   } else {
-    displayFilteredRecipes(filtered);
+    await displayFilteredRecipes(filtered);
   }
 }
 
@@ -785,7 +824,7 @@ async function filterRecipes() {
   if (timeChecked.length === 0 && difficultyChecked.length === 0 &&
     costChecked.length === 0 && dietaryChecked.length === 0 &&
     allergenChecked.length === 0) {
-    displayFilteredRecipes(allRecipes);
+    await displayFilteredRecipes(allRecipes);
     return;
   }
 
@@ -844,16 +883,15 @@ async function filterRecipes() {
   });
 
   console.log('Filtered recipes:', filtered.length);
-  displayFilteredRecipes(filtered);
+  await displayFilteredRecipes(filtered);
 }
 /**
  * Display filtered recipes in the general grid
  */
-function displayFilteredRecipes(recipes) {
+async function displayFilteredRecipes(recipes) {
   const generalGrid = document.querySelector('.section:last-child .recipe-cards-grid');
   if (!generalGrid) return;
 
-  // Clear grid
   generalGrid.innerHTML = '';
 
   if (recipes.length === 0) {
@@ -861,11 +899,116 @@ function displayFilteredRecipes(recipes) {
     return;
   }
 
-  // Display each recipe
-  recipes.forEach(recipe => {
-    const card = createRecipeCard(recipe, false);
+  for (const recipe of recipes) {
+    const card = await createPublicRecipeCard(recipe);
     generalGrid.appendChild(card);
-  });
+  }
+}
+
+async function fetchRecipeRatings(recipeId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipeRatings/${recipeId}`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching recipe ratings:", error);
+    return [];
+  }
+}
+
+async function fetchAverageRating(recipeId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/averageRating/${recipeId}`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) return 0;
+    const avg = await response.json();
+    return Number(avg) || 0;
+  } catch (error) {
+    console.error("Error fetching average rating:", error);
+    return 0;
+  }
+}
+
+// Fetch recipe video - handles both URL and file responses
+/* async function fetchRecipeVideo(recipeId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipes/${recipeId}/video`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) return null;
+
+    const contentType = response.headers.get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+      const data = await response.json();
+      return data?.videoUrl ? { type: "url", value: data.videoUrl } : null;
+    }
+
+    if (contentType.startsWith("video")) {
+      const blob = await response.blob();
+      return {
+        type: "file",
+        value: URL.createObjectURL(blob),
+        mimeType: contentType
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching recipe video:", error);
+    return null;
+  }
+} */
+
+function renderStars(avgRating) {
+  const rounded = Math.round(avgRating);
+  return '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
+}
+
+function getUserInitialsFromEmail(email = "") {
+  const name = email.split("@")[0] || "?";
+  return name.substring(0, 2).toUpperCase();
+}
+
+// Submit recipe rating and comment
+async function submitRecipeRatingAndComment(recipeId, rating, comment) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipeRatings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${getToken()}`
+      },
+      body: JSON.stringify({
+        recipeId,
+        rating,
+        comment
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to submit rating/comment");
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error submitting rating/comment:", error);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
@@ -877,13 +1020,13 @@ function createRecipeCard(recipe, isMyRecipe = false) {
 
   // Determine difficulty class
   let difficultyClass = 'tag-easy';
-  if (recipe.difficulty === 'Medium') difficultyClass = 'tag-medium';
-  if (recipe.difficulty === 'Hard') difficultyClass = 'tag-hard';
+  if ((recipe.difficulty || '').toLowerCase() === 'medium') difficultyClass = 'tag-medium';
+  if ((recipe.difficulty || '').toLowerCase() === 'hard') difficultyClass = 'tag-hard';
 
   // Cost display
   let costDisplay = '💰 Low';
-  if (recipe.cost === 'Medium') costDisplay = '💰💰 Medium';
-  if (recipe.cost === 'High') costDisplay = '💰💰💰 High';
+  if ((recipe.cost || '').toLowerCase() === 'medium') costDisplay = '💰💰 Medium';
+  if ((recipe.cost || '').toLowerCase() === 'high') costDisplay = '💰💰💰 High';
 
   // Dietary tags display
   const dietaryDisplay = recipe.dietary_tags && recipe.dietary_tags.length > 0
@@ -960,6 +1103,162 @@ function createRecipeCard(recipe, isMyRecipe = false) {
   return details;
 }
 
+async function createPublicRecipeCard(recipe) {
+  const details = document.createElement('details');
+  details.className = 'recipe-card-full public-recipe-card';
+  details.dataset.recipeId = recipe.id;
+
+  const avgRating = await fetchAverageRating(recipe.id);
+  const ratings = await fetchRecipeRatings(recipe.id);
+  const comments = ratings.filter(r => r.comment && r.comment.trim() !== "");
+  //const video = await fetchRecipeVideo(recipe.id);
+
+  let difficultyClass = 'tag-easy';
+  const difficultyValue = (recipe.difficulty || 'Easy');
+  if (difficultyValue.toLowerCase() === 'medium') difficultyClass = 'tag-medium';
+  if (difficultyValue.toLowerCase() === 'hard') difficultyClass = 'tag-hard';
+
+  let costDisplay = '💰 Low';
+  if ((recipe.cost || '').toLowerCase() === 'medium') costDisplay = '💰💰 Medium';
+  if ((recipe.cost || '').toLowerCase() === 'high') costDisplay = '💰💰💰 High';
+
+  const dietaryDisplay = recipe.dietary_tags && recipe.dietary_tags.length > 0
+    ? recipe.dietary_tags.join(' · ')
+    : '';
+
+  const ownerName = recipe.owner?.email
+    ? `@${recipe.owner.email.split('@')[0]}`
+    : '@user';
+
+  const ownerInitials = recipe.owner
+    ? `${(recipe.owner.firstName || '?')[0]}${(recipe.owner.lastName || '?')[0]}`
+    : '??';
+
+  let videoHTML = '<p>No video available.</p>';
+  if (video?.type === "url") {
+    videoHTML = `<a href="${video.value}" target="_blank" class="video-link">▶ Watch Video</a>`;
+  } else if (video?.type === "file") {
+    videoHTML = `
+      <video controls width="300">
+        <source src="${video.value}" type="${video.mimeType}">
+        Your browser does not support video.
+      </video>
+    `;
+  }
+
+  const commentsHTML = comments.length
+    ? comments.map(comment => `
+        <div class="comment-item">
+          <div class="comment-avatar">${getUserInitialsFromEmail(comment.user?.email || "")}</div>
+          <div class="comment-body">
+            <div class="comment-header">
+              <span class="comment-username">@${comment.user?.email ? comment.user.email.split('@')[0] : 'user'}</span>
+              <span class="comment-time">${new Date(comment.updated_at || comment.created_at).toLocaleDateString()}</span>
+            </div>
+            <p class="comment-text">${comment.comment}</p>
+          </div>
+        </div>
+      `).join('')
+    : '<p>No comments yet.</p>';
+
+  details.innerHTML = `
+    <summary class="recipe-card-top">
+      <span class="recipe-card-emoji">${recipe.emoji || '🍽️'}</span>
+      <div class="recipe-card-summary">
+        <div class="recipe-card-tags">
+          <span class="tag ${difficultyClass}">${difficultyValue}</span>
+          <span class="tag tag-cost">${costDisplay}</span>
+          ${dietaryDisplay ? `<span class="tag tag-diet">${dietaryDisplay}</span>` : ''}
+        </div>
+        <h3 class="recipe-card-title">${recipe.name}</h3>
+        <div class="recipe-card-meta">
+          <span>⏱️ ${recipe.prep_time ?? '-'} min</span>
+        </div>
+        <div class="recipe-card-author-row">
+          <div class="recipe-author-avatar">${ownerInitials}</div>
+          <span class="recipe-author-name">${ownerName}</span>
+          <div class="recipe-star-rating">${renderStars(avgRating)}</div>
+          <span class="recipe-rating-count">(${ratings.length})</span>
+        </div>
+      </div>
+      <span class="recipe-card-chevron">▼</span>
+    </summary>
+
+    <div class="recipe-card-details">
+      <div class="recipe-video">
+        <h4>🎥 Video</h4>
+        ${videoHTML}
+      </div>
+
+      <div class="recipe-card-ingredients">
+        <strong>🛒 Ingredients</strong><br>
+        ${(recipe.ingredients || []).join(' · ')}
+      </div>
+
+      <div class="recipe-card-steps">
+        <strong>📋 Steps</strong>
+        <ol>
+          ${(recipe.prep_steps || []).map(step => `<li>${step}</li>`).join('')}
+        </ol>
+      </div>
+
+      <div class="recipe-comments">
+        <h4 class="comments-heading">💬 Comments <span class="comments-count">${comments.length}</span></h4>
+        <div class="comments-list">${commentsHTML}</div>
+      </div>
+
+      <div class="recipe-rate-comment">
+        <h4>⭐ Rate & 💬 Comment</h4>
+        <div class="stars-input">
+          <input type="radio" id="star5-${recipe.id}" name="rating-${recipe.id}" value="5"><label for="star5-${recipe.id}">★</label>
+          <input type="radio" id="star4-${recipe.id}" name="rating-${recipe.id}" value="4"><label for="star4-${recipe.id}">★</label>
+          <input type="radio" id="star3-${recipe.id}" name="rating-${recipe.id}" value="3"><label for="star3-${recipe.id}">★</label>
+          <input type="radio" id="star2-${recipe.id}" name="rating-${recipe.id}" value="2"><label for="star2-${recipe.id}">★</label>
+          <input type="radio" id="star1-${recipe.id}" name="rating-${recipe.id}" value="1"><label for="star1-${recipe.id}">★</label>
+        </div>
+        <textarea class="comment-input" id="comment-${recipe.id}" placeholder="Add a comment..." rows="2"></textarea>
+        <button class="btn-submit-comment" data-recipe-id="${recipe.id}">Submit</button>
+      </div>
+
+      <button class="btn-save-recipe" data-save-recipe-id="${recipe.id}">+ Save to My Recipes</button>
+    </div>
+  `;
+
+  const submitBtn = details.querySelector('.btn-submit-comment');
+  submitBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    const selectedRating = details.querySelector(`input[name="rating-${recipe.id}"]:checked`);
+    const commentText = details.querySelector(`#comment-${recipe.id}`).value.trim();
+
+    if (!selectedRating) {
+      alert("Please select a rating.");
+      return;
+    }
+
+    const result = await submitRecipeRatingAndComment(
+      recipe.id,
+      selectedRating ? parseInt(selectedRating.value, 10) : null,
+      commentText
+    );
+
+    if (result.success) {
+      alert("Comment/rating submitted!");
+      await loadExploreRecipes();
+    } else {
+      alert(result.error || "Failed to submit.");
+    }
+  });
+
+  const saveBtn = details.querySelector('[data-save-recipe-id]');
+  saveBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await saveRecipeToMyCollection(recipe.id);
+  });
+
+  return details;
+}
+
 // Functions for edit/delete/save
 async function editRecipe(id) {
   console.log('Edit recipe:', id);
@@ -992,11 +1291,53 @@ async function deleteRecipe(id) {
   }
 }
 
+// Save a recipe from explore to My Recipes by copying its data and creating a new recipe owned by the user
 async function saveRecipeToMyCollection(recipeId) {
-  // This function would copy a recipe to the user's collection
-  // You'll need to implement this based on your backend
-  console.log('Save recipe to my collection:', recipeId);
-  alert('Save recipe functionality coming soon!');
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipes/${recipeId}`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to load recipe");
+    }
+
+    const recipe = await response.json();
+
+    const recipeData = {
+      name: recipe.name,
+      ingredients: recipe.ingredients || [],
+      prep_time: recipe.prep_time,
+      prep_steps: recipe.prep_steps || [],
+      cost: recipe.cost,
+      difficulty: recipe.difficulty,
+      dietary_tags: recipe.dietary_tags || [],
+      allergens: recipe.allergens || []
+    };
+
+    const createResponse = await fetch(`${API_BASE_URL}/recipes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${getToken()}`
+      },
+      body: JSON.stringify(recipeData)
+    });
+
+    const createData = await createResponse.json();
+
+    if (!createResponse.ok) {
+      throw new Error(createData.message || "Failed to save recipe");
+    }
+
+    alert("Recipe saved to My Recipes!");
+    loadMyRecipes();
+  } catch (error) {
+    console.error("Error saving recipe to collection:", error);
+    alert(error.message || "Failed to save recipe");
+  }
 }
 
 
@@ -1941,10 +2282,10 @@ async function showPublicRecipes() {
             <div class="video-upload-form">
                 <label class="video-upload-label">
                     🎥 Add a video or a link to a URL
-                    <input type="file" id = "videoInput" name="video" accept="video/*">
+                    <input type="file" id="videoInput-${e.id}" name="video" accept="video/*">
                 </label>
                 <div class="video-url-section">
-                  <input type="text" id="urlInput" placeholder="Paste video URL (YouTube, etc.)">
+                  <input type="text" id="urlInput-${e.id}" placeholder="Paste video URL (YouTube, etc.)">
                 </div>
                 <button type="button" class="btn-secondary" onclick="uploadVideo(${e.id})">Upload</button>
             </div>
@@ -2012,8 +2353,8 @@ async function showPrivateRecipes() {
                 </ol>
             </div>
             <div class="recipe-card-actions">
-                <a href="edit-recipe.html?id=p1" class="btn-edit-recipe">✏️ Edit</a>
-                <button type="button" class="btn-delete-recipe">🗑️ Delete</button>
+                <a href="edit-recipe.html?id=${e.id}" class="btn-edit-recipe">✏️ Edit</a>
+                <button type="button" class="btn-delete-recipe" onclick="deleteRecipe(${e.id})">🗑️ Delete</button>
                 <button type="button" class="btn-make-public" onclick="changePrivacy(${e.id}, false)">🌍 Make Public</button>
             </div>
           </div>
@@ -2025,9 +2366,8 @@ async function showPrivateRecipes() {
 }
 
 async function uploadVideo(id) {
-  document.getElementById("uploadVideoBtn");
-  const fileInput = document.getElementById("videoInput");
-  const urlInput = document.getElementById("urlInput");
+  const fileInput = document.getElementById(`videoInput-${id}`);
+  const urlInput = document.getElementById(`urlInput-${id}`);
   const file = fileInput.files[0];
   const url = urlInput.value.trim();
   if (!file && !url) {
@@ -2063,6 +2403,7 @@ async function uploadVideo(id) {
       }
   
       alert("Video uploaded successfully!");
+      await showPublicRecipes();
   
     } catch (error) {
       alert("Error uploading video");
@@ -2073,17 +2414,22 @@ async function uploadVideo(id) {
 
     try {
       const parsed = new URL(url);
-      return parsed.protocol === "http:" || parsed.protocol === "https:";
+      if (!(parsed.protocol === "http:" || parsed.protocol === "https:")) {
+        alert("Invalid url");
+        return;
+      }
     } catch (err) {
       alert("Invalid url");
+      return;
     }
 
     try {
       const response = await fetch(`/api/recipes/${recipeId}/video/url`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
-      },
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${getToken()}`
+        },
         body: JSON.stringify({ videoUrl: url })
       });
   
@@ -2094,6 +2440,7 @@ async function uploadVideo(id) {
       }
   
       alert("Video URL saved!");
+      await showPublicRecipes();
   
     } catch (error) {
       alert("Error uploading video");
@@ -2104,18 +2451,27 @@ async function uploadVideo(id) {
 
 //changes privacy
 async function changePrivacy(recipeId, privacy) {
-  const response = await fetch(`/api/recipes/privacy/${recipeId}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${getToken()}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ is_private: privacy })
-  });
+  try {
+    const response = await fetch(`/api/recipes/privacy/${recipeId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ is_private: privacy })
+    });
 
-  showPublicRecipes();
-  showPrivateRecipes();
-  showUserProfile()
+    if (!response.ok) {
+      throw new Error("Failed to update privacy");
+    }
+
+    showPublicRecipes();
+    showPrivateRecipes();
+    showUserProfile();
+  } catch (error) {
+    console.error("Error changing privacy:", error);
+    alert("Failed to update privacy.");
+  }
 }
 
 // Initialize add meal page 
@@ -2694,6 +3050,9 @@ function initRecipesPage() {
   // Load General Recipes
   //loadGeneralRecipes();
 
+  // Load Explore Recipes
+  loadExploreRecipes();
+
   // Setup logout functionality
   const logoutLink = document.querySelector('.nav-link.logout');
   if (logoutLink) {
@@ -2741,15 +3100,13 @@ function initRecipesPage() {
 
   // Setup Clear Filters button
   const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-  if (clearFiltersBtn) {
-    clearFiltersBtn.addEventListener('click', () => {
+    if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', async () => {
       console.log('Clear Filters button clicked');
-      // Uncheck all checkboxes
       document.querySelectorAll('.filter-bar input[type="checkbox"]').forEach(cb => {
         cb.checked = false;
       });
-      // Show all recipes
-      displayFilteredRecipes(allRecipes);
+      await displayFilteredRecipes(allRecipes);
     });
   }
 }

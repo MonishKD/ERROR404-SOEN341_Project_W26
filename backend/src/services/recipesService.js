@@ -44,6 +44,39 @@ export async function getRecipeById(recipeId) {
   }
 }
 
+// Get public recipes for Explore page
+export async function getExploreRecipes(currentUserId) {
+  try {
+    const recipes = await prisma.recipes.findMany({
+      where: {
+        is_private: false,
+        NOT: {
+          ownerId: currentUserId
+        }
+      },
+      include: {
+        owner: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        },
+        videos: true,      // already in schema
+        ratings: true      
+      },
+      orderBy: {
+        created_at: "desc"
+      }
+    });
+
+    return recipes;
+  } catch (error) {
+    console.error("Error fetching explore recipes:", error);
+    throw error;
+  }
+}
+
 // Update a recipe by ID
 export async function updateRecipe(recipeId, updateData) {
   try {
@@ -93,7 +126,7 @@ export async function deleteRecipe(recipeId) {
 // get recipe ratings by ID
 export async function recipeRatings(id) {
   try {
-    const ratings = await prisma.RecipeRating.findMany({
+    const ratings = await prisma.recipeRating.findMany({
       where: { recipeId: id },
       include: {
         user: {
@@ -112,15 +145,58 @@ export async function recipeRatings(id) {
   }
 }
 
-export async function videoRecipe(videoData){
-  try{
+// Add or update a user's rating and comment for a recipe
+export async function createOrUpdateRecipeRating(recipeId, userId, rating, comment) {
+  try {
+    const savedRating = await prisma.recipeRating.upsert({
+      where: {
+        recipeId_userId: {
+          recipeId,
+          userId
+        }
+      },
+      update: {
+        rating,
+        comment
+      },
+      create: {
+        recipeId,
+        userId,
+        rating,
+        comment
+      },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    return savedRating;
+  } catch (error) {
+    console.error("Error saving recipe rating/comment:", error);
+    throw error;
+  }
+}
+
+// Add or update video URL for a recipe
+export async function videoRecipe(recipeId, videoData) {
+  try {
     const newVideo = await prisma.video.upsert({
       where: {
         recipeId: recipeId,
       },
       update: videoData,
-      create: videoData,
+      create: {
+        ...videoData,
+        recipeId: recipeId
+      },
     });
+
     return newVideo;
   } catch (error) {
     throw error;
