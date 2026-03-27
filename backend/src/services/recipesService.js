@@ -20,12 +20,21 @@ export async function getAllRecipes(where) {
   try {
     const recipes = await prisma.recipes.findMany({
       where,
-      include: { owner: { select: { firstName: true, lastName: true, email: true } } }
+      include: {
+        owner: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        },
+        videos: true
+      }
     });
     return recipes;
   } catch (error) {
     console.error('Error fetching recipes:', error);
-    throw error; // re-throw to be handled by route handler
+    throw error;
   }
 }
 

@@ -1134,17 +1134,21 @@ async function createPublicRecipeCard(recipe) {
     ? `${(recipe.owner.firstName || '?')[0]}${(recipe.owner.lastName || '?')[0]}`
     : '??';
 
-  let videoHTML = '<p>No video available.</p>';
-  if (video?.type === "url") {
-    videoHTML = `<a href="${video.value}" target="_blank" class="video-link">▶ Watch Video</a>`;
-  } else if (video?.type === "file") {
-    videoHTML = `
-      <video controls width="300">
-        <source src="${video.value}" type="${video.mimeType}">
-        Your browser does not support video.
-      </video>
+  const firstVideo = Array.isArray(recipe.videos) && recipe.videos.length > 0
+  ? recipe.videos[0]
+  : null;
+
+  const videoLink = firstVideo?.videoUrl || null;
+
+  const videoHTML = videoLink
+    ? `
+      <a href="${videoLink}" target="_blank" class="video-link">
+        ▶ Watch Video
+      </a>
+    `
+    : `
+      <p>No video available.</p>
     `;
-  }
 
   const commentsHTML = comments.length
     ? comments.map(comment => `
@@ -2193,34 +2197,21 @@ async function showPublicRecipes() {
     `).join("");
 
     //video
-    const res = await fetch(`/api/recipes/${e.id}/video`);
+    const firstVideo = Array.isArray(e.videos) && e.videos.length > 0
+      ? e.videos[0]
+      : null;
 
-    let videoHTML = `<p>No video available.</p>`;
+    const videoLink = firstVideo?.videoUrl || null;
 
-    const contentType = res.headers.get("content-type") || "";
-
-    if (contentType.includes("application/json")) {
-      const data = await res.json();
-
-      if (data.videoUrl) {
-        videoHTML = `
-          <a href="${data.videoUrl}" target="_blank" class="video-link">
-            ▶️ Watch Video
-          </a>
-        `;
-      }
-    }
-    else if (contentType.startsWith("video")) {
-      const blob = await res.blob();
-      const videoUrl = URL.createObjectURL(blob);
-
-      videoHTML = `
-        <video controls width="300">
-          <source src="${videoUrl}" type="${contentType}">
-          Your browser does not support video.
-        </video>
+    let videoHTML = videoLink
+      ? `
+        <a href="${videoLink}" target="_blank" class="video-link">
+          ▶️ Watch Video
+        </a>
+      `
+      : `
+        <p>No video available.</p>
       `;
-    }
 
     const recipeCard = document.createElement("div");
     recipeCard.className = "recipe-card-full";
