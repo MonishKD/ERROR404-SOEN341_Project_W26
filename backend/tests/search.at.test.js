@@ -1,180 +1,204 @@
-import { jest } from "@jest/globals";
-import { fireEvent } from "@testing-library/dom";
+import { beforeAll, beforeEach, afterEach, afterAll, describe, expect, jest, test } from "@jest/globals";
+import { fireEvent, waitFor } from "@testing-library/dom";
 import "@testing-library/jest-dom";
 
-// Mock the entire module dependencies
-jest.mock("../../public/api.js", () => ({
-  fetchAverageRating: jest.fn(() => Promise.resolve(4.5)),
-  fetchRecipeRatings: jest.fn(() => Promise.resolve([])),
-  submitRecipeRatingAndComment: jest.fn(() => Promise.resolve({ success: true })),
-  saveRecipeToMyCollection: jest.fn(() => Promise.resolve({ success: true }))
-}));
-
 describe("Acceptance Test: Recipe Search for Logged-in Users", () => {
+  const mockAllRecipes = [
+    {
+      id: 1,
+      name: "Banana Oat Pancakes",
+      ingredients: ["2 ripe bananas", "1 cup oats", "2 eggs", "1/2 cup milk"],
+      prep_time: 15,
+      prep_steps: ["Mash bananas", "Mix all ingredients", "Cook on skillet until golden"],
+      cost: "Low",
+      difficulty: "Easy",
+      dietary_tags: ["Vegetarian", "Gluten-Free"],
+      allergens: [],
+      created_at: "2026-03-27T12:00:00.000Z",
+      updated_at: "2026-03-27T12:00:00.000Z",
+      ownerId: 1,
+      is_private: false,
+      owner: {
+        id: 1,
+        email: "user1@test.com",
+        firstName: "User",
+        lastName: "One",
+        username: "user1",
+      },
+      videos: [],
+      ratings: [],
+    },
+    {
+      id: 2,
+      name: "Halal Chicken Shawarma Bowl",
+      ingredients: ["500g chicken thighs", "shawarma spices", "rice", "garlic sauce", "pickles"],
+      prep_time: 30,
+      prep_steps: ["Marinate chicken with spices", "Cook chicken until done", "Serve over rice with sauce"],
+      cost: "Medium",
+      difficulty: "Medium",
+      dietary_tags: ["Halal", "High Protein"],
+      allergens: ["Dairy"],
+      created_at: "2026-03-27T12:00:00.000Z",
+      updated_at: "2026-03-27T12:00:00.000Z",
+      ownerId: 2,
+      is_private: false,
+      owner: {
+        id: 2,
+        email: "user2@test.com",
+        firstName: "User",
+        lastName: "Two",
+        username: "user2",
+      },
+      videos: [],
+      ratings: [],
+    },
+    {
+      id: 3,
+      name: "Greek Yogurt Parfait",
+      ingredients: ["Greek yogurt", "mixed berries", "granola", "honey"],
+      prep_time: 5,
+      prep_steps: ["Layer yogurt", "Add berries", "Top with granola and honey"],
+      cost: "Low",
+      difficulty: "Easy",
+      dietary_tags: ["Vegetarian", "High Protein"],
+      allergens: ["Dairy"],
+      created_at: "2026-03-27T12:00:00.000Z",
+      updated_at: "2026-03-27T12:00:00.000Z",
+      ownerId: 3,
+      is_private: false,
+      owner: {
+        id: 3,
+        email: "user3@test.com",
+        firstName: "User",
+        lastName: "Three",
+        username: "user3",
+      },
+      videos: [],
+      ratings: [],
+    },
+    {
+      id: 4,
+      name: "Spicy Chicken Tacos",
+      ingredients: ["chicken breast", "taco seasoning", "corn tortillas", "salsa", "cilantro"],
+      prep_time: 25,
+      prep_steps: ["Season chicken", "Cook and shred chicken", "Warm tortillas", "Assemble tacos"],
+      cost: "Medium",
+      difficulty: "Easy",
+      dietary_tags: ["Dairy-Free"],
+      allergens: [],
+      created_at: "2026-03-27T12:00:00.000Z",
+      updated_at: "2026-03-27T12:00:00.000Z",
+      ownerId: 4,
+      is_private: true,
+      owner: {
+        id: 4,
+        email: "user4@test.com",
+        firstName: "User",
+        lastName: "Four",
+        username: "user4",
+      },
+      videos: [],
+      ratings: [],
+    },
+  ];
+
   let originalFetch;
-  let mockAllRecipes;
 
-  beforeEach(() => {
-    // Setup mock data
-    mockAllRecipes = [
-      { 
-        id: 1, 
-        name: "Banana Oat Pancakes",
-        ingredients: ["2 ripe bananas", "1 cup oats", "2 eggs", "1/2 cup milk"],
-        prep_time: 15,
-        prep_steps: ["Mash bananas", "Mix all ingredients", "Cook on skillet until golden"],
-        cost: "Low",
-        difficulty: "Easy",
-        dietary_tags: ["Vegetarian", "Gluten-Free"],
-        allergens: [],
-        created_at: new Date(),
-        updated_at: new Date(),
-        ownerId: 1,
-        is_private: false,
-        owner: { 
-          id: 1,
-          email: "user1@test.com", 
-          firstName: "User", 
-          lastName: "One",
-          username: "user1"
-        },
-        videos: [],
-        ratings: []
-      },
-      { 
-        id: 2, 
-        name: "Halal Chicken Shawarma Bowl",
-        ingredients: ["500g chicken thighs", "shawarma spices", "rice", "garlic sauce", "pickles"],
-        prep_time: 30,
-        prep_steps: ["Marinate chicken with spices", "Cook chicken until done", "Serve over rice with sauce"],
-        cost: "Medium",
-        difficulty: "Medium",
-        dietary_tags: ["Halal", "High Protein"],
-        allergens: ["Dairy"],
-        created_at: new Date(),
-        updated_at: new Date(),
-        ownerId: 2,
-        is_private: false,
-        owner: { 
-          id: 2,
-          email: "user2@test.com", 
-          firstName: "User", 
-          lastName: "Two",
-          username: "user2"
-        },
-        videos: [],
-        ratings: []
-      },
-      { 
-        id: 3, 
-        name: "Greek Yogurt Parfait",
-        ingredients: ["Greek yogurt", "mixed berries", "granola", "honey"],
-        prep_time: 5,
-        prep_steps: ["Layer yogurt", "Add berries", "Top with granola and honey"],
-        cost: "Low",
-        difficulty: "Easy",
-        dietary_tags: ["Vegetarian", "High Protein"],
-        allergens: ["Dairy"],
-        created_at: new Date(),
-        updated_at: new Date(),
-        ownerId: 3,
-        is_private: false,
-        owner: { 
-          id: 3,
-          email: "user3@test.com", 
-          firstName: "User", 
-          lastName: "Three",
-          username: "user3"
-        },
-        videos: [],
-        ratings: []
-      },
-      { 
-        id: 4, 
-        name: "Spicy Chicken Tacos",
-        ingredients: ["chicken breast", "taco seasoning", "corn tortillas", "salsa", "cilantro"],
-        prep_time: 25,
-        prep_steps: ["Season chicken", "Cook and shred chicken", "Warm tortillas", "Assemble tacos"],
-        cost: "Medium",
-        difficulty: "Easy",
-        dietary_tags: ["Dairy-Free"],
-        allergens: [],
-        created_at: new Date(),
-        updated_at: new Date(),
-        ownerId: 4,
-        is_private: true,
-        owner: { 
-          id: 4,
-          email: "user4@test.com", 
-          firstName: "User", 
-          lastName: "Four",
-          username: "user4"
-        },
-        videos: [],
-        ratings: []
-      }
-    ];
+  const jsonResponse = (body, ok = true) =>
+    Promise.resolve({
+      ok,
+      json: async () => body,
+    });
 
-    // Set up DOM with proper structure
+  const renderRecipesPage = () => {
     document.body.innerHTML = `
       <div class="recipes-page">
-        <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Search recipes..." />
-          <button class="search-btn">Search</button>
-        </div>
-        <div class="section">
-          <div class="recipe-cards-grid"></div>
-        </div>
+        <div id="avatarNav"></div>
+        <a class="nav-link logout" href="#">Logout</a>
+        <section>
+          <div id="myRecipesEmpty"></div>
+          <div id="myRecipesGrid"></div>
+        </section>
+        <section class="section">
+          <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search recipes..." />
+            <button class="search-btn" type="button">Search</button>
+          </div>
+          <div id="generalRecipesGrid" class="recipe-cards-grid"></div>
+        </section>
       </div>
     `;
+  };
 
-    // Mock authenticated user session
-    localStorage.setItem("authToken", "mock-jwt-token");
-    sessionStorage.setItem("user", JSON.stringify({ 
-      id: 1, 
-      email: "test@example.com",
-      firstName: "Test",
-      lastName: "User" 
-    }));
+  const mockFetchRoutes = () => {
+    global.fetch = jest.fn((url) => {
+      if (url === "/api/profile") {
+        return jsonResponse({
+          id: 1,
+          email: "test@example.com",
+          firstName: "Test",
+          lastName: "User",
+        });
+      }
 
-    // Mock fetch for API calls
-    originalFetch = global.fetch;
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ success: true })
-      })
+      if (typeof url === "string" && url.includes("/recipes/explore")) {
+        return jsonResponse(mockAllRecipes.filter((recipe) => !recipe.is_private));
+      }
+
+      if (typeof url === "string" && url.includes("/recipes?ownerId=1")) {
+        return jsonResponse([
+          {
+            ...mockAllRecipes[0],
+            ownerId: 1,
+          },
+        ]);
+      }
+
+      if (typeof url === "string" && url.includes("/averageRating/")) {
+        return jsonResponse({ averageRating: 4.5 });
+      }
+
+      if (typeof url === "string" && url.includes("/recipeRatings/")) {
+        return jsonResponse([]);
+      }
+
+      return jsonResponse({});
+    });
+  };
+
+  const dispatchRecipesPageLoad = async () => {
+    window.history.pushState({}, "", "/recipes.html");
+    document.dispatchEvent(new Event("DOMContentLoaded"));
+
+    await waitFor(() => {
+      expect(document.querySelectorAll("#generalRecipesGrid .public-recipe-card")).toHaveLength(3);
+    });
+  };
+
+  const getRenderedTitles = () =>
+    Array.from(document.querySelectorAll("#generalRecipesGrid .recipe-card-title")).map((node) =>
+      node.textContent.trim()
     );
 
-    // Set up global variables
-    global.allRecipes = mockAllRecipes;
-    global.displayFilteredRecipes = jest.fn();
-    global.createPublicRecipeCard = jest.fn(async (recipe) => {
-      const card = document.createElement("div");
-      card.className = "recipe-card";
-      card.setAttribute('data-recipe-id', recipe.id);
-      card.innerHTML = `
-        <h3>${recipe.name}</h3>
-        <div class="recipe-meta">
-          <span>⏱️ ${recipe.prep_time} min</span>
-          <span>💰 ${recipe.cost}</span>
-          <span>📊 ${recipe.difficulty}</span>
-        </div>
-        <div class="recipe-tags">
-          ${recipe.dietary_tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-        </div>
-        <div class="recipe-author">by ${recipe.owner.username}</div>
-      `;
-      return card;
-    });
-    global.renderStars = jest.fn(() => "⭐⭐⭐⭐");
-    global.getUserInitialsFromEmail = jest.fn((email) => {
-      return email ? email.substring(0, 2).toUpperCase() : "??";
-    });
+  beforeAll(async () => {
+    jest.spyOn(console, "log").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => {});
 
-    // Import the actual module after mocks are set up
-    const script = require("../../public/script.js");
-    global.filterRecipesBySearch = script.filterRecipesBySearch;
+    await import("../../public/script.js");
+  });
+
+  afterAll(() => {
+    console.log.mockRestore();
+    console.error.mockRestore();
+  });
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+    renderRecipesPage();
+    localStorage.clear();
+    sessionStorage.clear();
+    localStorage.setItem("mealmajor_token", "mock-jwt-token");
+    mockFetchRoutes();
   });
 
   afterEach(() => {
@@ -185,110 +209,99 @@ describe("Acceptance Test: Recipe Search for Logged-in Users", () => {
   });
 
   test("AT-01: Logged-in user sees only public recipes matching search keyword", async () => {
+    await dispatchRecipesPageLoad();
+
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.querySelector(".search-btn");
-    const recipeGrid = document.querySelector(".recipe-cards-grid");
 
-    // Simulate user typing "chicken" in search bar
     searchInput.value = "chicken";
-    
-    // Simulate user clicking search button
     fireEvent.click(searchButton);
-    
-    // Wait for async operations to complete
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Verify that displayFilteredRecipes was called with filtered recipes
-    expect(global.displayFilteredRecipes).toHaveBeenCalled();
-    
-    const calledWithRecipes = global.displayFilteredRecipes.mock.calls[0][0];
-    
-    // Should only contain the chicken recipe
-    expect(calledWithRecipes).toHaveLength(1);
-    expect(calledWithRecipes[0].name).toBe("Halal Chicken Shawarma Bowl");
-    expect(calledWithRecipes[0].is_private).toBe(false);
+
+    await waitFor(() => {
+      expect(getRenderedTitles()).toEqual(["Halal Chicken Shawarma Bowl"]);
+    });
   });
 
   test("AT-02: Empty search shows all public recipes", async () => {
+    await dispatchRecipesPageLoad();
+
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.querySelector(".search-btn");
 
-    const publicRecipes = mockAllRecipes.filter(recipe => !recipe.is_private);
+    searchInput.value = "chicken";
+    fireEvent.click(searchButton);
 
-    // Simulate empty search
+    await waitFor(() => {
+      expect(getRenderedTitles()).toEqual(["Halal Chicken Shawarma Bowl"]);
+    });
+
     searchInput.value = "";
     fireEvent.click(searchButton);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    expect(global.displayFilteredRecipes).toHaveBeenCalledWith(publicRecipes);
+
+    await waitFor(() => {
+      expect(getRenderedTitles()).toEqual([
+        "Banana Oat Pancakes",
+        "Halal Chicken Shawarma Bowl",
+        "Greek Yogurt Parfait",
+      ]);
+    });
   });
 
   test("AT-03: Search with Enter key works", async () => {
+    await dispatchRecipesPageLoad();
+
     const searchInput = document.getElementById("searchInput");
-    
-    // Simulate typing and pressing Enter
+
     searchInput.value = "pancakes";
     fireEvent.keyUp(searchInput, { key: "Enter", code: "Enter" });
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    const calledWithRecipes = global.displayFilteredRecipes.mock.calls[0][0];
-    expect(calledWithRecipes).toHaveLength(1);
-    expect(calledWithRecipes[0].name).toBe("Banana Oat Pancakes");
-    expect(calledWithRecipes[0].is_private).toBe(false);
+
+    await waitFor(() => {
+      expect(getRenderedTitles()).toEqual(["Banana Oat Pancakes"]);
+    });
   });
 
   test("AT-04: No results message when no recipes match", async () => {
+    await dispatchRecipesPageLoad();
+
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.querySelector(".search-btn");
-    const recipeGrid = document.querySelector(".recipe-cards-grid");
-    
-    // Override displayFilteredRecipes to actually render
-    const originalDisplayFiltered = global.displayFilteredRecipes;
-    global.displayFilteredRecipes = async (recipes) => {
-      if (recipes.length === 0) {
-        recipeGrid.innerHTML = '<p class="no-results">No recipes match your search</p>';
-      } else {
-        recipeGrid.innerHTML = recipes.map(r => `<div class="recipe-card">${r.name}</div>`).join("");
-      }
-    };
-    
+    const recipeGrid = document.getElementById("generalRecipesGrid");
+
     searchInput.value = "nonexistent recipe";
     fireEvent.click(searchButton);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    expect(recipeGrid.innerHTML).toContain("No recipes match your search");
-    expect(recipeGrid.querySelectorAll('.recipe-card')).toHaveLength(0);
 
-    global.displayFilteredRecipes = originalDisplayFiltered;
+    await waitFor(() => {
+      expect(recipeGrid).toHaveTextContent("No recipes match your search");
+    });
+
+    expect(recipeGrid.querySelectorAll(".public-recipe-card")).toHaveLength(0);
   });
 
   test("AT-05: Case-insensitive search works", async () => {
+    await dispatchRecipesPageLoad();
+
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.querySelector(".search-btn");
-    
-    // Test uppercase search
+
     searchInput.value = "CHICKEN";
     fireEvent.click(searchButton);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    const calledWithRecipes = global.displayFilteredRecipes.mock.calls[0][0];
-    expect(calledWithRecipes[0].name).toBe("Halal Chicken Shawarma Bowl");
+
+    await waitFor(() => {
+      expect(getRenderedTitles()).toEqual(["Halal Chicken Shawarma Bowl"]);
+    });
   });
 
   test("AT-06: Partial match search works", async () => {
+    await dispatchRecipesPageLoad();
+
     const searchInput = document.getElementById("searchInput");
     const searchButton = document.querySelector(".search-btn");
-    
-    searchInput.value = "pancak"; // Partial word
+
+    searchInput.value = "pancak";
     fireEvent.click(searchButton);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    const calledWithRecipes = global.displayFilteredRecipes.mock.calls[0][0];
-    expect(calledWithRecipes[0].name).toBe("Banana Oat Pancakes");
+
+    await waitFor(() => {
+      expect(getRenderedTitles()).toEqual(["Banana Oat Pancakes"]);
+    });
   });
 });
