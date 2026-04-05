@@ -9,9 +9,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     defaults:
       run:
-        working-directory: src
+        working-directory: backend
 
     env:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -20,12 +23,22 @@ jobs:
       
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - run: npm run prisma:generate
-      - run: npm test
+      - run: npm test -- --coverage
       - run: npm run build --if-present
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=true
