@@ -30,7 +30,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load .env from project root
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 function mapDatabaseError(error) {
   if (!error) return null;
@@ -79,7 +79,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const publicPath = path.join(__dirname, "../../public");
+const publicPath = path.join(process.cwd(), "public");
 app.use(express.static(publicPath));
 
 /*** Page Routes ***/

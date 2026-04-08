@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 import request from "supertest";
-import { checkRecipeOwner } from "../src/middleware/auth.js";
 
 /**
  * Login Acceptance Test (AT)
@@ -14,7 +13,7 @@ import { checkRecipeOwner } from "../src/middleware/auth.js";
  */
 
 // Mock prisma so Jest never tries to load real Prisma client
-jest.unstable_mockModule("../src/database/prisma.js", () => ({
+jest.unstable_mockModule("../../src/database/prisma.js", () => ({
   prisma: {
     recipes: {
       findMany: jest.fn(),
@@ -36,25 +35,25 @@ jest.unstable_mockModule("../src/database/prisma.js", () => ({
 const mockLogin = jest.fn();
 const mockRegister = jest.fn();
 
-jest.unstable_mockModule("../src/services/authService.js", () => ({
+jest.unstable_mockModule("../../src/services/authService.js", () => ({
   login: mockLogin,
   register: mockRegister,
 }));
 
 // Mock profile service (not needed for login test, but server imports it)
-jest.unstable_mockModule("../src/services/profileService.js", () => ({
+jest.unstable_mockModule("../../src/services/profileService.js", () => ({
   getProfile: jest.fn(),
   updateProfile: jest.fn(),
 }));
 
 // Mock auth middleware (also imported by server)
-jest.unstable_mockModule("../src/middleware/auth.js", () => ({
+jest.unstable_mockModule("../../src/middleware/auth.js", () => ({
   authMiddleware: (req, res, next) => next(),
   checkRecipeOwner: (req, res, next) => next(),
 }));
 
 // Now import the app AFTER mocks
-const { default: app } = await import("../src/server.js");
+const { default: app } = await import("../../src/server.js");
 
 describe("AT Login - /api/auth/login", () => {
 

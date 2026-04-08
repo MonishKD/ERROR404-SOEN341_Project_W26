@@ -1,10 +1,7 @@
-import { prisma } from "./prisma.js";
+import { prisma } from "../src/database/prisma.js";
 
 async function main() {
   const ownerId = 1;
-
-  // Optional: clear old recipes
-  await prisma.recipes.deleteMany();
 
   await prisma.recipes.createMany({
     data: [
@@ -72,6 +69,63 @@ async function main() {
         difficulty: "Medium",
         dietary_tags: ["Halal", "Dairy-Free"],
         allergens: ["Gluten", "Dairy"],
+        ownerId,
+      },
+      // Snacks 
+      {
+        name: "Hummus & Veggie Sticks",
+        prep_time: 10,
+        cost: "Low",
+        ingredients: ["chickpeas", "tahini", "lemon", "garlic", "carrots", "celery", "bell pepper"],
+        prep_steps: ["Blend chickpeas, tahini, lemon, garlic.", "Season with salt + cumin.", "Slice veggies.", "Serve together. (vegan)"],
+        difficulty: "Easy",
+        dietary_tags: ["Vegan", "Gluten-Free"],
+        allergens: ["Sesame"],
+        ownerId,
+      },
+      {
+        name: "Peanut Butter Energy Balls",
+        prep_time: 15,
+        cost: "Low",
+        ingredients: ["oats", "peanut butter", "honey", "chocolate chips", "chia seeds"],
+        prep_steps: ["Mix all ingredients in a bowl.", "Roll into small balls.", "Refrigerate 30 min before serving."],
+        difficulty: "Easy",
+        dietary_tags: ["Vegetarian"],
+        allergens: ["Peanuts", "Gluten"],
+        ownerId,
+      },
+      // Breakfast
+      {
+        name: "Avocado Toast with Poached Egg",
+        prep_time: 15,
+        cost: "Low",
+        ingredients: ["sourdough bread", "avocado", "eggs", "lemon", "chili flakes", "salt"],
+        prep_steps: ["Toast bread.", "Mash avocado with lemon + salt.", "Poach egg 3–4 min.", "Assemble and top with chili flakes."],
+        difficulty: "Easy",
+        dietary_tags: ["Vegetarian"],
+        allergens: ["Gluten", "Eggs"],
+        ownerId,
+      },
+      {
+        name: "Banana Oat Pancakes",
+        prep_time: 20,
+        cost: "Low",
+        ingredients: ["oats", "banana", "eggs", "baking powder", "cinnamon", "maple syrup"],
+        prep_steps: ["Blend oats into flour.", "Mash banana + mix with eggs + baking powder.", "Cook small pancakes on medium heat 2 min per side.", "Serve with maple syrup. (gluten-free)"],
+        difficulty: "Easy",
+        dietary_tags: ["Gluten-Free", "Vegetarian"],
+        allergens: ["Eggs"],
+        ownerId,
+      },
+      {
+        name: "Greek Yogurt Parfait",
+        prep_time: 8,
+        cost: "Low",
+        ingredients: ["greek yogurt", "granola", "mixed berries", "honey", "chia seeds"],
+        prep_steps: ["Layer yogurt in a glass.", "Add granola + berries.", "Drizzle honey.", "Top with chia seeds."],
+        difficulty: "Easy",
+        dietary_tags: ["Vegetarian"],
+        allergens: ["Dairy", "Gluten", "Nuts"],
         ownerId,
       },
     ],
