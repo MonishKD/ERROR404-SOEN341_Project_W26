@@ -23,7 +23,7 @@ jest.unstable_mockModule("multer", () => {
 }, { virtual: true });
 
 // Mock Prisma before importing the server
-jest.unstable_mockModule("../src/database/prisma.js", () => ({
+jest.unstable_mockModule("../../src/database/prisma.js", () => ({
   prisma: {
     recipes: {
       findMany: jest.fn(),
@@ -44,7 +44,7 @@ jest.unstable_mockModule("../src/database/prisma.js", () => ({
 const mockLogin = jest.fn();
 const mockRegister = jest.fn();
 
-jest.unstable_mockModule("../src/services/authService.js", () => ({
+jest.unstable_mockModule("../../src/services/authService.js", () => ({
   login: mockLogin,
   register: mockRegister,
 }));
@@ -53,7 +53,7 @@ jest.unstable_mockModule("../src/services/authService.js", () => ({
 const mockGetProfile = jest.fn();
 const mockUpdateProfile = jest.fn();
 
-jest.unstable_mockModule("../src/services/profileService.js", () => ({
+jest.unstable_mockModule("../../src/services/profileService.js", () => ({
   getProfile: mockGetProfile,
   updateProfile: mockUpdateProfile,
 }));
@@ -69,7 +69,7 @@ const mockCreateOrUpdateRecipeRating = jest.fn();
 const mockVideoRecipe = jest.fn();
 const mockGetExploreRecipes = jest.fn();
 
-jest.unstable_mockModule("../src/services/recipesService.js", () => ({
+jest.unstable_mockModule("../../src/services/recipesService.js", () => ({
   createRecipe: mockCreateRecipe,
   getAllRecipes: mockGetAllRecipes,
   getRecipeById: mockGetRecipeById,
@@ -82,7 +82,7 @@ jest.unstable_mockModule("../src/services/recipesService.js", () => ({
 }));
 
 // Mock auth middleware
-jest.unstable_mockModule("../src/middleware/auth.js", () => ({
+jest.unstable_mockModule("../../src/middleware/auth.js", () => ({
   authMiddleware: (req, res, next) => {
     const authHeader = req.headers.authorization;
 
@@ -98,7 +98,7 @@ jest.unstable_mockModule("../src/middleware/auth.js", () => ({
 }));
 
 // Import app after mocks
-const { default: app } = await import("../src/server.js");
+const { default: app } = await import("../../src/server.js");
 
 describe("Browse Recipes AT - /api/recipes", () => {
   beforeAll(() => {

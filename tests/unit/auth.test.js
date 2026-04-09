@@ -1,6 +1,6 @@
 import request from 'supertest';
-import app from '../src/server.js';
-import { prisma } from '../src/database/prisma.js';
+import app from '../../src/server.js';
+import { prisma } from '../../src/database/prisma.js';
 
 let authToken;
 let userId;

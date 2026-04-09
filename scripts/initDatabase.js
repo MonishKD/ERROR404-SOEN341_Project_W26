@@ -1,6 +1,6 @@
-// init_database.js
+// initDatabase.js
 // Migrated from SQLite to PostgreSQL with Prisma ORM
-import { prisma } from './prisma.js';
+import { prisma } from '../src/database/prisma.js';
 
 // This script tests the database connection and provides instructions for syncing schema changes.
 async function initDatabase() {

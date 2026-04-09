@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import request from "supertest";
-import { checkRecipeOwner } from "../src/middleware/auth.js";
+import { checkRecipeOwner } from "../../src/middleware/auth.js";
 
 /**
  * Profile Acceptance Test (AT)
@@ -11,7 +11,7 @@ import { checkRecipeOwner } from "../src/middleware/auth.js";
 
 // Mock prisma
 // This ensures that when the server imports prisma, it gets our mocked version instead of trying to connect to a real database.
-jest.unstable_mockModule("../src/database/prisma.js", () => ({
+jest.unstable_mockModule("../../src/database/prisma.js", () => ({
   prisma: {
     users: {
       findUnique: jest.fn(),
@@ -28,7 +28,7 @@ jest.unstable_mockModule("../src/database/prisma.js", () => ({
 }));
 
 // Mock auth middleware
-jest.unstable_mockModule("../src/middleware/auth.js", () => ({
+jest.unstable_mockModule("../../src/middleware/auth.js", () => ({
   authMiddleware: (req, res, next) => {
     if (req.headers.authorization === "Bearer valid-token") {
       req.user = { userId: 1, email: "test@mail.com" };
@@ -44,13 +44,13 @@ jest.unstable_mockModule("../src/middleware/auth.js", () => ({
 const mockGetProfile = jest.fn();
 const mockUpdateProfile = jest.fn();
 
-jest.unstable_mockModule("../src/services/profileService.js", () => ({
+jest.unstable_mockModule("../../src/services/profileService.js", () => ({
   getProfile: mockGetProfile,
   updateProfile: mockUpdateProfile,
 }));
 
 // Now import the app AFTER mocks
-const { default: app } = await import("../src/server.js");
+const { default: app } = await import("../../src/server.js");
 
 describe("Profile AT - /api/profile", () => {
   const validToken = "Bearer valid-token";
