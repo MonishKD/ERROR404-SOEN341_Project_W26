@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="user-profile-styles.css">
     <link rel="stylesheet" href="home-styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="script-homepage.js" defer></script>
 </head>
 
 <body>
@@ -103,14 +104,14 @@
             <div class="stat-card">
                 <div class="stat-icon">📅</div>
                 <div class="stat-content">
-                    <h3 id="mealsPlannedCount">14</h3>
-                    <p>Meals Planned</p>
+                    <h3 id="mealsPlannedCount"></h3>
+                    <p>Weeks Planned</p>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">🧑‍🍳</div>
                 <div class="stat-content">
-                    <h3 id="recipesPostedCount">0</h3>
+                    <h3 id="recipesPostedCount"></h3>
                     <p>Recipes Posted</p>
                 </div>
             </div>
@@ -142,106 +143,13 @@
         </section>
 
         <!--This week's meals-->
-        <section class="meals-section">
-            <h2>This Week's Meal Plan</h2>
-            <div class="meals-grid">
-                <div class="meal-card">
-                    <div class="meal-day">Monday</div>
-                    <div class="meal-item">
-                        <span class="meal-type">Breakfast</span>
-                        <span class="meal-name">🥞 Pancakes</span>
-                    </div>
-                    <div class="meal-item">
-                        <span class="meal-type">Lunch</span>
-                        <span class="meal-name">🥗 Greek Salad</span>
-                    </div>
-                    <div class="meal-item">
-                        <span class="meal-type">Dinner</span>
-                        <span class="meal-name">🍝 Shrimp Pasta</span>
-                    </div>
-                    <a href="meal-planner.html" class="meal-item empty">
-                        <span class="meal-type">Snack</span>
-                        <span class="meal-name">+ Add Snack</span>
-                    </a>
-                </div>
-                <div class="meal-card">
-                    <div class="meal-day">Tuesday</div>
-                    <div class="meal-item">
-                        <span class="meal-type">Breakfast</span>
-                        <span class="meal-name">🥣 Oatmeal Bowl</span>
-                    </div>
-                    <a href="meal-planner.html" class="meal-item empty">
-                        <span class="meal-type">Lunch</span>
-                        <span class="meal-name">+ Add Lunch</span>
-                    </a>
-                    <div class="meal-item">
-                        <span class="meal-type">Dinner</span>
-                        <span class="meal-name">🥘 Beef Chili</span>
-                    </div>
-                    <div class="meal-item">
-                        <span class="meal-type">Snack</span>
-                        <span class="meal-name">🍎 Apple &amp; Peanut Butter</span>
-                    </div>
-                </div>
-                <div class="meal-card">
-                    <div class="meal-day">Wednesday</div>
-                    <a href="meal-planner.html" class="meal-item empty">
-                        <span class="meal-type">Breakfast</span>
-                        <span class="meal-name">+ Add Breakfast</span>
-                    </a>
-                    <div class="meal-item">
-                        <span class="meal-type">Lunch</span>
-                        <span class="meal-name">🌯 Chickpea Wrap</span>
-                    </div>
-                    <a href="meal-planner.html" class="meal-item empty">
-                        <span class="meal-type">Dinner</span>
-                        <span class="meal-name">+ Add Dinner</span>
-                    </a>
-                    <a href="meal-planner.html" class="meal-item empty">
-                        <span class="meal-type">Snack</span>
-                        <span class="meal-name">+ Add Snack</span>
-                    </a>
-                </div>
-            </div>
-            <a href="meal-planner.html" class="view-full-plan">View Full Weekly Plan →</a>
+        <section class="meals-section" id="homeMealPlanSection">
+            
         </section>
 
         <!--Suggested recipes-->
-        <section class="recipes-section">
-            <h2>Suggested Recipes For You</h2>
-            <div class="recipes-grid">
-                <a href="recipes.html" class="recipe-card">
-                    <div class="recipe-image">🥗</div>
-                    <div class="recipe-info">
-                        <h4>Greek Salad</h4>
-                        <div class="recipe-details">
-                            <span>⏱️ 15 min</span>
-                            <span>💰 Low</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="recipes.html" class="recipe-card">
-                    <div class="recipe-image">🥣</div>
-                    <div class="recipe-info">
-                        <h4>Oatmeal Bowl</h4>
-                        <div class="recipe-details">
-                            <span>⏱️ 10 min</span>
-                            <span>💰 Low</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="recipes.html" class="recipe-card">
-                    <div class="recipe-image">🍝</div>
-                    <div class="recipe-info">
-                        <h4>Lasagna</h4>
-                        <div class="recipe-details">
-                            <span>⏱️ 75 min</span>
-                            <span>💰 Medium</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <a href="recipes.html" class="view-full-plan">View All Recipes →</a>
+        <section class="recipes-section" id="homeRecipeSuggestions">
+            
         </section>
 
     </div>
