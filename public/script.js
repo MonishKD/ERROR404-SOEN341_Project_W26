@@ -20,28 +20,28 @@ let undoTimeout = null;
 /**
  * Store authentication token in localStorage
  */
-function saveToken(token) {
+export function saveToken(token) {
   localStorage.setItem(TOKEN_KEY, token);
 }
 
 /**
  * Retrieve authentication token from localStorage
  */
-function getToken() {
+export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
 /**
  * Remove authentication token (logout)
  */
-function clearToken() {
+export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
 /**
  * Check if user is authenticated
  */
-function isAuthenticated() {
+export function isAuthenticated() {
   return !!getToken();
 }
 
@@ -102,7 +102,7 @@ function setButtonLoading(button, isLoading) {
   }
 }
 
-async function getInitials() {
+export async function getInitials() {
   // If not authenticated, skip
   if (!isAuthenticated()) return;
   
@@ -201,7 +201,7 @@ async function registerUser(firstName, lastName, email, password) {
 /**
  * Get user profile
  */
-async function getUserProfile() {
+export async function getUserProfile() {
   try {
     const token = getToken();
     if (!token) {
@@ -320,7 +320,7 @@ async function createMealPlanForWeek(weekStartDate, weekEndDate) {
 /**
  * Check profile completion status
  */
-async function checkProfileCompletion() {
+export async function checkProfileCompletion() {
   console.log('🔍 CHECK_PROFILE_COMPLETION STARTED at:', new Date().toISOString());
 
   const token = getToken();
@@ -413,16 +413,6 @@ function showProfilePrompt(missingFields) {
 }
 
 /**
- * Close prompt
- */
-function closePrompt() {
-  const prompt = document.getElementById('profilePrompt');
-  if (prompt) {
-    prompt.classList.add('hidden');
-  }
-}
-
-/**
  * Show success toast
  */
 function showSuccessToast(message) {
@@ -437,102 +427,6 @@ function showSuccessToast(message) {
     setTimeout(() => {
       toast.classList.add('hidden');
     }, 3000);
-  }
-}
-
-/**
- * Save health metrics
- */
-async function saveHealthMetrics(event) {
-  event.preventDefault();
-
-  const age = document.getElementById('promptAge').value;
-  const weight = document.getElementById('promptWeight').value;
-  const height = document.getElementById('promptHeight').value;
-
-  // Remove error classes
-  document.querySelectorAll('.metric-input-group input').forEach(input => {
-    input.classList.remove('error');
-  });
-
-  // Validate inputs
-  let hasError = false;
-
-  if (!age || age < 1 || age > 120) {
-    document.getElementById('promptAge').classList.add('error');
-    hasError = true;
-  }
-
-  if (!weight || weight < 1 || weight > 300) {
-    document.getElementById('promptWeight').classList.add('error');
-    hasError = true;
-  }
-
-  if (!height || height < 50 || height > 250) {
-    document.getElementById('promptHeight').classList.add('error');
-    hasError = true;
-  }
-
-  if (hasError) return;
-
-  try {
-    const token = getToken();
-    const response = await fetch(`${API_BASE_URL}/profile/health-metrics`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        age: parseInt(age),
-        weight: parseFloat(weight),
-        height: parseFloat(height)
-      })
-    });
-
-    if (response.ok) {
-      closePrompt();
-      showSuccessToast('Great! Your profile is now complete! 🎉');
-
-      // Update UI to show completion
-      const welcomeCard = document.querySelector('.welcome-card p');
-      if (welcomeCard) {
-        welcomeCard.innerHTML = 'Your profile is complete! Enjoy personalized recommendations. ✨';
-      }
-    } else {
-      const error = await response.json();
-      alert('Error: ' + error.message);
-    }
-  } catch (error) {
-    console.error('Error saving health metrics:', error);
-    alert('Failed to save. Please try again.');
-  }
-}
-
-/**
- * Load user profile and display on home page
- */
-async function loadUserProfile() {
-  const result = await getUserProfile();
-
-  if (result.success) {
-    // Update name display
-    const firstNameElement = document.getElementById('firstName');
-    if (firstNameElement) {
-      firstNameElement.textContent = `${result.data.firstName || 'User'}`;
-    }
-
-    const fullNameElement = document.getElementById('fullName');
-    if (fullNameElement) {
-      fullNameElement.textContent = `${result.data.firstName} ${result.data.lastName}`;
-    }
-  } else {
-    console.error('Failed to load profile:', result.error);
-    // If token is invalid, redirect to login
-    if (result.error.includes('token') || result.error.includes('auth')) {
-      clearToken();
-      window.location.href = 'login-page.html';
-    }
   }
 }
 
@@ -2888,45 +2782,6 @@ function initSignupPage() {
 }
 
 /**
- * Initialize home page
- */
-function initHomePage() {
-  console.log('🏠 INIT_HOME_PAGE CALLED at:', new Date().toISOString());
-
-  // Check if prompt exists
-  const prompt = document.getElementById('profilePrompt');
-  console.log('Prompt element exists at init:', !!prompt);
-
-  // Check authentication
-  if (!isAuthenticated()) {
-    window.location.href = 'login-page.html';
-    return;
-  }
-
-  // Load user profile and display name
-  loadUserProfile();
-
-  // Check profile completion
-  checkProfileCompletion();
-
-  // Setup logout functionality
-  const logoutLink = document.querySelector('.nav-link.logout');
-  if (logoutLink) {
-    logoutLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      clearToken();
-      window.location.href = 'login-page.html';
-    });
-  }
-
-  // Add form submit handler
-  const metricsForm = document.getElementById('healthMetricsForm');
-  if (metricsForm) {
-    metricsForm.addEventListener('submit', saveHealthMetrics);
-  }
-}
-
-/**
  * Initialize edit profile page
  */
 function initEditProfilePage() {
@@ -3240,12 +3095,6 @@ document.addEventListener('DOMContentLoaded', () => {
     case 'signup':
       getInitials();
       initSignupPage();
-      break;
-
-    case 'home-page.html':
-    case 'home':
-      getInitials();
-      initHomePage();
       break;
 
     case 'edit-profile.html':
