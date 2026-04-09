@@ -1104,6 +1104,20 @@ app.delete('/api/mealPlan/items/:itemId', authMiddleware, async (req, res) => {
   }
 });
 
+// GET mealPlan by ownerId
+app.get('/api/mealPlan/owner', authMiddleware, async (req, res) => {
+  try {
+    const ownerId = parseInt(req.user.userId, 10);
+    const mealPlans = await prisma.mealPlan.findMany({
+      where: { ownerId }
+    });
+    return res.json(mealPlans);
+  } catch (error) {
+    console.error('Error fetching owner mealPlan', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET mealPlan for the week
 app.get('/api/mealPlan/week/:startDate', authMiddleware, async (req, res) => {
   try {
