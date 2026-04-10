@@ -1,6 +1,7 @@
 // home-page script
 
-import { getToken, clearToken, isAuthenticated, getUserProfile, checkProfileCompletion, getInitials } from "./script.js";
+import { getToken, clearToken, isAuthenticated, getUserProfile, checkProfileCompletion, getInitials, logout, fetchAllRecipes } from "./script.js";
+const API_BASE_URL = 'http://localhost:4002/api';
 
 /**
  * Load user profile and display on home page
@@ -33,7 +34,7 @@ async function loadUserProfile() {
  * displays number of meal plans
  */
 async function displayMealPlanCount() {
-    const response = await fetch("/api/mealPlan/owner", {
+    const response = await fetch(`${API_BASE_URL}/mealPlan/owner`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${getToken()}`
@@ -49,14 +50,8 @@ async function displayMealPlanCount() {
  * displays number of public recipes
  */
 async function displayPublicRecipeCount() {
-    const responseRecipes = await fetch(`/api/recipes`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${getToken()}`
-            }
-    });
-
-    const userRecipes = await responseRecipes.json();
+    
+    const userRecipes = await fetchAllRecipes();
     const publicRecipes = userRecipes.filter(e => e.is_private == false);
 
     const recipePostedElement = document.getElementById("recipesPostedCount");
@@ -151,7 +146,7 @@ async function homePageMealPlan() {
 
     const formatDate = (date) => date.toISOString().split('T')[0];
 
-    const responsePlan = await fetch(`/api/mealPlan/week/${formatDate(startWeek)}`, {
+    const responsePlan = await fetch(`${API_BASE_URL}/mealPlan/week/${formatDate(startWeek)}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${getToken()}`
@@ -161,7 +156,7 @@ async function homePageMealPlan() {
     let items = [];
     
     if (mealPlan != null) {
-        const responseItems = await fetch(`/api/mealPlan/${mealPlan.id}/items`, {
+        const responseItems = await fetch(`${API_BASE_URL}/mealPlan/${mealPlan.id}/items`, {
             headers: {
                 'Authorization': `Bearer ${getToken()}`
             }
@@ -234,7 +229,7 @@ async function showSuggestions() {
     titleContainer.textContent = "Suggested Recipes For You";
     container.appendChild(titleContainer);
 
-    const responseRecipes = await fetch(`/api/recipes/explore`, {
+    const responseRecipes = await fetch(`${API_BASE_URL}/recipes/explore`, {
       method: 'GET',
       headers: {
             'Authorization': `Bearer ${getToken()}`
@@ -255,8 +250,8 @@ async function showSuggestions() {
         <div class="recipe-info">
             <h4>${recipe.name}</h4>
             <div class="recipe-details">
-                <span>⏱️ ${recipe.prep_time}</span>
-                <span>💰 $${recipe.cost}</span>
+                <span>⏱️${recipe.prep_time} mins</span>
+                <span>💰${recipe.cost}</span>
             </div>
         </div>
     </a>
@@ -270,6 +265,24 @@ async function showSuggestions() {
   button.classList.add('view-full-plan');
   button.textContent = 'View All Recipes →';
   container.appendChild(button);
+}
+
+/**
+ * Show success toast
+ */
+function showSuccessToast(message) {
+  const toast = document.getElementById('successToast');
+  const toastMessage = document.querySelector('.toast-message');
+
+  if (toast && toastMessage) {
+    toastMessage.textContent = message || 'Profile updated successfully!';
+    toast.classList.remove('hidden');
+
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 3000);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -293,16 +306,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Check profile completion
     checkProfileCompletion();
 
-    // Setup logout functionality
-    const logoutLink = document.querySelector('.nav-link.logout');
-    if (logoutLink) {
-    logoutLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        clearToken();
-        window.location.href = 'login-page.html';
-    });
-    }
-
     // Add form submit handler
     const metricsForm = document.getElementById('healthMetricsForm');
     if (metricsForm) {
@@ -313,4 +316,6 @@ document.addEventListener("DOMContentLoaded", () => {
     displayPublicRecipeCount();
     homePageMealPlan();
     showSuggestions();
+
+    logout();
 });
