@@ -135,36 +135,21 @@ describe("Acceptance Test: Recipe Search for Logged-in Users", () => {
 
   const mockFetchRoutes = () => {
     global.fetch = jest.fn((url) => {
-      if (url === "/api/profile") {
-        return jsonResponse({
-          id: 1,
-          email: "test@example.com",
-          firstName: "Test",
-          lastName: "User",
-        });
+      if (url.includes("/api/profile")) {
+        return jsonResponse({ id: 1, email: "test@example.com", firstName: "Test", lastName: "User" });
       }
-
-      if (typeof url === "string" && url.includes("/recipes/explore")) {
-        return jsonResponse(mockAllRecipes.filter((recipe) => !recipe.is_private));
+      if (url.includes("/recipes/explore")) {
+        return jsonResponse(mockAllRecipes.filter((r) => !r.is_private));
       }
-
-      if (typeof url === "string" && url.includes("/recipes?ownerId=1")) {
-        return jsonResponse([
-          {
-            ...mockAllRecipes[0],
-            ownerId: 1,
-          },
-        ]);
+      if (url.includes("/recipes?ownerId=")) {
+        return jsonResponse([{ ...mockAllRecipes[0], ownerId: 1 }]);
       }
-
-      if (typeof url === "string" && url.includes("/averageRating/")) {
+      if (url.includes("/averageRating/")) {
         return jsonResponse({ averageRating: 4.5 });
       }
-
-      if (typeof url === "string" && url.includes("/recipeRatings/")) {
+      if (url.includes("/recipeRatings/")) {
         return jsonResponse([]);
       }
-
       return jsonResponse({});
     });
   };
@@ -187,7 +172,7 @@ describe("Acceptance Test: Recipe Search for Logged-in Users", () => {
     jest.spyOn(console, "log").mockImplementation(() => {});
     jest.spyOn(console, "error").mockImplementation(() => {});
 
-    await import("../../public/script.js");
+    await import("../../public/script-recipe.js");
   });
 
   afterAll(() => {
