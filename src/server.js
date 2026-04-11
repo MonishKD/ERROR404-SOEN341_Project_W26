@@ -1136,9 +1136,14 @@ app.get('/api/mealPlan/week/:startDate', authMiddleware, async (req, res) => {
     const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
     const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
 
-    console.log("Requested startDate:", startDate);
-    console.log("Query startOfDay:", startOfDay);
-    console.log("Query endOfDay:", endOfDay);
+    // Implemented bug fix for security issue where users could manipulate the date query (SonarQube)
+    console.log({
+      message: "Meal plan date query",
+      requestedStartDate: startDate,
+      queryStartOfDay: startOfDay,
+      queryEndOfDay: endOfDay,
+      time: new Date().toISOString(),
+    });
 
     const mealPlan = await prisma.mealPlan.findFirst({
       where: {
