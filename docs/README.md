@@ -26,16 +26,10 @@ This project was built with the following:
 
 - **Frontend**: HTML, CSS, JavaScript
 - **Backend**: Node.js (Express)
-- **Shared Database**: PostgreSQL (Neon)
+- **Shared Database**: PostgreSQL (Prisma & Neon)
 - **CI/CD**: GitHub Actions
 - **Testing**: Jest
-
-To run the project (from project root):
-
-```bash
-cd "...\ERROR404-SOEN341_Project_W26"
-node backend/src/server.js
-```
+- **Static Analysis Tool**: SonarQube
 
 ## Links
 - **Sprint Plan**: https://liveconcordia-my.sharepoint.com/:x:/g/personal/l_chara_live_concordia_ca/IQD5OXHngoiFTomhX_sbMb6-AVpZgNg431IBatTNJU6YrFA?e=1O6bVY
@@ -44,12 +38,13 @@ node backend/src/server.js
 
 #
 
-### Team Members
-- Laila
-- Ishrak
-- Monish
-- Liliana
-- Shekinah
+### Team Members (IDs - GitHub Usernames)
+- Laila Charaf (40318173 - Laila25-eng)
+- Ishrak Mellah (40317450 - sharkie1704)
+- Monish Kumar Das (40312217 - MonishKD)
+- Liliana José Ferreira (40325772 - linearana)
+- Shekinah Joy Nagarasa A. (40287073 - hendriktebeng & shekinah-jn)
+
 
 #
 
