@@ -4,33 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MealMajor - Add a Meal</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="user-profile-styles.css">
-    <link rel="stylesheet" href="home-styles.css">
-    <link rel="stylesheet" href="profile-styles.css">
-    <link rel="stylesheet" href="recipe-styles.css">
-    <link rel="stylesheet" href="planner-styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/user-profile-styles.css">
+    <link rel="stylesheet" href="/css/home-styles.css">
+    <link rel="stylesheet" href="/css/profile-styles.css">
+    <link rel="stylesheet" href="/css/recipe-styles.css">
+    <link rel="stylesheet" href="/css/planner-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-     <script type="module" src="script-add-meal.js" defer></script>
+     <script type="module" src="/js/script-add-meal.js" defer></script>
 </head>
 <body>
 
     <!--Navigation bar-->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="home-page.html" class="nav-brand">
+            <a href="/pages/home-page.html" class="nav-brand">
                 <span class="brand-icon">🍴</span>
                 <span class="brand-name">MealMajor</span>
             </a>
             <div class="nav-links">
-                <a href="home-page.html" class="nav-link">Home</a>
-                <a href="recipes.html" class="nav-link">Recipes</a>
-                <a href="meal-planner.html" class="nav-link active">Meal Planner</a>
-                <a href="edit-profile.html" class="nav-link">Profile</a>
-                <a href="user-profile.html" class="nav-link nav-avatar">
+                <a href="/pages/home-page.html" class="nav-link">Home</a>
+                <a href="/pages/recipes.html" class="nav-link">Recipes</a>
+                <a href="/pages/meal-planner.html" class="nav-link active">Meal Planner</a>
+                <a href="/pages/edit-profile.html" class="nav-link">Profile</a>
+                <a href="/pages/user-profile.html" class="nav-link nav-avatar">
                     <div class="avatar-circle" id="avatarNav"></div>
                 </a>
-                <a href="login-page.html" class="nav-link logout">Logout</a>
+                <a href="/pages/login-page.html" class="nav-link logout">Logout</a>
             </div>
         </div>
     </nav>   
@@ -42,13 +42,13 @@
             <h1>🍽️ Add a Meal</h1>
             <p>Pick a recipe to add to your meal plan</p>
         </div>
+
         <!--Empty state-->
         <div id="addMealEmptyState" class="add-meal-empty-state" style="display: flex;">
             <div class="empty-icon">🍽️</div>
             <h3>No recipes yet!</h3>
             <p> You haven't created any recipes. Create one first and it will appear here.</p>
             <a href="create-recipe.html" class="btn-green">+ Create a Recipe</a>
-
         </div>
 
         <!--Recipe grid-->
@@ -56,7 +56,7 @@
 
         <!--Cancel-->
         <div>
-            <a href="meal-planner.html" class="view-full-plan">← Back to Meal Planner</a>
+            <a href="/pages/meal-planner.html" class="view-full-plan">← Back to Meal Planner</a>
         </div>
 
     </div>    

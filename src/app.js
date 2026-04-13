@@ -32,15 +32,15 @@ app.use(express.static(publicPath));
 
 /*** Page Routes ***/
 app.get("/", (req, res) => {
-  res.sendFile(path.join(publicPath, "login-page.html"));
+  res.sendFile(path.join(publicPath, "pages", "login-page.html"));
 });
 
 app.get("/login", (req, res) => {
-  res.sendFile(path.join(publicPath, "login-page.html"));
+  res.sendFile(path.join(publicPath, "pages", "login-page.html"));
 });
 
 app.get("/signup", (req, res) => {
-  res.sendFile(path.join(publicPath, "sign-up-page.html"));
+  res.sendFile(path.join(publicPath, "pages", "sign-up-page.html"));
 });
 
 /*** API Routes ***/

@@ -1,3 +1,5 @@
+// script-user-profile.js - Handles user profile page interactions and data fetching
+
 import { getInitials, getUserProfile, isAuthenticated, getToken, fetchAverageRating, fetchRecipeRatings, renderStars, fetchAllRecipes, logout } from "./script.js";
 const API_BASE_URL = "http://localhost:4002/api";
 const MAX_SIZE_MB = 50; // max video upload size
@@ -222,7 +224,7 @@ async function showPrivateRecipes() {
                 </ol>
             </div>
             <div class="recipe-card-actions">
-                <a href="edit-recipe.html?id=${e.id}" class="btn-edit-recipe">✏️ Edit</a>
+                <a href="/pages/edit-recipe.html?id=${e.id}" class="btn-edit-recipe">✏️ Edit</a>
                 <button type="button" class="btn-delete-recipe">🗑️ Delete</button>
                 <button type="button" class="btn-make-public">🌍 Make Public</button>
             </div>
@@ -280,7 +282,8 @@ async function uploadVideo(id) {
       await showPublicRecipes();
   
     } catch (error) {
-      alert("Error uploading video");
+      console.error("Upload error:", error);
+      alert(error.message || "Error uploading video");
     }
   }
 
@@ -293,6 +296,7 @@ async function uploadVideo(id) {
         return;
       }
     } catch (err) {
+      console.error("Invalid URL:", err);
       alert("Invalid url");
       return;
     }
@@ -318,11 +322,13 @@ async function uploadVideo(id) {
       await showPublicRecipes();
   
     } catch (error) {
-      alert("Error uploading video");
+      console.error("Upload error:", error);
+      alert(error.message || "Error uploading video");
     }
   }
 
 };
+
 /**
  * Change the privacy of a recipe
  */
@@ -356,7 +362,7 @@ async function changePrivacy(recipeId, privacy) {
 document.addEventListener("DOMContentLoaded", async () => {
     // Check authentication
     if (!isAuthenticated()) {
-      window.location.href = 'login-page.html';
+      globalThis.location.href = '/pages/login-page.html';
       return;
     }
 

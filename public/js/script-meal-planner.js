@@ -243,7 +243,7 @@ async function weeklyMeals(currentDate) {
               notes: item.notes || ""
             });
 
-            window.location.href = "add-meal.html";
+            window.location.href = "/pages/add-meal.html";
           });
 
           const removeBtn = document.createElement("button");
@@ -338,7 +338,7 @@ async function weeklyMeals(currentDate) {
           meal_type: meal.type
         });
 
-        window.location.href = "add-meal.html";
+        window.location.href = "/pages/add-meal.html";
       });
 
         grid.appendChild(addBtn);
@@ -498,7 +498,7 @@ function showUndoBanner() {
 // initialization
 document.addEventListener('DOMContentLoaded', () => {
     if (!isAuthenticated()) {
-        window.location.href = 'login-page.html';
+        window.location.href = '/pages/login-page.html';
         return;
     }
     
