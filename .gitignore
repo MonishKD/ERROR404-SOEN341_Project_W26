@@ -16,3 +16,5 @@ src/database/migrations/
 # Prisma generated files
 **/.prisma/
 **/node_modules/.prisma/
+config/prisma.config.ts
+package-lock.json
