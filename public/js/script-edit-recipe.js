@@ -1,4 +1,4 @@
-import { getToken, clearToken, isAuthenticated, getInitials, logout, fetchRecipeData } from "./script.js";
+import { getToken, clearToken, isAuthenticated, getInitials, logout, fetchRecipeData, notificationManager } from "./script.js";
 const API_BASE_URL = 'http://localhost:4002/api';
 /**
  * Helper to set field value
@@ -106,7 +106,7 @@ async function updateRecipe(recipeId) {
 
   // Validate required fields
   if (!recipeData.name || !recipeData.prep_time || !ingredientsArray.length || !stepsArray.length) {
-    alert('Please fill in all required fields');
+    notificationManager.error('Please fill in all required fields');
     return;
   }
 
@@ -124,14 +124,14 @@ async function updateRecipe(recipeId) {
     console.log('Server response:', responseData);
 
     if (response.ok) {
-      alert('Recipe updated successfully!');
+      notificationManager.success('Recipe updated successfully!');
       window.location.href = '/pages/recipes.html';
     } else {
-      alert('Error: ' + (responseData.message || 'Failed to update recipe'));
+      notificationManager.error('Error: ' + (responseData.message || 'Failed to update recipe'));
     }
   } catch (error) {
     console.error('Error updating recipe:', error);
-    alert('Failed to update recipe. Please try again.');
+    notificationManager.error('Failed to update recipe. Please try again.');
   }
 }
 
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const recipeId = urlParams.get('id');
 
     if (!recipeId) {
-        alert('No recipe ID specified');
+        notificationManager.error('No recipe ID specified');
         window.location.href = '/pages/recipes.html';
         return;
     }

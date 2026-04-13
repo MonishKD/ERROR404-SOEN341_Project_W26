@@ -43,6 +43,10 @@ app.get("/signup", (req, res) => {
   res.sendFile(path.join(publicPath, "pages", "sign-up-page.html"));
 });
 
+app.get("/reset-password", (req, res) => {
+  res.sendFile(path.join(publicPath, "pages", "reset-password.html"));
+});
+
 /*** API Routes ***/
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);

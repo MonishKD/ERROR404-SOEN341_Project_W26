@@ -1,4 +1,5 @@
-import { getInitials, createMealPlanItem, logout, fetchAllRecipes, isAuthenticated, getToken } from "./script.js";
+import { getInitials, createMealPlanItem, logout, fetchAllRecipes, isAuthenticated, getToken, notificationManager } from "./script.js";
+
 const API_BASE_URL = "http://localhost:4002/api";
 
 /**
@@ -168,7 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const header = document.querySelector('.profile-header h1');
 
     if (!slotValidation.valid) {
-    alert(slotValidation.message);
+    notificationManager.error(slotValidation.message);
     window.location.href = '/pages/meal-planner.html';
     return;
     }
@@ -216,38 +217,49 @@ document.addEventListener("DOMContentLoaded", async () => {
         // If the API returns a duplicate recipe error, prompt the user for confirmation to allow duplicates
         if (!result.success && result.code === 'DUPLICATE_RECIPE_IN_WEEK') {
         const duplicateLocations = formatDuplicateMealAssignments(result.duplicates);
-        const confirmed = confirm(
-            `This recipe is already used this week in ${duplicateLocations}. Do you want to use it again?`
-        );
-        // If the user confirms, retry the API call with allowDuplicate set to true
-        if (confirmed) {
+        notificationManager.confirm(
+            `This recipe is already used this week in ${duplicateLocations}. Do you want to use it again?`,
+            async () => {
+            // If the user confirms, retry the API call with allowDuplicate set to true
             result = slot.itemId
-            ? await updateMealPlanItem(
-                slot.itemId,
-                recipeId,
-                slot.day_of_week,
-                slot.meal_type,
-                slot.notes || "", // for empty notes
-                true
-                )
-            : await createMealPlanItem(
-                slot.mealPlanId,
-                recipeId,
-                slot.day_of_week,
-                slot.meal_type,
-                "", // for empty notes
-                true
-                );
-        }
-        }
+                ? await updateMealPlanItem(
+                    slot.itemId,
+                    recipeId,
+                    slot.day_of_week,
+                    slot.meal_type,
+                    slot.notes || "", // for empty notes
+                    true
+                    )
+                : await createMealPlanItem(
+                    slot.mealPlanId,
+                    recipeId,
+                    slot.day_of_week,
+                    slot.meal_type,
+                    "", // for empty notes
+                    true
+                    );
 
-        if (result.success) {
+            if (result.success) {
+                clearSelectedMealSlot();
+                notificationManager.success(slot.itemId ? 'Meal updated successfully!' : 'Meal added successfully!');
+                setTimeout(() => {
+                    window.location.href = '/pages/meal-planner.html';
+                }, 800);
+            } else {
+                card.style.pointerEvents = 'auto';
+                notificationManager.error(result.error || (slot.itemId ? 'Failed to update meal.' : 'Failed to add meal.'));
+            }
+            }
+        );
+        } else if (result.success) {
         clearSelectedMealSlot();
-        alert(slot.itemId ? 'Meal updated successfully!' : 'Meal added successfully!');
-        window.location.href = '/pages/meal-planner.html';
+        notificationManager.success(slot.itemId ? 'Meal updated successfully!' : 'Meal added successfully!');
+        setTimeout(() => {
+            window.location.href = '/pages/meal-planner.html';
+        }, 800);
         } else {
         card.style.pointerEvents = 'auto';
-        alert(result.error || (slot.itemId ? 'Failed to update meal.' : 'Failed to add meal.'));
+        notificationManager.error(result.error || (slot.itemId ? 'Failed to update meal.' : 'Failed to add meal.'));
         }
     });
     });
