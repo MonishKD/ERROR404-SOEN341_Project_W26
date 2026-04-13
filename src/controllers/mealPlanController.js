@@ -1,65 +1,41 @@
 import { prisma } from "../database/prisma.js";
+import {
+  validateAllowDuplicate,
+  validateCreateMealPlanItemInput,
+  validateUpdateMealPlanItemInput
+} from "../utils/mealPlanHelpers.js";
 
 export async function createMealPlanItemController(req, res) {
   console.log("HIT /api/mealPlan/item route");
 
   try {
-    const ownerId = parseInt(req.user.userId, 10);
+    const ownerId = Number.parseInt(req.user.userId, 10);
     let { mealPlanId, recipeId, day_of_week, meal_type, notes, allowDuplicate } = req.body;
 
-    if (typeof allowDuplicate === "string") {
-      const normalizedAllowDuplicate = allowDuplicate.trim().toLowerCase();
-      if (normalizedAllowDuplicate === "true") {
-        allowDuplicate = true;
-      } else if (normalizedAllowDuplicate === "false") {
-        allowDuplicate = false;
-      } else if (normalizedAllowDuplicate !== "") {
-        return res.status(400).json({ message: "Invalid value for allowDuplicate" });
-      }
-    } else if (typeof allowDuplicate !== "boolean" && typeof allowDuplicate !== "undefined") {
+    allowDuplicate = validateAllowDuplicate(allowDuplicate);
+
+    if (allowDuplicate === "INVALID") {
       return res.status(400).json({ message: "Invalid value for allowDuplicate" });
     }
 
-    const validDays = [
-      "MONDAY",
-      "TUESDAY",
-      "WEDNESDAY",
-      "THURSDAY",
-      "FRIDAY",
-      "SATURDAY",
-      "SUNDAY"
-    ];
+    const validationError = validateCreateMealPlanItemInput({
+      mealPlanId,
+      recipeId,
+      day_of_week,
+      meal_type,
+      notes
+    });
 
-    const validMealTypes = [
-      "BREAKFAST",
-      "LUNCH",
-      "DINNER",
-      "SNACK"
-    ];
-
-    if (!mealPlanId || Number.isNaN(parseInt(mealPlanId, 10))) {
-      return res.status(400).json({ message: "Valid mealPlanId is required" });
+    if (validationError) {
+      return res.status(400).json({ message: validationError });
     }
 
-    if (!recipeId || Number.isNaN(parseInt(recipeId, 10))) {
-      return res.status(400).json({ message: "Valid recipeId is required" });
-    }
-
-    if (!day_of_week || !validDays.includes(day_of_week)) {
-      return res.status(400).json({ message: "Invalid day_of_week value" });
-    }
-
-    if (!meal_type || !validMealTypes.includes(meal_type)) {
-      return res.status(400).json({ message: "Invalid meal_type value" });
-    }
-
-    if (notes !== undefined && typeof notes !== "string") {
-      return res.status(400).json({ message: "Notes must be a string" });
-    }
+    const parsedMealPlanId = Number.parseInt(mealPlanId, 10);
+    const parsedRecipeId = Number.parseInt(recipeId, 10);
 
     const mealPlan = await prisma.mealPlan.findFirst({
       where: {
-        id: parseInt(mealPlanId, 10),
+        id: parsedMealPlanId,
         ownerId
       }
     });
@@ -70,7 +46,7 @@ export async function createMealPlanItemController(req, res) {
 
     const recipe = await prisma.recipes.findFirst({
       where: {
-        id: parseInt(recipeId, 10),
+        id: parsedRecipeId,
         ownerId
       }
     });
@@ -81,8 +57,8 @@ export async function createMealPlanItemController(req, res) {
 
     const duplicateAssignments = await prisma.mealPlanItem.findMany({
       where: {
-        mealPlanId: parseInt(mealPlanId, 10),
-        recipeId: parseInt(recipeId, 10)
+        mealPlanId: parsedMealPlanId,
+        recipeId: parsedRecipeId
       },
       select: {
         day_of_week: true,
@@ -100,8 +76,8 @@ export async function createMealPlanItemController(req, res) {
 
     const mealPlanItem = await prisma.mealPlanItem.create({
       data: {
-        mealPlanId: parseInt(mealPlanId, 10),
-        recipeId: parseInt(recipeId, 10),
+        mealPlanId: parsedMealPlanId,
+        recipeId: parsedRecipeId,
         day_of_week,
         meal_type,
         notes: notes?.trim() || null
@@ -130,27 +106,25 @@ export async function createMealPlanItemController(req, res) {
 
 export async function updateMealPlanItemController(req, res) {
   try {
-    const itemId = parseInt(req.params.itemId, 10);
-    const ownerId = parseInt(req.user.userId, 10);
-    const { recipeId, day_of_week, meal_type, notes, allowDuplicate } = req.body;
+    const itemId = Number.parseInt(req.params.itemId, 10);
+    const ownerId = Number.parseInt(req.user.userId, 10);
+    let { recipeId, day_of_week, meal_type, notes, allowDuplicate } = req.body;
 
-    const validDays = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
-    const validMealTypes = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"];
+    allowDuplicate = validateAllowDuplicate(allowDuplicate);
 
-    if (Number.isNaN(itemId)) {
-      return res.status(400).json({ message: "Invalid meal assignment id" });
+    if (allowDuplicate === "INVALID") {
+      return res.status(400).json({ message: "Invalid value for allowDuplicate" });
     }
 
-    if (day_of_week !== undefined && !validDays.includes(day_of_week)) {
-      return res.status(400).json({ message: "Invalid day_of_week value" });
-    }
+    const validationError = validateUpdateMealPlanItemInput({
+      itemId,
+      day_of_week,
+      meal_type,
+      notes
+    });
 
-    if (meal_type !== undefined && !validMealTypes.includes(meal_type)) {
-      return res.status(400).json({ message: "Invalid meal_type value" });
-    }
-
-    if (notes !== undefined && typeof notes !== "string") {
-      return res.status(400).json({ message: "Notes must be a string" });
+    if (validationError) {
+      return res.status(400).json({ message: validationError });
     }
 
     const item = await prisma.mealPlanItem.findUnique({
@@ -167,13 +141,15 @@ export async function updateMealPlanItemController(req, res) {
     }
 
     if (item.mealPlan.ownerId !== ownerId) {
-      return res.status(403).json({ message: "You do not have permission to update this meal assignment" });
+      return res.status(403).json({
+        message: "You do not have permission to update this meal assignment"
+      });
     }
 
     const updateData = {};
 
     if (recipeId !== undefined) {
-      const parsedRecipeId = parseInt(recipeId, 10);
+      const parsedRecipeId = Number.parseInt(recipeId, 10);
 
       if (Number.isNaN(parsedRecipeId)) {
         return res.status(400).json({ message: "Invalid recipeId" });
@@ -240,8 +216,8 @@ export async function updateMealPlanItemController(req, res) {
 
 export async function deleteMealPlanItemController(req, res) {
   try {
-    const itemId = parseInt(req.params.itemId, 10);
-    const ownerId = parseInt(req.user.userId, 10);
+    const itemId = Number.parseInt(req.params.itemId, 10);
+    const ownerId = Number.parseInt(req.user.userId, 10);
 
     if (Number.isNaN(itemId)) {
       return res.status(400).json({ message: "Invalid meal assignment id" });
@@ -277,7 +253,7 @@ export async function deleteMealPlanItemController(req, res) {
 
 export async function getOwnerMealPlansController(req, res) {
   try {
-    const ownerId = parseInt(req.user.userId, 10);
+    const ownerId = Number.parseInt(req.user.userId, 10);
     const mealPlans = await prisma.mealPlan.findMany({
       where: { ownerId }
     });
@@ -291,7 +267,7 @@ export async function getOwnerMealPlansController(req, res) {
 export async function getMealPlanByWeekController(req, res) {
   try {
     const { startDate } = req.params;
-    const ownerId = parseInt(req.user.userId, 10);
+    const ownerId = Number.parseInt(req.user.userId, 10);
 
     const [year, month, day] = startDate.split("-").map(Number);
 
@@ -326,8 +302,8 @@ export async function getMealPlanByWeekController(req, res) {
 
 export async function getMealPlanItemsController(req, res) {
   try {
-    const id = parseInt(req.params.id, 10);
-    const ownerId = parseInt(req.user.userId, 10);
+    const id = Number.parseInt(req.params.id, 10);
+    const ownerId = Number.parseInt(req.user.userId, 10);
 
     if (!id || Number.isNaN(id)) {
       return res.status(400).json({ message: "Valid mealPlan id is required" });
@@ -355,7 +331,7 @@ export async function getMealPlanItemsController(req, res) {
 
 export async function createMealPlanController(req, res) {
   try {
-    const ownerId = parseInt(req.user.userId, 10);
+    const ownerId = Number.parseInt(req.user.userId, 10);
     const { week_start_date, week_end_date, name } = req.body;
 
     if (!week_start_date || !week_end_date) {

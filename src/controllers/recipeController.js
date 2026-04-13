@@ -1,21 +1,30 @@
 import multer from "multer";
 import { prisma } from "../database/prisma.js";
-import { checkRecipeOwner } from "../middleware/auth.js";
+
+// services
 import {
-  createRecipe,
   getAllRecipes,
-  getRecipeById,
+  createRecipe,
   updateRecipe,
   deleteRecipe,
+  getRecipeById,
+  getExploreRecipes,
   recipeRatings,
   createOrUpdateRecipeRating,
-  videoRecipe,
-  getExploreRecipes
+  videoRecipe
 } from "../services/recipesService.js";
 
-const upload = multer({ storage: multer.memoryStorage() });
+// helpers
+import {
+  buildRecipeCreateData,
+  buildRecipeUpdateData
+} from "../utils/recipeHelpers.js";
 
-export { upload, checkRecipeOwner };
+export { checkRecipeOwner } from "../middleware/auth.js";
+
+// upload config
+const upload = multer({ storage: multer.memoryStorage() });
+export { upload };
 
 export async function getAllRecipesController(req, res) {
   try {
@@ -26,7 +35,7 @@ export async function getAllRecipesController(req, res) {
     });
 
     const q = (req.query.q || "").trim();
-    const ownerId = parseInt(req.user.userId, 10);
+    const ownerId = Number.parseInt(req.user.userId, 10);
 
     const normalize = (v) =>
       (v || "")
@@ -126,92 +135,8 @@ export async function getAllRecipesController(req, res) {
 
 export async function createRecipeController(req, res) {
   try {
-    const { name, ingredients, prep_time, prep_steps, cost, difficulty, dietary_tags, allergens } = req.body;
-    const ownerId = parseInt(req.user.userId, 10);
-
-    let ingredientsArray = ingredients;
-    if (typeof ingredients === "string") {
-      try {
-        ingredientsArray = JSON.parse(ingredients);
-      } catch {
-        if (ingredients.includes("\n")) {
-          ingredientsArray = ingredients.split("\n").map(i => i.trim()).filter(Boolean);
-        } else if (ingredients.includes(",")) {
-          ingredientsArray = ingredients.split(",").map(i => i.trim()).filter(Boolean);
-        } else {
-          ingredientsArray = [ingredients];
-        }
-      }
-    }
-    if (!Array.isArray(ingredientsArray)) {
-      ingredientsArray = ingredientsArray ? [ingredientsArray] : [];
-    }
-
-    let prepStepsArray = prep_steps;
-    if (typeof prep_steps === "string") {
-      try {
-        prepStepsArray = JSON.parse(prep_steps);
-      } catch {
-        if (prep_steps.includes("\n")) {
-          prepStepsArray = prep_steps.split("\n").map(s => s.trim()).filter(Boolean);
-        } else if (prep_steps.includes(".")) {
-          prepStepsArray = prep_steps.split(".").map(s => s.trim()).filter(Boolean);
-        } else {
-          prepStepsArray = [prep_steps];
-        }
-      }
-    }
-    if (!Array.isArray(prepStepsArray)) {
-      prepStepsArray = prepStepsArray ? [prepStepsArray] : [];
-    }
-
-    let parsedDietaryTags = dietary_tags;
-    if (typeof dietary_tags === "string") {
-      try {
-        parsedDietaryTags = JSON.parse(dietary_tags);
-      } catch {}
-    }
-    const dietaryTagsArray = Array.isArray(parsedDietaryTags) ? parsedDietaryTags : [];
-
-    const mappedDietaryTags = dietaryTagsArray.map(tag => {
-      if (tag === "gluten-free" || tag === "Gluten-Free") return "Gluten-Free";
-      if (tag === "dairy-free" || tag === "Dairy-Free") return "Dairy-Free";
-      if (tag === "nut-free" || tag === "Nut-Free") return "Nut-Free";
-      if (tag === "vegan" || tag === "Vegan") return "Vegan";
-      if (tag === "vegetarian" || tag === "Vegetarian") return "Vegetarian";
-      if (tag === "halal" || tag === "Halal") return "Halal";
-      return tag;
-    });
-
-    let allergensArray = allergens;
-    if (typeof allergens === "string") {
-      try {
-        allergensArray = JSON.parse(allergens);
-      } catch {
-        if (allergens.includes(",")) {
-          allergensArray = allergens.split(",").map(a => a.trim()).filter(Boolean);
-        } else if (allergens.length > 0) {
-          allergensArray = [allergens];
-        } else {
-          allergensArray = [];
-        }
-      }
-    }
-    if (!Array.isArray(allergensArray)) {
-      allergensArray = allergensArray ? [allergensArray] : [];
-    }
-
-    const recipeData = {
-      name,
-      ingredients: ingredientsArray,
-      prep_time: parseInt(prep_time, 10),
-      prep_steps: prepStepsArray,
-      cost,
-      difficulty,
-      dietary_tags: mappedDietaryTags,
-      allergens: allergensArray,
-      ownerId
-    };
+    const ownerId = Number.parseInt(req.user.userId, 10);
+    const recipeData = buildRecipeCreateData(req.body, ownerId);
 
     const newRecipe = await createRecipe(recipeData);
     res.status(201).json(newRecipe);
@@ -223,7 +148,7 @@ export async function createRecipeController(req, res) {
 
 export async function getExploreRecipesController(req, res) {
   try {
-    const currentUserId = parseInt(req.user.userId, 10);
+    const currentUserId = Number.parseInt(req.user.userId, 10);
     const recipes = await getExploreRecipes(currentUserId);
     return res.json(recipes);
   } catch (error) {
@@ -234,7 +159,7 @@ export async function getExploreRecipesController(req, res) {
 
 export async function getRecipeByIdController(req, res) {
   try {
-    const recipe = await getRecipeById(parseInt(req.params.id, 10));
+    const recipe = await getRecipeById(Number.parseInt(req.params.id, 10));
     if (!recipe) {
       return res.status(404).json({ error: "Recipe not found" });
     }
@@ -247,83 +172,13 @@ export async function getRecipeByIdController(req, res) {
 
 export async function updateRecipeController(req, res) {
   try {
-    const { name, ingredients, prep_time, prep_steps, cost, difficulty, dietary_tags, allergens } = req.body;
+    const updateData = buildRecipeUpdateData(req.body);
 
-    let ingredientsArray = ingredients;
-    if (typeof ingredients === "string") {
-      try {
-        ingredientsArray = JSON.parse(ingredients);
-      } catch {
-        if (ingredients.includes("\n")) {
-          ingredientsArray = ingredients.split("\n").map(i => i.trim()).filter(Boolean);
-        } else if (ingredients.includes(",")) {
-          ingredientsArray = ingredients.split(",").map(i => i.trim()).filter(Boolean);
-        } else {
-          ingredientsArray = ingredients ? [ingredients] : undefined;
-        }
-      }
-    }
+    const updatedRecipe = await updateRecipe(
+      Number.parseInt(req.params.id, 10),
+      updateData
+    );
 
-    let prepStepsArray = prep_steps;
-    if (typeof prep_steps === "string") {
-      try {
-        prepStepsArray = JSON.parse(prep_steps);
-      } catch {
-        if (prep_steps.includes("\n")) {
-          prepStepsArray = prep_steps.split("\n").map(s => s.trim()).filter(Boolean);
-        } else if (prep_steps.includes(".")) {
-          prepStepsArray = prep_steps.split(".").map(s => s.trim()).filter(Boolean);
-        } else {
-          prepStepsArray = prep_steps ? [prep_steps] : undefined;
-        }
-      }
-    }
-
-    let mappedDietaryTags = [];
-    if (dietary_tags && Array.isArray(dietary_tags)) {
-      mappedDietaryTags = dietary_tags.map(tag => {
-        if (tag === "gluten-free") return "Gluten-Free";
-        if (tag === "dairy-free") return "Dairy-Free";
-        if (tag === "nut-free") return "Nut-Free";
-        if (tag === "vegan") return "Vegan";
-        if (tag === "vegetarian") return "Vegetarian";
-        if (tag === "halal") return "Halal";
-        return tag;
-      });
-    }
-
-    let allergensArray = allergens;
-    if (typeof allergens === "string") {
-      try {
-        allergensArray = JSON.parse(allergens);
-      } catch {
-        if (allergens.includes(",")) {
-          allergensArray = allergens.split(",").map(a => a.trim()).filter(Boolean);
-        } else {
-          allergensArray = allergens ? [allergens] : [];
-        }
-      }
-    }
-    if (allergensArray && !Array.isArray(allergensArray)) {
-      allergensArray = [allergensArray];
-    }
-
-    const updateData = {
-      name,
-      ingredients: ingredientsArray,
-      prep_time: prep_time ? parseInt(prep_time, 10) : undefined,
-      prep_steps: prepStepsArray,
-      cost,
-      difficulty,
-      dietary_tags: mappedDietaryTags,
-      allergens: allergensArray || []
-    };
-
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] === undefined) delete updateData[key];
-    });
-
-    const updatedRecipe = await updateRecipe(parseInt(req.params.id, 10), updateData);
     res.json(updatedRecipe);
   } catch (error) {
     console.error("Error updating recipe:", error);
@@ -333,7 +188,7 @@ export async function updateRecipeController(req, res) {
 
 export async function deleteRecipeController(req, res) {
   try {
-    await deleteRecipe(parseInt(req.params.id, 10));
+    await deleteRecipe(Number.parseInt(req.params.id, 10));
     res.json({ message: "Recipe deleted successfully" });
   } catch (error) {
     console.error("Error deleting recipe:", error);
@@ -345,7 +200,7 @@ export async function updateRecipePrivacyController(req, res) {
   try {
     const { is_private } = req.body;
 
-    const updatedRecipe = await updateRecipe(parseInt(req.params.id, 10), {
+    const updatedRecipe = await updateRecipe(Number.parseInt(req.params.id, 10), {
       is_private
     });
 
@@ -357,7 +212,7 @@ export async function updateRecipePrivacyController(req, res) {
 
 export async function getRecipeRatingsController(req, res) {
   try {
-    const ratings = await recipeRatings(parseInt(req.params.recipeId, 10));
+    const ratings = await recipeRatings(Number.parseInt(req.params.recipeId, 10));
     res.json(ratings);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -366,7 +221,7 @@ export async function getRecipeRatingsController(req, res) {
 
 export async function getAverageRatingController(req, res) {
   try {
-    const ratings = await recipeRatings(parseInt(req.params.recipeId, 10));
+    const ratings = await recipeRatings(Number.parseInt(req.params.recipeId, 10));
     const average =
       ratings.length > 0
         ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
@@ -380,20 +235,20 @@ export async function getAverageRatingController(req, res) {
 
 export async function createOrUpdateRecipeRatingController(req, res) {
   try {
-    const userId = parseInt(req.user.userId, 10);
+    const userId = Number.parseInt(req.user.userId, 10);
     const { recipeId, rating, comment } = req.body;
 
-    if (!recipeId || Number.isNaN(parseInt(recipeId, 10))) {
+    if (!recipeId || Number.isNaN(Number.parseInt(recipeId, 10))) {
       return res.status(400).json({ message: "Valid recipeId is required" });
     }
 
-    const parsedRecipeId = parseInt(recipeId, 10);
+    const parsedRecipeId = Number.parseInt(recipeId, 10);
 
     if (rating === null || rating === undefined) {
       return res.status(400).json({ message: "Rating is required" });
     }
 
-    const parsedRating = parseInt(rating, 10);
+    const parsedRating = Number.parseInt(rating, 10);
     if (Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
       return res.status(400).json({ message: "Rating must be between 1 and 5" });
     }
@@ -422,7 +277,7 @@ export async function createOrUpdateRecipeRatingController(req, res) {
 
 export async function uploadRecipeVideoController(req, res) {
   try {
-    const recipeId = parseInt(req.params.id, 10);
+    const recipeId = Number.parseInt(req.params.id, 10);
 
     if (!req.file) {
       return res.status(400).json({ error: "No video uploaded" });
@@ -446,7 +301,7 @@ export async function uploadRecipeVideoController(req, res) {
 
 export async function saveRecipeVideoUrlController(req, res) {
   try {
-    const recipeId = parseInt(req.params.id, 10);
+    const recipeId = Number.parseInt(req.params.id, 10);
     const { videoUrl } = req.body;
 
     if (!videoUrl) {
@@ -468,7 +323,7 @@ export async function saveRecipeVideoUrlController(req, res) {
 
 export async function getRecipeVideoController(req, res) {
   try {
-    const recipeId = parseInt(req.params.id, 10);
+    const recipeId = Number.parseInt(req.params.id, 10);
 
     const video = await prisma.video.findFirst({
       where: { recipeId }

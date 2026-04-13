@@ -29,7 +29,7 @@ export async function updateProfileController(req, res) {
 export async function getProfileCompletionStatusController(req, res) {
   try {
     const user = await prisma.users.findUnique({
-      where: { id: parseInt(req.user.userId, 10) },
+      where: { id: Number.parseInt(req.user.userId, 10) },
       select: { age: true, weight: true, height: true }
     });
 
@@ -65,11 +65,11 @@ export async function updateHealthMetricsController(req, res) {
     }
 
     const updatedUser = await prisma.users.update({
-      where: { id: parseInt(req.user.userId, 10) },
+      where: { id: Number.parseInt(req.user.userId, 10) },
       data: {
-        age: age ? parseInt(age, 10) : null,
-        weight: weight ? parseFloat(weight) : null,
-        height: height ? parseFloat(height) : null
+        age: age ? Number.parseInt(age, 10) : null,
+        weight: weight ? Number.parseFloat(weight) : null,
+        height: height ? Number.parseFloat(height) : null
       }
     });
 
