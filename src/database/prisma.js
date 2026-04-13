@@ -2,8 +2,8 @@ import { PrismaClient } from '@prisma/client'
 import pg from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import dotenv from 'dotenv'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 // Get current directory
 const __filename = fileURLToPath(import.meta.url)

@@ -1,5 +1,5 @@
 
-import { getToken, clearToken, clearAllErrors, setButtonLoading, isAuthenticated, getInitials, showError, validateEmail, getUserProfile, logout } from "./script.js";
+import { getToken, clearToken, clearAllErrors, setButtonLoading, isAuthenticated, getInitials, showError, validateEmail, getUserProfile, logout, notificationManager } from "./script.js";
 const API_BASE_URL = 'http://localhost:4002/api';
 
 /**
@@ -194,10 +194,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setButtonLoading(submitButton, false);
 
         if (result.success) {
-        alert('Profile updated successfully!');
-        window.location.href = '/pages/home-page.html';
+        notificationManager.success('Profile updated successfully!');
+        // Wait 800ms before redirecting so user can see the notification
+        setTimeout(() => {
+          window.location.href = '/pages/home-page.html';
+        }, 800);
         } else {
-        alert(result.error || 'Failed to update profile. Please try again.');
+        notificationManager.error(result.error || 'Failed to update profile. Please try again.');
         }
     });
     }

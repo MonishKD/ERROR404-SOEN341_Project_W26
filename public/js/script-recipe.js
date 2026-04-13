@@ -1,5 +1,5 @@
 // script-recipe.js
-import { getToken, clearToken, isAuthenticated, getUserProfile, getInitials, logout, fetchRecipeRatings, fetchAverageRating, renderStars, fetchRecipeData } from "./script.js";
+import { getToken, clearToken, isAuthenticated, getUserProfile, getInitials, logout, fetchRecipeRatings, fetchAverageRating, renderStars, fetchRecipeData, notificationManager } from "./script.js";
 const API_BASE_URL = 'http://localhost:4002/api';
 let allRecipes = []; // Store all recipes for filtering
 /**
@@ -29,8 +29,16 @@ async function filterRecipesBySearch(searchTerm) {
 
   if (filtered.length === 0) {
     generalGrid.innerHTML = '<p class="no-results">No recipes match your search</p>';
+    // Scroll to no results message
+    setTimeout(() => {
+      generalGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   } else {
     await displayFilteredRecipes(filtered);
+    // Scroll to results
+    setTimeout(() => {
+      generalGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   }
 }
 
@@ -119,6 +127,14 @@ async function filterRecipes() {
 
   console.log('Filtered recipes:', filtered.length);
   await displayFilteredRecipes(filtered);
+  
+  // Scroll to results
+  const generalGrid = document.querySelector('.section:last-child .recipe-cards-grid');
+  if (generalGrid) {
+    setTimeout(() => {
+      generalGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
 }
 /**
  * Display filtered recipes in the general grid
@@ -210,14 +226,14 @@ async function deleteRecipe(id) {
 
     const recipe = await response.json();
     if (recipe.isInMealPlan === true) {
-      alert('This recipe is currently used in a meal plan. Please remove it from the meal plan before deleting.');
+      notificationManager.error('This recipe is currently used in a meal plan. Please remove it from the meal plan before deleting.');
       return;
     }
   } catch (error) {
     console.error('Error checking meal plan usage:', error);
   }
   
-  if (confirm('Are you sure you want to delete this recipe?')) {
+  notificationManager.confirm('Are you sure you want to delete this recipe?', async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/recipes/${id}`, {
         method: 'DELETE',
@@ -227,18 +243,18 @@ async function deleteRecipe(id) {
       });
       
       if (response.ok) {
-        alert('Recipe deleted successfully!');
+        notificationManager.success('Recipe deleted successfully!');
         // Reload recipes
         loadMyRecipes();
         loadAllRecipes();
       } else {
-        alert('Failed to delete recipe');
+        notificationManager.error('Failed to delete recipe');
       }
     } catch (error) {
       console.error('Error deleting recipe:', error);
-      alert('Error deleting recipe');
+      notificationManager.error('Error deleting recipe');
     }
-  }
+  });
 }
 /**
  * Load all recipes for filtering
@@ -521,7 +537,7 @@ async function createPublicRecipeCard(recipe) {
     const commentText = details.querySelector(`#comment-${recipe.id}`).value.trim();
 
     if (!selectedRating) {
-      alert("Please select a rating.");
+      notificationManager.error("Please select a rating.");
       return;
     }
 
@@ -532,10 +548,10 @@ async function createPublicRecipeCard(recipe) {
     );
 
     if (result.success) {
-      alert("Comment/rating submitted!");
+      notificationManager.success("Comment/rating submitted!");
       await loadExploreRecipes();
     } else {
-      alert(result.error || "Failed to submit.");
+      notificationManager.error(result.error || "Failed to submit.");
     }
   });
 
@@ -580,11 +596,11 @@ async function saveRecipeToMyCollection(recipeId) {
       throw new Error(createData.message || "Failed to save recipe");
     }
 
-    alert("Recipe saved to My Recipes!");
+    notificationManager.success("Recipe saved to My Recipes!");
     loadMyRecipes();
   } catch (error) {
     console.error("Error saving recipe to collection:", error);
-    alert(error.message || "Failed to save recipe");
+    notificationManager.error(error.message || "Failed to save recipe");
   }
 }
 
@@ -707,6 +723,25 @@ document.addEventListener('DOMContentLoaded', () => {
       await displayFilteredRecipes(allRecipes);
     });
   }
+
+  // Setup single-select behavior for time, difficulty, and cost
+  const singleSelectGroups = ['time', 'difficulty', 'cost'];
+  
+  singleSelectGroups.forEach(groupName => {
+    const checkboxes = document.querySelectorAll(`input[name="${groupName}"]`);
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          // Uncheck all other checkboxes in this group
+          checkboxes.forEach(cb => {
+            if (cb !== e.target) {
+              cb.checked = false;
+            }
+          });
+        }
+      });
+    });
+  });
 
   //logout functionality
   logout();

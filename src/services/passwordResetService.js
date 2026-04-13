@@ -4,6 +4,8 @@ import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
 import { prisma } from '../database/prisma.js';
 
+const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:4002';
+
 // Configure email transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -53,7 +55,7 @@ export async function requestPasswordReset(email) {
   });
 
   // Create reset link
-  const resetLink = `http://localhost:4000/reset-password?token=${token}`;
+  const resetLink = `${APP_BASE_URL}/reset-password?token=${token}`;
 
   // Send email
   const mailOptions = {

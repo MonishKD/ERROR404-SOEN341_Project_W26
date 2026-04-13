@@ -75,12 +75,19 @@ npm test -- --coverage
 ├── config/              # Jest and Prisma configuration
 ├── docs/                # Project documentation
 ├── prisma/              # Prisma schema and migrations
-├── public/              # Frontend HTML, CSS, and JS files
+├── public/              
+│   ├── css/             # CSS files
+│   ├── js/              # JS files
+│   └── pages            # Frontend HTML files
 ├── scripts/             # Database initialization and seeding scripts
 ├── src/
+│   ├── controllers/     # Application controllers
 │   ├── database/        # Database connection setup
-│   ├── middleware/       # Express middleware (e.g., auth)
+│   ├── middleware/      # Express middleware (e.g., auth)
+│   ├── routes/          # Express route definitions
 │   ├── services/        # Business logic and service layer
+│   ├── utils/           # Utility and helper functions
+│   ├── app.js           # Main Express app configuration and route setup
 │   └── server.js        # Express server entry point
 ├── tests/
 │   └── unit/            # Unit tests

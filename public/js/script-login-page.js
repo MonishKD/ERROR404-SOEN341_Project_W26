@@ -1,4 +1,4 @@
-import { saveToken, setButtonLoading, clearAllErrors } from "./script.js";
+import { saveToken, setButtonLoading, clearAllErrors, notificationManager } from "./script.js";
 const API_BASE_URL = 'http://localhost:4002/api';
 
 /**
@@ -41,12 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Validate inputs
     if (!email) {
-        alert('Please enter your email address');
+        notificationManager.error('Please enter your email address');
         return;
     }
 
     if (!password) {
-        alert('Please enter your password');
+        notificationManager.error('Please enter your password');
         return;
     }
 
@@ -64,10 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
         saveToken(result.data.token);
 
         // Redirect to home page
-        window.location.href = '/pages/home-page.html';
+        globalThis.location.href = '/pages/home-page.html';
     } else {
         // Show error
-        alert(result.error || 'Login failed. Please check your credentials and try again.');
+        notificationManager.error(result.error || 'Login failed. Please check your credentials and try again.');
     }
     });
 });

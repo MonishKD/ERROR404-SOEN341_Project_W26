@@ -1,4 +1,4 @@
-import { clearAllErrors, setButtonLoading, validateEmail, showError } from "./script.js";
+import { clearAllErrors, setButtonLoading, validateEmail, showError, notificationManager } from "./script.js";
 const API_BASE_URL = 'http://localhost:4002/api';
 
 async function registerUser(firstName, lastName, email, password) {
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (result.success) {
         // Show success message
-        alert('Registration successful! Please log in.');
+        notificationManager.success('Registration successful! Please log in.');
 
         // Redirect to login page
         window.location.href = '/pages/login-page.html';
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.error.includes('Email')) {
             showError('emailError', result.error);
         } else {
-            alert(result.error || 'Registration failed. Please try again.');
+            notificationManager.error(result.error || 'Registration failed. Please try again.');
         }
         }
     });
