@@ -42,15 +42,14 @@
             <h1>🍽️ Add a Meal</h1>
             <p>Pick a recipe to add to your meal plan</p>
         </div>
+        <!--Empty state-->
+        <div id="addMealEmptyState" class="add-meal-empty-state" style="display: flex;">
+            <div class="empty-icon">🍽️</div>
+            <h3>No recipes yet!</h3>
+            <p> You haven't created any recipes. Create one first and it will appear here.</p>
+            <a href="create-recipe.html" class="btn-green">+ Create a Recipe</a>
 
-        <!--Search bar
-        <div class="search-bar-container">
-            <div class="search-bar">
-                <span class="search-icon">🔍</span>
-                <input type="text" placeholder="Search recipes...">
-                <button class="search-btn">Search</button>
-            </div>
-        </div> -->
+        </div>
 
         <!--Recipe grid-->
         <div id="addMealRecipesContainer" class="recipes-grid"></div>

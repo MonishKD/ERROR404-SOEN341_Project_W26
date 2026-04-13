@@ -1,4 +1,4 @@
-/* ── Page header ── */
+/*Page header*/
 .recipes-page-header {
     text-align: center;
     margin-bottom: 35px;
@@ -723,4 +723,36 @@
 
 .recipe-rate-comment .btn-submit-comment:hover {
     background-color: #357ab8;
+}
+
+/*Add-meal empty state*/
+.add-meal-empty-state {
+    background: white;
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    border: 2px dashed #d1d5db;
+    margin-bottom: 30px;
+}
+
+.add-meal-empty-state .empty-icon {
+    font-size: 60px;
+}
+
+.add-meal-empty-state h3 {
+    margin: 0;
+    color: #555;
+    font-size: 20px;
+}
+
+.add-meal-empty-state p {
+    color: #888;
+    margin: 0;
+    font-size: 15px;
+    max-width: 300px;
 }
