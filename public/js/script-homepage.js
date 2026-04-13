@@ -25,7 +25,7 @@ async function loadUserProfile() {
     // If token is invalid, redirect to login
     if (result.error.includes('token') || result.error.includes('auth')) {
       clearToken();
-      window.location.href = 'login-page.html';
+      window.location.href = '/pages/login-page.html';
     }
   }
 }
@@ -204,7 +204,7 @@ async function homePageMealPlan() {
                 `;
             } else {
                 html += `
-                    <a href="meal-planner.html" class="meal-item empty">
+                    <a href="/pages/meal-planner.html" class="meal-item empty">
                         <span class="meal-type">${label}</span>
                         <span class="meal-name">+ Add ${label}</span>
                     </a>
@@ -217,7 +217,7 @@ async function homePageMealPlan() {
 
     html += `
         </div>
-        <a href="meal-planner.html" class="view-full-plan">View Full Weekly Plan →</a>
+        <a href="/pages/meal-planner.html" class="view-full-plan">View Full Weekly Plan →</a>
     `;
 
     container.innerHTML = html;
@@ -245,7 +245,7 @@ async function showSuggestions() {
 
   for (const recipe of randomRecipes) {
     html += `
-      <a href="recipes.html" class="recipe-card">
+      <a href="/pages/recipes.html" class="recipe-card">
         <div class="recipe-image">🍽️</div>
         <div class="recipe-info">
             <h4>${recipe.name}</h4>
@@ -296,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Check authentication
     if (!isAuthenticated()) {
-    window.location.href = 'login-page.html';
+    window.location.href = '/pages/login-page.html';
     return;
     }
 

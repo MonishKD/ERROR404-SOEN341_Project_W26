@@ -125,7 +125,7 @@ async function updateRecipe(recipeId) {
 
     if (response.ok) {
       alert('Recipe updated successfully!');
-      window.location.href = 'recipes.html';
+      window.location.href = '/pages/recipes.html';
     } else {
       alert('Error: ' + (responseData.message || 'Failed to update recipe'));
     }
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Check authentication
     if (!isAuthenticated()) {
-    window.location.href = 'login-page.html';
+    window.location.href = '/pages/login-page.html';
     return;
     }
 
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (!recipeId) {
         alert('No recipe ID specified');
-        window.location.href = 'recipes.html';
+        window.location.href = '/pages/recipes.html';
         return;
     }
 

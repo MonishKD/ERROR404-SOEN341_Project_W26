@@ -1,4 +1,4 @@
-import { getToken, clearToken, isAuthenticated, getInitials, logout } from "./script.js";
+import { getToken, isAuthenticated, getInitials, logout } from "./script.js";
 const API_BASE_URL = 'http://localhost:4002/api';
 
 /**
@@ -43,7 +43,7 @@ async function saveRecipe(event) {
 
   const recipeData = {
     name: document.getElementById('recipeName')?.value,
-    prep_time: parseInt(document.getElementById('prepTime')?.value),
+    prep_time: Number.parseInt(document.getElementById('prepTime')?.value),
     cost: document.getElementById('cost')?.value,
     difficulty: document.getElementById('difficulty')?.value,
     ingredients: ingredientsArray,
@@ -75,7 +75,7 @@ async function saveRecipe(event) {
 
     if (response.ok) {
       alert('Recipe saved successfully!');
-      window.location.href = 'recipes.html';
+      globalThis.location.href = '/pages/recipes.html';
     } else {
       alert('Error: ' + (responseData.message || 'Failed to save recipe'));
     }
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check authentication
     if (!isAuthenticated()) {
-    window.location.href = 'login-page.html';
+    globalThis.location.href = '/pages/login-page.html';
     return;
     }
 

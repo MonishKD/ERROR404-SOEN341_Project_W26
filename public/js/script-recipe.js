@@ -193,7 +193,7 @@ async function loadMyRecipes() {
 }
 async function editRecipe(id) {
   console.log('Edit recipe:', id);
-  window.location.href = `edit-recipe.html?id=${id}`;
+  window.location.href = `/pages/edit-recipe.html?id=${id}`;
 }
 /**
  * Delete a recipe by ID
@@ -633,7 +633,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Check authentication
   if (!isAuthenticated()) {
-    window.location.href = 'login-page.html';
+    window.location.href = '/pages/login-page.html';
     return;
   }
   getInitials();

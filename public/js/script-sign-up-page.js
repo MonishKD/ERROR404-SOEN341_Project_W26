@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Registration successful! Please log in.');
 
         // Redirect to login page
-        window.location.href = 'login-page.html';
+        window.location.href = '/pages/login-page.html';
         } else {
         // Show error
         if (result.error.includes('Email')) {

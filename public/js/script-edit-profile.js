@@ -80,7 +80,7 @@ async function loadUserProfileForEdit() {
     // If token is invalid, redirect to login
     if (result.error.includes('token') || result.error.includes('auth')) {
       clearToken();
-      window.location.href = 'login-page.html';
+      window.location.href = '/pages/login-page.html';
     }
   }
 }
@@ -120,7 +120,7 @@ async function updateUserProfile(updates) {
 document.addEventListener('DOMContentLoaded', () => {
 // Check authentication
     if (!isAuthenticated()) {
-    window.location.href = 'login-page.html';
+    window.location.href = '/pages/login-page.html';
     return;
     }
      
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (result.success) {
         alert('Profile updated successfully!');
-        window.location.href = 'home-page.html';
+        window.location.href = '/pages/home-page.html';
         } else {
         alert(result.error || 'Failed to update profile. Please try again.');
         }

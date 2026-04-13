@@ -112,7 +112,7 @@ export function logout() {
       logoutLink.addEventListener('click', (e) => {
         e.preventDefault();
         clearToken();
-        window.location.href = 'login-page.html';
+        window.location.href = '/pages/login-page.html';
     });
   }
 }
