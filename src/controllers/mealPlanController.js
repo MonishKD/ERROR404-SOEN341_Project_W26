@@ -104,6 +104,60 @@ export async function createMealPlanItemController(req, res) {
   }
 }
 
+async function resolveUpdatedRecipeId({
+  recipeId,
+  ownerId,
+  item,
+  itemId,
+  allowDuplicate
+}) {
+  if (recipeId === undefined) return { parsedRecipeId: undefined };
+
+  const parsedRecipeId = Number.parseInt(recipeId, 10);
+
+  if (Number.isNaN(parsedRecipeId)) {
+    return { error: { status: 400, message: "Invalid recipeId" } };
+  }
+
+  const recipe = await prisma.recipes.findFirst({
+    where: {
+      id: parsedRecipeId,
+      ownerId
+    }
+  });
+
+  if (!recipe) {
+    return { error: { status: 404, message: "Recipe not found" } };
+  }
+
+  const duplicateAssignments = await prisma.mealPlanItem.findMany({
+    where: {
+      mealPlanId: item.mealPlanId,
+      recipeId: parsedRecipeId,
+      NOT: { id: itemId }
+    },
+    select: {
+      day_of_week: true,
+      meal_type: true
+    }
+  });
+
+  if (duplicateAssignments.length > 0 && allowDuplicate !== true) {
+    return {
+      error: {
+        status: 409,
+        body: {
+          code: "DUPLICATE_RECIPE_IN_WEEK",
+          message: "This recipe is already assigned in this week.",
+          duplicates: duplicateAssignments
+        }
+      }
+    };
+  }
+
+  return { parsedRecipeId };
+}
+
 export async function updateMealPlanItemController(req, res) {
   try {
     const itemId = Number.parseInt(req.params.itemId, 10);
@@ -148,47 +202,21 @@ export async function updateMealPlanItemController(req, res) {
 
     const updateData = {};
 
-    if (recipeId !== undefined) {
-      const parsedRecipeId = Number.parseInt(recipeId, 10);
+    const recipeResolution = await resolveUpdatedRecipeId({
+        recipeId,
+        ownerId,
+        item,
+        itemId,
+        allowDuplicate
+    });
 
-      if (Number.isNaN(parsedRecipeId)) {
-        return res.status(400).json({ message: "Invalid recipeId" });
-      }
+    if (recipeResolution.error) {
+        const { status, message, body } = recipeResolution.error;
+        return res.status(status).json(body || { message });
+    }
 
-      const recipe = await prisma.recipes.findFirst({
-        where: {
-          id: parsedRecipeId,
-          ownerId
-        }
-      });
-
-      if (!recipe) {
-        return res.status(404).json({ message: "Recipe not found" });
-      }
-
-      const duplicateAssignments = await prisma.mealPlanItem.findMany({
-        where: {
-          mealPlanId: item.mealPlanId,
-          recipeId: parsedRecipeId,
-          NOT: {
-            id: itemId
-          }
-        },
-        select: {
-          day_of_week: true,
-          meal_type: true
-        }
-      });
-
-      if (duplicateAssignments.length > 0 && allowDuplicate !== true) {
-        return res.status(409).json({
-          code: "DUPLICATE_RECIPE_IN_WEEK",
-          message: "This recipe is already assigned in this week.",
-          duplicates: duplicateAssignments
-        });
-      }
-
-      updateData.recipeId = parsedRecipeId;
+    if (recipeResolution.parsedRecipeId !== undefined) {
+        updateData.recipeId = recipeResolution.parsedRecipeId;
     }
 
     if (day_of_week !== undefined) updateData.day_of_week = day_of_week;

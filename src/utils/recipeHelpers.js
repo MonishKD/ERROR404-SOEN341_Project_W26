@@ -1,39 +1,66 @@
-export function parseStringOrArray(value, splitMode = "comma", keepUndefined = false) {
+function emptyResult(keepUndefined) {
+  return keepUndefined ? undefined : [];
+}
+
+function wrapSingleValue(value, keepUndefined) {
+  if (!value) return emptyResult(keepUndefined);
+  return [value];
+}
+
+function tryParseJsonArray(value, keepUndefined) {
+  try {
+    const parsed = JSON.parse(value);
+
+    if (Array.isArray(parsed)) return parsed;
+    if (parsed) return [parsed];
+    return emptyResult(keepUndefined);
+  } catch {
+    return null;
+  }
+}
+
+function splitStringValue(value, splitMode, keepUndefined) {
+  if (splitMode === "newline" && value.includes("\n")) {
+    return value.split("\n").map((v) => v.trim()).filter(Boolean);
+  }
+
+  if (splitMode === "period" && value.includes(".")) {
+    return value.split(".").map((v) => v.trim()).filter(Boolean);
+  }
+
+  if (value.includes(",")) {
+    return value.split(",").map((v) => v.trim()).filter(Boolean);
+  }
+
+  if (!value.trim()) return emptyResult(keepUndefined);
+  return [value.trim()];
+}
+
+export function parseStringOrArray(
+  value,
+  splitMode = "comma",
+  keepUndefined = false
+) {
   if (value === undefined || value === null) {
-    return keepUndefined ? undefined : [];
+    return emptyResult(keepUndefined);
   }
 
   if (Array.isArray(value)) return value;
 
   if (typeof value !== "string") {
-    return value ? [value] : keepUndefined ? undefined : [];
+    return wrapSingleValue(value, keepUndefined);
   }
 
-  try {
-    const parsed = JSON.parse(value);
-    if (Array.isArray(parsed)) return parsed;
-    return parsed ? [parsed] : keepUndefined ? undefined : [];
-  } catch {
-    if (splitMode === "newline" && value.includes("\n")) {
-      return value.split("\n").map(v => v.trim()).filter(Boolean);
-    }
+  const parsedJson = tryParseJsonArray(value, keepUndefined);
+  if (parsedJson !== null) return parsedJson;
 
-    if (splitMode === "period" && value.includes(".")) {
-      return value.split(".").map(v => v.trim()).filter(Boolean);
-    }
-
-    if (value.includes(",")) {
-      return value.split(",").map(v => v.trim()).filter(Boolean);
-    }
-
-    return value.trim() ? [value.trim()] : keepUndefined ? undefined : [];
-  }
+  return splitStringValue(value, splitMode, keepUndefined);
 }
 
 export function mapDietaryTags(tags) {
   const normalizedTags = parseStringOrArray(tags, "comma");
 
-  return normalizedTags.map(tag => {
+  return normalizedTags.map((tag) => {
     if (tag === "gluten-free" || tag === "Gluten-Free") return "Gluten-Free";
     if (tag === "dairy-free" || tag === "Dairy-Free") return "Dairy-Free";
     if (tag === "nut-free" || tag === "Nut-Free") return "Nut-Free";
@@ -81,20 +108,36 @@ export function buildRecipeUpdateData(body) {
     allergens
   } = body;
 
-  const updateData = {
+  return removeUndefinedFields({
     name,
-    ingredients: ingredients !== undefined ? parseStringOrArray(ingredients, "newline", true) : undefined,
+    ingredients:
+      ingredients === undefined
+        ? undefined
+        : parseStringOrArray(ingredients, "newline", true),
     prep_time: prep_time ? Number.parseInt(prep_time, 10) : undefined,
-    prep_steps: prep_steps !== undefined ? parseStringOrArray(prep_steps, "newline", true) : undefined,
+    prep_steps:
+      prep_steps === undefined
+        ? undefined
+        : parseStringOrArray(prep_steps, "newline", true),
     cost,
     difficulty,
-    dietary_tags: dietary_tags !== undefined ? mapDietaryTags(dietary_tags) : undefined,
-    allergens: allergens !== undefined ? parseStringOrArray(allergens, "comma", true) : undefined
-  };
+    dietary_tags:
+      dietary_tags === undefined ? undefined : mapDietaryTags(dietary_tags),
+    allergens:
+      allergens === undefined
+        ? undefined
+        : parseStringOrArray(allergens, "comma", true)
+  });
+}
 
-  Object.keys(updateData).forEach((key) => {
-    if (updateData[key] === undefined) delete updateData[key];
+function removeUndefinedFields(obj) {
+  const cleaned = { ...obj };
+
+  Object.keys(cleaned).forEach((key) => {
+    if (cleaned[key] === undefined) {
+      delete cleaned[key];
+    }
   });
 
-  return updateData;
+  return cleaned;
 }

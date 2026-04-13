@@ -1,5 +1,6 @@
 import multer from "multer";
 import { prisma } from "../database/prisma.js";
+import { buildRecipeWhereClause } from "../utils/recipeFilterHelpers.js";
 
 // services
 import {
@@ -31,100 +32,12 @@ export async function getAllRecipesController(req, res) {
     console.log({
       message: "/api/recipes route HIT",
       query: req.query,
-      time: new Date().toISOString(),
+      time: new Date().toISOString()
     });
 
-    const q = (req.query.q || "").trim();
     const ownerId = Number.parseInt(req.user.userId, 10);
+    const where = buildRecipeWhereClause(req.query, ownerId);
 
-    const normalize = (v) =>
-      (v || "")
-        .toString()
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-
-    const timeVals = normalize(req.query.time);
-    const costVals = normalize(req.query.cost);
-    const dietaryVals = normalize(req.query.dietary);
-    const difficultyVals = normalize(req.query.difficulty);
-    const allergyVals = normalize(req.query.allergies);
-
-    const AND = [];
-    AND.push({ ownerId });
-
-    if (q) {
-      AND.push({
-        OR: [
-          { name: { contains: q, mode: "insensitive" } },
-          { ingredients: { has: q } },
-          { prep_steps: { has: q } },
-        ],
-      });
-    }
-
-    if (timeVals.length) {
-      const timeOR = [];
-
-      for (const time of timeVals) {
-        if (time === "under-15") timeOR.push({ prep_time: { lt: 15 } });
-        else if (time === "15-30") timeOR.push({ prep_time: { gte: 15, lte: 30 } });
-        else if (time === "30-60") timeOR.push({ prep_time: { gte: 30, lte: 60 } });
-        else if (time === "60plus") timeOR.push({ prep_time: { gt: 60 } });
-      }
-
-      if (timeOR.length) AND.push({ OR: timeOR });
-    }
-
-    if (costVals.length) {
-      const costOR = [];
-      for (const cost of costVals) {
-        if (cost === "low") costOR.push({ cost: "Low" });
-        else if (cost === "medium") costOR.push({ cost: "Medium" });
-        else if (cost === "high") costOR.push({ cost: "High" });
-      }
-      if (costOR.length) AND.push({ OR: costOR });
-    }
-
-    if (dietaryVals.length) {
-      const dietaryOR = [];
-
-      for (const dietary of dietaryVals) {
-        let dbValue = dietary;
-        if (dietary === "gluten-free") dbValue = "Gluten-Free";
-        else if (dietary === "dairy-free") dbValue = "Dairy-Free";
-        else if (dietary === "nut-free") dbValue = "Nut-Free";
-
-        dietaryOR.push({ dietary_tags: { has: dbValue } });
-      }
-      if (dietaryOR.length) AND.push({ OR: dietaryOR });
-    }
-
-    if (difficultyVals.length) {
-      const difficultyOR = [];
-      for (const difficulty of difficultyVals) {
-        const capitalized = difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
-        if (["Easy", "Medium", "Hard"].includes(capitalized)) {
-          difficultyOR.push({ difficulty: capitalized });
-        }
-      }
-      if (difficultyOR.length) AND.push({ OR: difficultyOR });
-    }
-
-    if (allergyVals.length) {
-      const allergyOR = [];
-      for (const allergy of allergyVals) {
-        let dbValue = allergy;
-        if (allergy === "nut-free") dbValue = "Nut-Free";
-        else if (allergy === "dairy-free") dbValue = "Dairy-Free";
-        else if (allergy === "gluten-free") dbValue = "Gluten-Free";
-
-        allergyOR.push({ allergens: { has: dbValue } });
-      }
-      if (allergyOR.length) AND.push({ OR: allergyOR });
-    }
-
-    const where = AND.length ? { AND } : undefined;
     const recipes = await getAllRecipes(where);
     return res.json(recipes);
   } catch (error) {
