@@ -362,7 +362,7 @@ export async function fetchRecipeData(recipeId) {
 
     const recipe = await response.json();
 
-    return recipe;
+    return recipe.recipe;
     } catch (error) {
         console.error('Error fetching recipe:', error);
     }

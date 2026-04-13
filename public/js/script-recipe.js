@@ -215,6 +215,24 @@ async function editRecipe(id) {
  * Delete a recipe by ID
  */
 async function deleteRecipe(id) {
+  // verify if recipe is used in meal plan
+  try {
+    const response = await fetch(`${API_BASE_URL}/recipes/${id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
+    });
+
+    const recipe = await response.json();
+    if (recipe.isInMealPlan === true) {
+      notificationManager.error('This recipe is currently used in a meal plan. Please remove it from the meal plan before deleting.');
+      return;
+    }
+  } catch (error) {
+    console.error('Error checking meal plan usage:', error);
+  }
+  
   notificationManager.confirm('Are you sure you want to delete this recipe?', async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/recipes/${id}`, {
@@ -223,7 +241,7 @@ async function deleteRecipe(id) {
           'Authorization': `Bearer ${getToken()}`
         }
       });
-
+      
       if (response.ok) {
         notificationManager.success('Recipe deleted successfully!');
         // Reload recipes

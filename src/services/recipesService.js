@@ -43,9 +43,19 @@ export async function getRecipeById(recipeId) {
   try {
     const recipe = await prisma.recipes.findUnique({
       where: { id: recipeId },
-      include: { owner: { select: { firstName: true, lastName: true, email: true } } }
+      include: {
+        owner: { select: { firstName: true, lastName: true, email: true } },
+        mealPlanItems: {
+          take: 1,
+          select: { id: true },
+        },
+      },
     });
-    return recipe;
+    return {
+      ...recipe,
+      isInMealPlan: recipe.mealPlanItems.length > 0,
+      mealPlanItems: undefined,
+    };
   }
   catch (error) {
     console.error('Error fetching recipe by ID:', error);
