@@ -1,4 +1,4 @@
-import { getInitials, createMealPlanItem, logout, fetchAllRecipes } from "./script.js";
+import { getInitials, createMealPlanItem, logout, fetchAllRecipes, isAuthenticated, getToken } from "./script.js";
 const API_BASE_URL = "http://localhost:4002/api";
 
 /**
