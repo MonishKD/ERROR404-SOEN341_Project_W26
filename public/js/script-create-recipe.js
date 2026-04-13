@@ -1,4 +1,4 @@
-import { getToken, isAuthenticated, getInitials, logout } from "./script.js";
+import { getToken, isAuthenticated, getInitials, logout, notificationManager } from "./script.js";
 const API_BASE_URL = 'http://localhost:4002/api';
 
 /**
@@ -56,7 +56,7 @@ async function saveRecipe(event) {
 
   // Validate required fields
   if (!recipeData.name || !recipeData.prep_time || !ingredientsArray.length || !stepsArray.length) {
-    alert('Please fill in all required fields');
+    notificationManager.error('Please fill in all required fields');
     return;
   }
 
@@ -74,14 +74,14 @@ async function saveRecipe(event) {
     console.log('Server response:', responseData);
 
     if (response.ok) {
-      alert('Recipe saved successfully!');
+      notificationManager.success('Recipe saved successfully!');
       globalThis.location.href = '/pages/recipes.html';
     } else {
-      alert('Error: ' + (responseData.message || 'Failed to save recipe'));
+      notificationManager.error('Error: ' + (responseData.message || 'Failed to save recipe'));
     }
   } catch (error) {
     console.error('Error saving recipe:', error);
-    alert('Failed to save recipe. Please try again.');
+    notificationManager.error('Failed to save recipe. Please try again');
   }
 }
 

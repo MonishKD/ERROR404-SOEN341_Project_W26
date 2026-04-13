@@ -1,6 +1,6 @@
 // script-user-profile.js - Handles user profile page interactions and data fetching
 
-import { getInitials, getUserProfile, isAuthenticated, getToken, fetchAverageRating, fetchRecipeRatings, renderStars, fetchAllRecipes, logout } from "./script.js";
+import { getInitials, getUserProfile, isAuthenticated, getToken, fetchAverageRating, fetchRecipeRatings, renderStars, fetchAllRecipes, logout, notificationManager } from "./script.js";
 const API_BASE_URL = "http://localhost:4002/api";
 const MAX_SIZE_MB = 50; // max video upload size
 
@@ -246,7 +246,7 @@ async function uploadVideo(id) {
   const file = fileInput.files[0];
   const url = urlInput.value.trim();
   if (!file && !url) {
-    alert("Please select a video first.");
+    notificationManager.error("Please select a video first.");
     return;
   }
   const recipeId = id;
@@ -255,7 +255,7 @@ async function uploadVideo(id) {
     const sizeMB = file.size / (1024 * 1024);
 
     if (sizeMB > MAX_SIZE_MB) {
-      alert("File is too large! Max is 50MB.");
+      notificationManager.error("File is too large! Max is 50MB.");
       return;
     }
   
@@ -277,13 +277,13 @@ async function uploadVideo(id) {
         throw new Error(data.error || "Upload failed");
       }
   
-      alert("Video uploaded successfully!");
+      notificationManager.success("Video uploaded successfully!");
       await refreshRecipes();
       await showPublicRecipes();
   
     } catch (error) {
       console.error("Upload error:", error);
-      alert(error.message || "Error uploading video");
+      notificationManager.error(error.message || "Error uploading video");
     }
   }
 
@@ -292,12 +292,12 @@ async function uploadVideo(id) {
     try {
       const parsed = new URL(url);
       if (!(parsed.protocol === "http:" || parsed.protocol === "https:")) {
-        alert("Invalid url");
+        notificationManager.error("Invalid url");
         return;
       }
     } catch (err) {
       console.error("Invalid URL:", err);
-      alert("Invalid url");
+      notificationManager.error("Invalid url");
       return;
     }
 
@@ -317,13 +317,13 @@ async function uploadVideo(id) {
         throw new Error(data.error || "Upload failed");
       }
   
-      alert("Video URL saved!");
+      notificationManager.success("Video URL saved!");
       await refreshRecipes();
       await showPublicRecipes();
   
     } catch (error) {
       console.error("Upload error:", error);
-      alert(error.message || "Error uploading video");
+      notificationManager.error(error.message || "Error uploading video");
     }
   }
 
@@ -354,7 +354,7 @@ async function changePrivacy(recipeId, privacy) {
     showUserProfile();
   } catch (error) {
     console.error("Error changing privacy:", error);
-    alert("Failed to update privacy.");
+    notificationManager.error("Failed to update privacy.");
   }
 }
 

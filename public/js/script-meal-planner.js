@@ -1,4 +1,4 @@
-import { getToken, getInitials, isAuthenticated, createMealPlanItem, logout } from "./script.js";
+import { getToken, getInitials, isAuthenticated, createMealPlanItem, logout, notificationManager } from "./script.js";
 const API_BASE_URL = "http://localhost:4002/api";
 
 let lastDeletedMeal = null;
@@ -8,90 +8,108 @@ let undoTimeout = null;
  * Helper functions
  */
 function setTodayDate() {
-    const today = new Date();
-    // Format as YYYY-MM-DD
-    const formattedDate = today.toISOString().split('T')[0];
-    
-    document.getElementById("weekPicker").value = formattedDate;
+  const today = new Date();
+  // Format as YYYY-MM-DD
+  const formattedDate = today.toISOString().split('T')[0];
 
-    mealPlannerDate();
+  document.getElementById("weekPicker").value = formattedDate;
+
+  mealPlannerDate();
 }
 function parseLocalDate(dateString) {
-    const [year, month, day] = dateString.split('-').map(Number);
-    return new Date(year, month - 1, day); // months are 0-indexed
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day); // months are 0-indexed
 }
 function saveSelectedMealSlot(slotData) {
   localStorage.setItem('selectedMealSlot', JSON.stringify(slotData));
+}
+
+function formatDuplicateMealAssignments(duplicates = []) {
+  if (!Array.isArray(duplicates) || duplicates.length === 0) {
+    return "another slot";
+  }
+  // Map the duplicate assignments to user-friendly strings and join them with commas
+  return duplicates
+    .map(({ day_of_week, meal_type }) => {
+      const prettyDay = day_of_week
+        ? day_of_week.charAt(0) + day_of_week.slice(1).toLowerCase()
+        : "Unknown day";
+      const prettyMeal = meal_type
+        ? meal_type.charAt(0) + meal_type.slice(1).toLowerCase()
+        : "Unknown meal";
+      return `${prettyDay} ${prettyMeal}`;
+    })
+    .join(", ");
 }
 
 /**
  * Updates meal planner based on date
  */
 function mealPlannerDate() {
-    const dateContainer = document.getElementById("mealplanWeekDate");
-    dateContainer.innerHTML = "";
+  const dateContainer = document.getElementById("mealplanWeekDate");
+  dateContainer.innerHTML = "";
 
-    const spanMonth = document.createElement("span");
-    const spanWeek = document.createElement("span");
+  const spanMonth = document.createElement("span");
+  const spanWeek = document.createElement("span");
 
-    spanMonth.className = "week-month";
-    spanWeek.className = "week-range";
+  spanMonth.className = "week-month";
+  spanWeek.className = "week-range";
 
-    const inputValue = document.getElementById("weekPicker").value;
+  const inputValue = document.getElementById("weekPicker").value;
 
-    const selectedDate = inputValue ? parseLocalDate(inputValue) : new Date();
+  const selectedDate = inputValue ? parseLocalDate(inputValue) : new Date();
 
-    // Month
-    const monthFormatter = new Intl.DateTimeFormat("en-US", {
-        month: "long",
-        year: "numeric"
-    });
-    spanMonth.textContent = monthFormatter.format(selectedDate);
-    
-    // Week range
-    const startOfWeek = new Date(selectedDate);
-    const day = startOfWeek.getDay(); // 0 = Sunday
-    const diffToMonday = (day === 0 ? -6 : 1 - day); // adjust to Monday
+  // Month
+  const monthFormatter = new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric"
+  });
+  spanMonth.textContent = monthFormatter.format(selectedDate);
 
-    startOfWeek.setDate(selectedDate.getDate() + diffToMonday);
+  // Week range
+  const startOfWeek = new Date(selectedDate);
+  const day = startOfWeek.getDay(); // 0 = Sunday
+  const diffToMonday = (day === 0 ? -6 : 1 - day); // adjust to Monday
 
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
+  startOfWeek.setDate(selectedDate.getDate() + diffToMonday);
 
-    const shortFormatter = new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric"
-    });
-    spanWeek.textContent = `${shortFormatter.format(startOfWeek)} - ${shortFormatter.format(endOfWeek)}`;
-    
-    dateContainer.appendChild(spanMonth);
-    dateContainer.appendChild(spanWeek);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-    weeklyMeals(selectedDate);
+  const shortFormatter = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric"
+  });
+  spanWeek.textContent = `${shortFormatter.format(startOfWeek)} - ${shortFormatter.format(endOfWeek)}`;
+
+  dateContainer.appendChild(spanMonth);
+  dateContainer.appendChild(spanWeek);
+
+  weeklyMeals(selectedDate);
 }
 /**
  * Handles week navigation for the meal planner. Updates the date input to the Monday of the selected week and refreshes the meal planner view.
  */
 function mealPlannerWeek(input) {
-    const inputDate = document.getElementById("weekPicker");
+  const inputDate = document.getElementById("weekPicker");
 
-    let date = inputDate.value ? parseLocalDate(inputDate.value) : new Date();
+  let date = inputDate.value ? parseLocalDate(inputDate.value) : new Date();
 
-    const currentDay = date.getDay(); // 0 = Sunday
-    const diffToMonday = (currentDay === 0 ? -6 : 1 - currentDay);
-    date.setDate(date.getDate() + diffToMonday);
+  const currentDay = date.getDay(); // 0 = Sunday
+  const diffToMonday = (currentDay === 0 ? -6 : 1 - currentDay);
+  date.setDate(date.getDate() + diffToMonday);
 
-    // Move 7 days
-    if(input == "next"){
-        date.setDate(date.getDate() + 7);
-    } else if (input == "prev"){
-        date.setDate(date.getDate() - 7);
-    }
+  // Move 7 days
+  if (input == "next") {
+    date.setDate(date.getDate() + 7);
+  } else if (input == "prev") {
+    date.setDate(date.getDate() - 7);
+  }
 
-    // Update input value
-    inputDate.value = date.toISOString().split("T")[0];
+  // Update input value
+  inputDate.value = date.toISOString().split("T")[0];
 
-    mealPlannerDate();
+  mealPlannerDate();
 }
 /**
  * Load meal plan for the week and populate the grid
@@ -156,7 +174,7 @@ async function weeklyMeals(currentDate) {
 
   const mealPlan = await mealPlanResponse.json();
   console.log("mealPlan data:", mealPlan)
-  
+
   let mealPlanItems = [];
 
   if (mealPlan) {
@@ -211,7 +229,7 @@ async function weeklyMeals(currentDate) {
         e.day_of_week === dayEnum
       );
 
-    if (item) {
+      if (item) {
         try {
           // Fetch recipe details for the assigned meal
           const recipe = item.recipe;
@@ -243,7 +261,7 @@ async function weeklyMeals(currentDate) {
               notes: item.notes || ""
             });
 
-            window.location.href = "/pages/add-meal.html";
+            globalThis.location.href = "/pages/add-meal.html";
           });
 
           const removeBtn = document.createElement("button");
@@ -252,41 +270,43 @@ async function weeklyMeals(currentDate) {
           removeBtn.textContent = "✕";
 
           // Add confirmation before deletion
-            removeBtn.addEventListener("click", async () => {
-            const confirmed = confirm(`Are you sure you want to remove "${recipe.name}" from your planner?`);
-            if (!confirmed) return;
+          removeBtn.addEventListener("click", async () => {
+            notificationManager.confirm(
+              `Are you sure you want to remove "${recipe.name}" from your planner?`,
+              async () => {
+                // Store details of the deleted meal for potential undo functionality
+                lastDeletedMeal = {
+                  mealPlanId: item.mealPlanId,
+                  recipeId: item.recipeId,
+                  day_of_week: item.day_of_week,
+                  meal_type: item.meal_type,
+                  notes: item.notes || ""
+                };
 
-          // Store details of the deleted meal for potential undo functionality
-              lastDeletedMeal = {
-              mealPlanId: item.mealPlanId,
-              recipeId: item.recipeId,
-              day_of_week: item.day_of_week,
-              meal_type: item.meal_type,
-              notes: item.notes || ""
-            };
+                try {
+                  const response = await fetch(`${API_BASE_URL}/mealPlan/items/${item.id}`, {
+                    method: "DELETE",
+                    headers: {
+                      "Authorization": `Bearer ${getToken()}`
+                    }
+                  });
 
-            try {
-              const response = await fetch(`${API_BASE_URL}/mealPlan/items/${item.id}`, {
-                method: "DELETE",
-                headers: {
-                  "Authorization": `Bearer ${getToken()}`
+                  const data = await response.json();
+
+                  if (!response.ok) {
+                    notificationManager.error(data.message || "Failed to delete meal assignment.");
+                    return;
+                  }
+                  // Refresh the meal plan grid after deletion
+                  await weeklyMeals(currentDate);
+                  showUndoBanner(); // Show undo option after deletion
+
+                } catch (error) {
+                  console.error("Error deleting meal assignment:", error);
+                  notificationManager.error("Something went wrong while deleting the meal.");
                 }
-              });
-
-              const data = await response.json();
-
-              if (!response.ok) {
-                alert(data.message || "Failed to delete meal assignment.");
-                return;
               }
-              // Refresh the meal plan grid after deletion
-              await weeklyMeals(currentDate);
-              showUndoBanner(); // Show undo option after deletion
-              
-            } catch (error) {
-              console.error("Error deleting meal assignment:", error);
-              alert("Something went wrong while deleting the meal.");
-            }
+            );
           });
 
           actions.appendChild(editBtn);
@@ -311,35 +331,35 @@ async function weeklyMeals(currentDate) {
           <span>Add ${meal.label}</span>
         `;
 
-      addBtn.addEventListener("click", async () => {
-        let currentMealPlan = mealPlan;
+        addBtn.addEventListener("click", async () => {
+          let currentMealPlan = mealPlan;
 
-        if (!currentMealPlan) {
-          const weekStart = new Date(monday);
-          const weekEnd = new Date(monday);
-          weekEnd.setDate(weekEnd.getDate() + 6);
+          if (!currentMealPlan) {
+            const weekStart = new Date(monday);
+            const weekEnd = new Date(monday);
+            weekEnd.setDate(weekEnd.getDate() + 6);
 
-          const result = await createMealPlanForWeek(
-            weekStart.toISOString(),
-            weekEnd.toISOString()
-          );
+            const result = await createMealPlanForWeek(
+              weekStart.toISOString(),
+              weekEnd.toISOString()
+            );
 
-          if (!result.success) {
-            alert(result.error || "Failed to create meal plan.");
-            return;
+            if (!result.success) {
+              notificationManager.error(result.error || "Failed to create meal plan.");
+              return;
+            }
+
+            currentMealPlan = result.data;
           }
 
-          currentMealPlan = result.data;
-        }
+          saveSelectedMealSlot({
+            mealPlanId: currentMealPlan.id,
+            day_of_week: dayEnum,
+            meal_type: meal.type
+          });
 
-        saveSelectedMealSlot({
-          mealPlanId: currentMealPlan.id,
-          day_of_week: dayEnum,
-          meal_type: meal.type
+          globalThis.location.href = "/pages/add-meal.html";
         });
-
-        window.location.href = "/pages/add-meal.html";
-      });
 
         grid.appendChild(addBtn);
       }
@@ -381,42 +401,42 @@ async function createMealPlanForWeek(weekStartDate, weekEndDate) {
  * Undo functionality for meal deletion
  */
 function showUndoBanner() {
-    let banner = document.getElementById("undoBanner");
+  let banner = document.getElementById("undoBanner");
 
-    if (!banner) {
-        banner = document.createElement("div");
-        banner.id = "undoBanner";
-        document.body.appendChild(banner);
-    }
+  if (!banner) {
+    banner = document.createElement("div");
+    banner.id = "undoBanner";
+    document.body.appendChild(banner);
+  }
 
-    banner.style.position = "fixed";
-    banner.style.bottom = "24px";
-    banner.style.right = "24px";
-    banner.style.background = "#ffffff";
-    banner.style.border = "1px solid #e5e7eb";
-    banner.style.borderLeft = "4px solid #16a34a";
-    banner.style.padding = "18px 22px";
-    banner.style.borderRadius = "12px";
-    banner.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)";
-    banner.style.zIndex = "9999";
-    banner.style.display = "flex";
-    banner.style.alignItems = "center";
-    banner.style.gap = "12px";
-    banner.style.minWidth = "300px";
-    banner.style.fontSize = "16px";
-    banner.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+  banner.style.position = "fixed";
+  banner.style.bottom = "24px";
+  banner.style.right = "24px";
+  banner.style.background = "#ffffff";
+  banner.style.border = "1px solid #e5e7eb";
+  banner.style.borderLeft = "4px solid #16a34a";
+  banner.style.padding = "18px 22px";
+  banner.style.borderRadius = "12px";
+  banner.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)";
+  banner.style.zIndex = "9999";
+  banner.style.display = "flex";
+  banner.style.alignItems = "center";
+  banner.style.gap = "12px";
+  banner.style.minWidth = "300px";
+  banner.style.fontSize = "16px";
+  banner.style.transition = "opacity 0.3s ease, transform 0.3s ease";
 
-    banner.style.transform = "translateY(20px)";
-    banner.style.opacity = "0"; 
+  banner.style.transform = "translateY(20px)";
+  banner.style.opacity = "0";
 
-    setTimeout(() => {
+  setTimeout(() => {
     banner.style.opacity = "1";
     banner.style.transform = "translateY(0)";
-    }, 10);
+  }, 10);
 
 
 
-    banner.innerHTML = `
+  banner.innerHTML = `
     <span style="font-weight: 600; color: #111827;">
         Meal removed — But not too late to undo
     </span>
@@ -434,91 +454,121 @@ function showUndoBanner() {
     </button>
     `;
 
-    const undoBtn = document.getElementById("undoDeleteBtn");
+  const undoBtn = document.getElementById("undoDeleteBtn");
 
-    undoBtn.onmouseover = () => {
-        undoBtn.style.opacity = "0.9";
-    };
+  undoBtn.onmouseover = () => {
+    undoBtn.style.opacity = "0.9";
+  };
 
-    undoBtn.onmouseout = () => {
-        undoBtn.style.opacity = "1";
-    };
+  undoBtn.onmouseout = () => {
+    undoBtn.style.opacity = "1";
+  };
 
-    undoBtn.onclick = async () => {
-        if (!lastDeletedMeal) return;
+  undoBtn.onclick = async () => {
+    if (!lastDeletedMeal) return;
 
-        const result = await createMealPlanItem(
-        lastDeletedMeal.mealPlanId,
-        lastDeletedMeal.recipeId,
-        lastDeletedMeal.day_of_week,
-        lastDeletedMeal.meal_type,
-        lastDeletedMeal.notes || ""
-        );
+    let result = await createMealPlanItem(
+      lastDeletedMeal.mealPlanId,
+      lastDeletedMeal.recipeId,
+      lastDeletedMeal.day_of_week,
+      lastDeletedMeal.meal_type,
+      lastDeletedMeal.notes || ""
+    );
 
-        if (result.success) {
-        lastDeletedMeal = null;
-        banner.style.display = "none";
-        mealPlannerDate();
-        } else {
-        alert(result.error || "Failed to restore meal.");
+    // If the meal conflicts (duplicate recipe), ask user if they want to allow duplicates
+    if (!result.success && result.code === 'DUPLICATE_RECIPE_IN_WEEK') {
+      const duplicateLocations = formatDuplicateMealAssignments(result.duplicates);
+      notificationManager.confirm(
+        `This recipe is already used this week in ${duplicateLocations}. Do you want to restore it anyway?`,
+        async () => {
+          // Retry with allowDuplicate flag
+          result = await createMealPlanItem(
+            lastDeletedMeal.mealPlanId,
+            lastDeletedMeal.recipeId,
+            lastDeletedMeal.day_of_week,
+            lastDeletedMeal.meal_type,
+            lastDeletedMeal.notes || "",
+            true // allowDuplicate
+          );
+
+          if (result.success) {
+            lastDeletedMeal = null;
+            banner.style.display = "none";
+            notificationManager.success("Meal restored!");
+            mealPlannerDate();
+          } else {
+            notificationManager.error(result.error || "Failed to restore meal.");
+          }
         }
-    };
+      );
+      return;
+    }
 
+    if (result.success) {
+      lastDeletedMeal = null;
+      banner.style.display = "none";
+      notificationManager.success("Meal restored!");
+      mealPlannerDate();
+    } else {
+      notificationManager.error(result.error || "Failed to restore meal.");
+    }
+  };
+
+  if (undoTimeout) clearTimeout(undoTimeout);
+
+  undoTimeout = setTimeout(() => {
+    banner.style.opacity = "0";
+    banner.style.transform = "translateY(10px)";
+
+    setTimeout(() => {
+      banner.style.display = "none";
+      banner.style.opacity = "1";
+      banner.style.transform = "translateY(0)";
+      lastDeletedMeal = null;
+    }, 300);
+  }, 5000);
+
+  banner.onmouseenter = () => {
     if (undoTimeout) clearTimeout(undoTimeout);
+  };
 
+  banner.onmouseleave = () => {
     undoTimeout = setTimeout(() => {
-        banner.style.opacity = "0";
-        banner.style.transform = "translateY(10px)";
+      banner.style.opacity = "0";
+      banner.style.transform = "translateY(10px)";
 
-        setTimeout(() => {
-        banner.style.display = "none";
-        banner.style.opacity = "1";
-        banner.style.transform = "translateY(0)";
-        lastDeletedMeal = null;
-        }, 300);
-    }, 5000);
-
-    banner.onmouseenter = () => {
-    if (undoTimeout) clearTimeout(undoTimeout);
-    };
-
-    banner.onmouseleave = () => {
-    undoTimeout = setTimeout(() => {
-        banner.style.opacity = "0";
-        banner.style.transform = "translateY(10px)";
-
-        setTimeout(() => {
+      setTimeout(() => {
         banner.style.display = "none";
         lastDeletedMeal = null;
-        }, 300);
+      }, 300);
     }, 3000);
-    };
+  };
 
 }
 // initialization
 document.addEventListener('DOMContentLoaded', () => {
-    if (!isAuthenticated()) {
-        window.location.href = '/pages/login-page.html';
-        return;
-    }
-    
-    getInitials();
+  if (!isAuthenticated()) {
+    globalThis.location.href = '/pages/login-page.html';
+    return;
+  }
 
-    const weekPicker = document.getElementById('weekPicker');
-    if (weekPicker) {
+  getInitials();
+
+  const weekPicker = document.getElementById('weekPicker');
+  if (weekPicker) {
     setTodayDate();
 
     weekPicker.addEventListener('change', () => {
-        mealPlannerDate();
+      mealPlannerDate();
     });
-    }
+  }
 
-    const weekButtons = document.querySelectorAll('.week-nav-btn');
-    if (weekButtons.length >= 2) {
+  const weekButtons = document.querySelectorAll('.week-nav-btn');
+  if (weekButtons.length >= 2) {
     weekButtons[0].addEventListener('click', () => mealPlannerWeek('prev'));
     weekButtons[1].addEventListener('click', () => mealPlannerWeek('next'));
-    }
+  }
 
-    // log out functionality
-    logout();
+  // log out functionality
+  logout();
 });

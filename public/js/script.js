@@ -2,10 +2,14 @@
 // Frontend-Backend Integration for MealMajor
 // Handles: Login, Signup, Form Validation, Token Management, Profile Loading, Recipes
 
+import { NotificationManager } from './notifications.js';
 
 // CONFIGURATION
 const API_BASE_URL = 'http://localhost:4002/api';
 const TOKEN_KEY = 'mealmajor_token';
+
+// Initialize global notification manager
+export const notificationManager = new NotificationManager();
 
 // UTILITY FUNCTIONS
 /**
@@ -112,7 +116,11 @@ export function logout() {
       logoutLink.addEventListener('click', (e) => {
         e.preventDefault();
         clearToken();
-        window.location.href = '/pages/login-page.html';
+        notificationManager.success(' See you soon! 👋');
+        // Wait 800ms before redirecting so user can see the notification
+        setTimeout(() => {
+          window.location.href = '/pages/login-page.html';
+        }, 800);
     });
   }
 }
