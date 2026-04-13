@@ -46,7 +46,7 @@ class NotificationManager {
     // Set colors based on type
     const colors = {
       success: { bg: '#d4edda', border: '#28a745', text: '#155724', icon: '✓' },
-      error: { bg: '#f8d7da', border: '#dc3545', text: '#721c24', icon: '✗' },
+      error: { bg: '#f8d7da', border: '#dc3545', text: '#721c24', icon: '' },
       warning: { bg: '#fff3cd', border: '#ffc107', text: '#856404', icon: '⚠' },
       info: { bg: '#d1ecf1', border: '#17a2b8', text: '#0c5460', icon: 'ℹ' }
     };
