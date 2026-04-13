@@ -157,7 +157,7 @@ async function updateMealPlanItem(itemId, recipeId, day_of_week, meal_type, note
 document.addEventListener("DOMContentLoaded", async () => {
     
     if (!isAuthenticated()) {
-    window.location.href = 'login-page.html';
+    window.location.href = '/pages/login-page.html';
     return;
     }
 
@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!slotValidation.valid) {
     alert(slotValidation.message);
-    window.location.href = 'meal-planner.html';
+    window.location.href = '/pages/meal-planner.html';
     return;
     }
 
@@ -244,7 +244,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (result.success) {
         clearSelectedMealSlot();
         alert(slot.itemId ? 'Meal updated successfully!' : 'Meal added successfully!');
-        window.location.href = 'meal-planner.html';
+        window.location.href = '/pages/meal-planner.html';
         } else {
         card.style.pointerEvents = 'auto';
         alert(result.error || (slot.itemId ? 'Failed to update meal.' : 'Failed to add meal.'));

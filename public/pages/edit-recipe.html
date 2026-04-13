@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MealMajor - Create Recipe</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="user-profile-styles.css">
-    <link rel="stylesheet" href="home-styles.css">
-    <link rel="stylesheet" href="profile-styles.css">
+    <title>MealMajor - Edit Recipe</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/user-profile-styles.css">
+    <link rel="stylesheet" href="/css/home-styles.css">
+    <link rel="stylesheet" href="/css/profile-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-     <script type="module" src="script-create-recipe.js"></script>
+     <script type="module" src="/js/script-edit-recipe.js"></script>
 </head>
 
 <body>
@@ -18,19 +18,19 @@
     <!--Navigation bar-->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="home-page.html" class="nav-brand">
+            <a href="/pages/home-page.html" class="nav-brand">
                 <span class="brand-icon">🍴</span>
                 <span class="brand-name">MealMajor</span>
             </a>
             <div class="nav-links">
-                <a href="home-page.html" class="nav-link">Home</a>
-                <a href="recipes.html" class="nav-link active">Recipes</a>
-                <a href="meal-planner.html" class="nav-link">Meal Planner</a>
-                <a href="edit-profile.html" class="nav-link">Profile</a>
-                <a href="user-profile.html" class="nav-link nav-avatar">
+                <a href="/pages/home-page.html" class="nav-link">Home</a>
+                <a href="/pages/recipes.html" class="nav-link active">Recipes</a>
+                <a href="/pages/meal-planner.html" class="nav-link">Meal Planner</a>
+                <a href="/pages/edit-profile.html" class="nav-link">Profile</a>
+                <a href="/pages/user-profile.html" class="nav-link nav-avatar">
                     <div class="avatar-circle" id="avatarNav"></div>
                 </a>
-                <a href="login-page.html" class="nav-link logout">Logout</a>
+                <a href="/pages/login-page.html" class="nav-link logout">Logout</a>
             </div>
         </div>
     </nav>
@@ -39,21 +39,22 @@
 
         <!--Page header-->
         <div class="profile-header">
-            <h1>🍳 Create a Recipe</h1>
-            <p>Fill in the details for your new recipe</p>
+            <h1>✏️ Edit Recipe</h1>
+            <p>Update your recipe details below</p>
         </div>
 
         <div class="profile-content">
-            <form id="createRecipeForm" class="profile-form">
 
-                <!--Basic infos-->
+            <!--Backend must pre-fill all inputs/textareas/selects with the existing recipe data-->
+            <form id="editRecipeForm" class="profile-form">
+
+                <!--Basic info-->
                 <section class="form-section">
                     <h2 class="section-title">Basic Info</h2>
 
                     <div class="form-group">
                         <label for="recipeName">Recipe Name</label>
-                        <input type="text" id="recipeName" name="recipeName" placeholder="e.g. Spicy Chicken Stir Fry"
-                            required>
+                        <input type="text" id="recipeName" name="recipeName" placeholder="e.g. Spicy Chicken Stir Fry" required>
                     </div>
 
                     <div class="form-group">
@@ -89,42 +90,42 @@
                         <label>Select all that apply</label>
                         <div class="checkbox-grid">
                             <label class="checkbox-card">
-                                <input type="checkbox" name="diet" value="gluten-free">
+                                <input type="checkbox" name="dietary" value="gluten-free">
                                 <span class="checkbox-content">
                                     <span class="checkbox-icon">🌾</span>
                                     <span class="checkbox-label">Gluten-Free</span>
                                 </span>
                             </label>
                             <label class="checkbox-card">
-                                <input type="checkbox" name="diet" value="dairy-free">
+                                <input type="checkbox" name="dietary" value="dairy-free">
                                 <span class="checkbox-content">
                                     <span class="checkbox-icon">🥛</span>
                                     <span class="checkbox-label">Dairy-Free</span>
                                 </span>
                             </label>
                             <label class="checkbox-card">
-                                <input type="checkbox" name="diet" value="nut-free">
+                                <input type="checkbox" name="dietary" value="nut-free">
                                 <span class="checkbox-content">
                                     <span class="checkbox-icon">🥜</span>
                                     <span class="checkbox-label">Nut-Free</span>
                                 </span>
                             </label>
                             <label class="checkbox-card">
-                                <input type="checkbox" name="diet" value="vegan">
+                                <input type="checkbox" name="dietary" value="vegan">
                                 <span class="checkbox-content">
                                     <span class="checkbox-icon">🌱</span>
                                     <span class="checkbox-label">Vegan</span>
                                 </span>
                             </label>
                             <label class="checkbox-card">
-                                <input type="checkbox" name="diet" value="vegetarian">
+                                <input type="checkbox" name="dietary" value="vegetarian">
                                 <span class="checkbox-content">
                                     <span class="checkbox-icon">🥗</span>
                                     <span class="checkbox-label">Vegetarian</span>
                                 </span>
                             </label>
                             <label class="checkbox-card">
-                                <input type="checkbox" name="diet" value="halal">
+                                <input type="checkbox" name="dietary" value="halal">
                                 <span class="checkbox-content">
                                     <span class="checkbox-icon">🕌</span>
                                     <span class="checkbox-label">Halal</span>
@@ -140,8 +141,7 @@
                     <div class="form-group">
                         <label for="ingredients">List your ingredients</label>
                         <textarea id="ingredients" name="ingredients" rows="5"
-                            placeholder="e.g. 2 chicken breasts&#10;1 tbsp olive oil&#10;3 cloves garlic&#10;Salt and pepper to taste"
-                            required></textarea>
+                            placeholder="e.g. 2 chicken breasts&#10;1 tbsp olive oil&#10;3 cloves garlic&#10;Salt and pepper to taste" required></textarea>
                     </div>
                 </section>
 
@@ -151,18 +151,16 @@
                     <div class="form-group">
                         <label for="steps">Write your steps in order</label>
                         <textarea id="steps" name="steps" rows="8"
-                            placeholder="e.g. Step 1: Heat oil in a pan over medium heat&#10;Step 2: Season chicken with salt and pepper&#10;Step 3: Cook chicken 5-6 min per side"
-                            required></textarea>
+                            placeholder="e.g. Step 1: Heat oil in a pan over medium heat&#10;Step 2: Season chicken with salt and pepper&#10;Step 3: Cook chicken 5-6 min per side" required></textarea>
                     </div>
                 </section>
 
                 <!--Action buttons-->
                 <div class="form-actions">
-                    <button type="button" class="btn-secondary"
-                        onclick="window.location.href='recipes.html'">Cancel</button>
+                    <button type="button" class="btn-secondary" onclick="window.location.href='/pages/recipes.html'">Cancel</button>
                     <button type="submit" class="cssbuttons-io-button">
                         <span>
-                            Save Recipe
+                            Save Changes
                             <div class="icon">
                                 <svg height="24" width="24" viewBox="0 0 24 24">
                                     <path fill="none" d="M0 0h24v24H0z"></path>
@@ -181,5 +179,4 @@
     </div>
 
 </body>
-
 </html>

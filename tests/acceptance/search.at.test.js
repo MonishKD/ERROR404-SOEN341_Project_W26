@@ -172,7 +172,7 @@ describe("Acceptance Test: Recipe Search for Logged-in Users", () => {
     jest.spyOn(console, "log").mockImplementation(() => {});
     jest.spyOn(console, "error").mockImplementation(() => {});
 
-    await import("../../public/script-recipe.js");
+    await import("../../public/js/script-recipe.js");
   });
 
   afterAll(() => {

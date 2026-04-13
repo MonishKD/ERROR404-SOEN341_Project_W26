@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveToken(result.data.token);
 
         // Redirect to home page
-        window.location.href = 'home-page.html';
+        window.location.href = '/pages/home-page.html';
     } else {
         // Show error
         alert(result.error || 'Login failed. Please check your credentials and try again.');
