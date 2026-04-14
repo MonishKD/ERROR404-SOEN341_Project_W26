@@ -5,7 +5,7 @@ const API_BASE_URL = 'http://localhost:4002/api';
  * Helper functions to get selected tags
  */
 function getSelectedDietaryTags() {
-  const checkboxes = document.querySelectorAll('input[name="dietary"]:checked');
+  const checkboxes = document.querySelectorAll('input[name="diet"]:checked');
   return Array.from(checkboxes).map(cb => cb.value);
 }
 

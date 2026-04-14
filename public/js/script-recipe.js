@@ -184,6 +184,7 @@ async function loadMyRecipes() {
 
     if (result.success) {
         myRecipes = result.data;
+        window.myRecipes = myRecipes;
         console.log('My Recipes fetched:', myRecipes.length);
 
         const filters = getSelectedFilters();
