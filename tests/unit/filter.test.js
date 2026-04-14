@@ -9,7 +9,7 @@
  * If the filter logic in script-recipe.js changes, update applyFilters() below.
  */
 
-// ── pure filter function (mirrors the logic in filterRecipes) ──────────────
+// ── pure filter function (mirrors the logic in filterRecipes)
 function applyFilters(recipes, { timeChecked = [], difficultyChecked = [], costChecked = [], dietaryChecked = [], allergenChecked = [] }) {
   if (!timeChecked.length && !difficultyChecked.length && !costChecked.length && !dietaryChecked.length && !allergenChecked.length) {
     return recipes;

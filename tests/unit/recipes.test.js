@@ -1,12 +1,11 @@
-// recipes.test.js
-
-// This file contains unit tests for the recipe-related routes (create, read, update, delete).
-// It uses Jest and Supertest to send HTTP requests to the Express app and verify responses.
-// Tests cover successful operations as well as various failure scenarios (e.g., unauthorized access, invalid data).
-
 import request from 'supertest';
 import app from '../../src/server.js';
 import { prisma } from '../../src/database/prisma.js';
+
+/* This file contains unit tests for the recipe-related routes (create, read, update, delete).
+** It uses Jest and Supertest to send HTTP requests to the Express app and verify responses.
+** Tests cover successful operations as well as various failure scenarios (e.g., unauthorized access, invalid data).
+*/
 
 let authToken;
 let userId;
