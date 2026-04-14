@@ -35,10 +35,20 @@ function formatDuplicateMealAssignments(duplicates = []) {
 async function loadRecipesForAddMealPage() {
   const recipes = await fetchAllRecipes();
   const container = document.getElementById("addMealRecipesContainer");
+  const emptyState = document.getElementById("addMealEmptyState");
 
   if (!container) return;
 
   container.innerHTML = "";
+
+  if (!recipes || recipes.length === 0) {
+    if (emptyState) emptyState.style.display = "flex";
+    container.style.display = "none";
+    return;
+  }
+
+  if (emptyState) emptyState.style.display = "none";
+  container.style.display = "grid";
 
   recipes.forEach((recipe) => {
     const card = document.createElement("a");
@@ -61,6 +71,7 @@ async function loadRecipesForAddMealPage() {
     container.appendChild(card);
   });
 }
+
 /**
  * Validate selected meal
  */
