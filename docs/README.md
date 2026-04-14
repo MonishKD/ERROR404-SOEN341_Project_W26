@@ -60,3 +60,6 @@ This project was built with the following:
 - **Database**:
     - Monish
     - Ishrak
+- **Testing & Continuous Integration (CI)**:
+  - Setup: Monish
+  - Test Implementation (Unit & ATs): Liliana, Laila, Monish, Ishrak
