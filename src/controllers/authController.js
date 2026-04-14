@@ -1,3 +1,9 @@
+// authController.js
+
+// Handles HTTP requests for authentication routes.
+// Delegates authentication logic to service functions and returns responses to the client.
+// Also manages input validation and error handling.
+
 import { login, register } from "../services/authService.js";
 import {
   requestPasswordReset,

@@ -1,3 +1,7 @@
+//recipeRoutes.js
+
+// This file defines the routes for recipe-related operations such as creating, updating, deleting recipes, fetching recipes, and managing recipe ratings and videos. It imports the necessary controller functions from recipeController.js and sets up the Express router to handle incoming requests to these routes. 
+
 import express from "express";
 import { authMiddleware } from "../middleware/auth.js";
 import {

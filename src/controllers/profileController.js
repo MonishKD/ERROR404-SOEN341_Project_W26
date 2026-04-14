@@ -1,3 +1,9 @@
+// profileController.js
+
+// Handles HTTP requests for user profile routes.
+// Delegates business logic to service functions and returns responses to the client.
+// Also manages input validation and error handling.
+
 import { prisma } from "../database/prisma.js";
 import { getProfile, updateProfile } from "../services/profileService.js";
 

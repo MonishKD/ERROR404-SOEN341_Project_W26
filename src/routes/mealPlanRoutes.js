@@ -1,3 +1,7 @@
+//mealPlanRoutes.js
+
+// This file defines the routes for meal plan-related operations such as creating, updating, deleting meal plan items, and fetching meal plans. It imports the necessary controller functions from mealPlanController.js and sets up the Express router to handle incoming requests to these routes.
+
 import express from "express";
 import { authMiddleware } from "../middleware/auth.js";
 import {

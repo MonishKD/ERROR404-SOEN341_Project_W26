@@ -1,3 +1,9 @@
+// recipeController.js
+
+// Handles HTTP requests for recipe-related routes.
+// Delegates business logic to service functions and returns responses to the client.
+// Also manages input validation and error handling.
+
 import multer from "multer";
 import { prisma } from "../database/prisma.js";
 import { buildRecipeWhereClause } from "../utils/recipeFilterHelpers.js";
@@ -21,12 +27,14 @@ import {
   buildRecipeUpdateData
 } from "../utils/recipeHelpers.js";
 
+// Re-export middleware used in routes
 export { checkRecipeOwner } from "../middleware/auth.js";
 
-// upload config
+// Multer configuration for in-memory file uploads
 const upload = multer({ storage: multer.memoryStorage() });
 export { upload };
 
+//Get all recipes belonging to the authenticated user, optionally filtered by query parameters.
 export async function getAllRecipesController(req, res) {
   try {
     console.log({
@@ -46,6 +54,7 @@ export async function getAllRecipesController(req, res) {
   }
 }
 
+// Create a new recipe for the authenticated user.
 export async function createRecipeController(req, res) {
   try {
     const ownerId = Number.parseInt(req.user.userId, 10);
@@ -59,6 +68,7 @@ export async function createRecipeController(req, res) {
   }
 }
 
+// Create a new recipe for the authenticated user.
 export async function getExploreRecipesController(req, res) {
   try {
     const currentUserId = Number.parseInt(req.user.userId, 10);
@@ -70,6 +80,7 @@ export async function getExploreRecipesController(req, res) {
   }
 }
 
+//Get a single recipe by id.
 export async function getRecipeByIdController(req, res) {
   try {
     const recipe = await getRecipeById(Number.parseInt(req.params.id, 10));
@@ -83,6 +94,7 @@ export async function getRecipeByIdController(req, res) {
   }
 }
 
+//Update an existing recipe.
 export async function updateRecipeController(req, res) {
   try {
     const updateData = buildRecipeUpdateData(req.body);
@@ -99,6 +111,7 @@ export async function updateRecipeController(req, res) {
   }
 }
 
+//Delete a recipe by id.
 export async function deleteRecipeController(req, res) {
   try {
     await deleteRecipe(Number.parseInt(req.params.id, 10));
@@ -109,6 +122,7 @@ export async function deleteRecipeController(req, res) {
   }
 }
 
+//Update recipe privacy status.
 export async function updateRecipePrivacyController(req, res) {
   try {
     const { is_private } = req.body;
@@ -123,6 +137,7 @@ export async function updateRecipePrivacyController(req, res) {
   }
 }
 
+// Get all ratings and comments for a specific recipe.
 export async function getRecipeRatingsController(req, res) {
   try {
     const ratings = await recipeRatings(Number.parseInt(req.params.recipeId, 10));
@@ -132,6 +147,7 @@ export async function getRecipeRatingsController(req, res) {
   }
 }
 
+//Compute and return the average rating for a specific recipe.
 export async function getAverageRatingController(req, res) {
   try {
     const ratings = await recipeRatings(Number.parseInt(req.params.recipeId, 10));
@@ -146,6 +162,7 @@ export async function getAverageRatingController(req, res) {
   }
 }
 
+//Create or update a user's rating/comment for a recipe.
 export async function createOrUpdateRecipeRatingController(req, res) {
   try {
     const userId = Number.parseInt(req.user.userId, 10);
@@ -188,6 +205,7 @@ export async function createOrUpdateRecipeRatingController(req, res) {
   }
 }
 
+//Upload a video file for a recipe.
 export async function uploadRecipeVideoController(req, res) {
   try {
     const recipeId = Number.parseInt(req.params.id, 10);
@@ -212,6 +230,7 @@ export async function uploadRecipeVideoController(req, res) {
   }
 }
 
+//Save an external video URL for a recipe.
 export async function saveRecipeVideoUrlController(req, res) {
   try {
     const recipeId = Number.parseInt(req.params.id, 10);
@@ -234,6 +253,7 @@ export async function saveRecipeVideoUrlController(req, res) {
   }
 }
 
+//Get stored video data or external video URL for a recipe.
 export async function getRecipeVideoController(req, res) {
   try {
     const recipeId = Number.parseInt(req.params.id, 10);

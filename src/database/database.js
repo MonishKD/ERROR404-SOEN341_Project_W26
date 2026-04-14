@@ -1,4 +1,7 @@
 // database.js
+
+// This file defines a Database class that provides methods for connecting to the database, creating users, finding users by email or fullname, and updating user profiles. It uses the Prisma Client to interact with the PostgreSQL database and includes error handling for common database issues.
+
 import { prisma } from './prisma.js';
 
 class Database {

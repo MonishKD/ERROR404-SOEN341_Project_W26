@@ -1,3 +1,7 @@
+// recipeFilterHelpers.js
+
+// This file contains helper functions for building Prisma `where` clauses based on query parameters for filtering recipes. It includes functions to normalize query values, build filters for search terms, preparation time, cost, dietary tags, difficulty, and allergens.
+
 function normalizeQueryValue(value) {
   return (value || "")
     .toString()

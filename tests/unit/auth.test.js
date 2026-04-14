@@ -1,3 +1,8 @@
+// auth.test.js
+
+// This file contains unit tests for the authentication routes (registration and login).
+// It uses Jest and Supertest to send HTTP requests to the Express app and verify responses.
+// Tests cover successful registration and login, as well as various failure scenarios.
 import request from 'supertest';
 import app from '../../src/server.js';
 import { prisma } from '../../src/database/prisma.js';

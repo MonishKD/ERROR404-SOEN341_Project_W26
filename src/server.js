@@ -1,4 +1,10 @@
 // server.js
+
+// Entry point of the application.
+// Initializes environment variables, configures the Express app,
+// and starts the server. The app instance is exported for testing.
+
+
 import dotenv from "dotenv";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

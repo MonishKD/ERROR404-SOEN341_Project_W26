@@ -1,3 +1,7 @@
+// recipeHelpers.js
+
+// This file contains helper functions for recipes, such as parsing string or array inputs for ingredients, preparation steps, dietary tags, and allergens. It also includes functions to build the data structures needed for creating and updating recipes based on the incoming request body.  
+
 function emptyResult(keepUndefined) {
   return keepUndefined ? undefined : [];
 }
