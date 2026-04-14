@@ -60,3 +60,5 @@ This project was built with the following:
 - **Database**:
     - Monish
     - Ishrak
+- **Testing & Continuous Integration (CI)**:
+  - Monish
