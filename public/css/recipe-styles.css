@@ -370,11 +370,35 @@
     font-weight: 600;
 }
 
-.tag-easy   { background: #dcfce7; color: #16a34a; }
-.tag-medium { background: #fef9c3; color: #a16207; }
-.tag-hard   { background: #fee2e2; color: #dc2626; }
-.tag-cost   { background: #f3f4f6; color: #555; }
-.tag-diet   { background: #eff6ff; color: #2563eb; }
+.tag-easy {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.tag-medium {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.tag-hard {
+    background: #fce7f3;
+    color: #be185d;
+}
+
+.tag-cost {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.tag-diet {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.tag-allergen {
+    background: #fee2e2;
+    color: #b91c1c;
+}
 
 .recipe-card-title {
     margin: 0;
@@ -669,6 +693,7 @@
     background: #dc2626;
     color: white;
 }
+
 
 .allergen-filter .checkbox-content {
     padding: 8px 16px;

@@ -71,6 +71,23 @@ export function mapDietaryTags(tags) {
   });
 }
 
+// Additional helper functions for recipes can be added here, such as mapping allergens, building recipe data for creation/updating, etc.
+export function mapAllergens(allergens) {
+  const normalizedAllergens = parseStringOrArray(allergens, "comma");
+
+  return normalizedAllergens.map((allergen) => {
+    if (allergen === "peanuts" || allergen === "Peanuts") return "Peanuts";
+    if (allergen === "tree-nuts" || allergen === "Tree Nuts" || allergen === "tree nuts") return "Tree Nuts";
+    if (allergen === "dairy" || allergen === "Dairy") return "Dairy";
+    if (allergen === "eggs" || allergen === "Eggs") return "Eggs";
+    if (allergen === "soy" || allergen === "Soy") return "Soy";
+    if (allergen === "wheat" || allergen === "Wheat") return "Wheat";
+    if (allergen === "fish" || allergen === "Fish") return "Fish";
+    if (allergen === "shellfish" || allergen === "Shellfish") return "Shellfish";
+    return allergen;
+  });
+}
+
 export function buildRecipeCreateData(body, ownerId) {
   const {
     name,
@@ -91,7 +108,7 @@ export function buildRecipeCreateData(body, ownerId) {
     cost,
     difficulty,
     dietary_tags: mapDietaryTags(dietary_tags),
-    allergens: parseStringOrArray(allergens, "comma"),
+    allergens: mapAllergens(allergens),
     ownerId
   };
 }
@@ -126,7 +143,7 @@ export function buildRecipeUpdateData(body) {
     allergens:
       allergens === undefined
         ? undefined
-        : parseStringOrArray(allergens, "comma", true)
+        : mapAllergens(allergens)
   });
 }
 

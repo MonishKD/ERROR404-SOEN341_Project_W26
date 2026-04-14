@@ -4,6 +4,15 @@ const API_BASE_URL = 'http://localhost:4002/api';
 
 let myRecipes = [];
 let exploreRecipes = []; // Store all recipes for filtering
+let exploreRenderVersion = 0;
+
+//Helper function to normalize allergen values for consistent filtering and display
+function normalizeAllergenValue(value) {
+  return (value || '')
+    .toLowerCase()
+    .replace(/-/g, ' ')
+    .trim();
+}
 
 // Get selected filter values
 function getSelectedFilters() {
@@ -71,7 +80,9 @@ function recipeMatchesFilters(recipe, filters) {
   if (allergenChecked.length > 0) {
     const allergens = recipe.allergens || [];
     const hasBlockedAllergen = allergenChecked.some(allergen =>
-      allergens.some(recipeAllergen => recipeAllergen.toLowerCase() === allergen.toLowerCase())
+      allergens.some(recipeAllergen =>
+        normalizeAllergenValue(recipeAllergen) === normalizeAllergenValue(allergen)
+      )
     );
     if (hasBlockedAllergen) return false;
   }
@@ -108,6 +119,7 @@ async function displayFilteredExploreRecipes(recipes, emptyMessage = "No recipes
 
   if (!generalGrid) return;
 
+  const currentRenderVersion = ++exploreRenderVersion;
   generalGrid.innerHTML = '';
 
   if (recipes.length === 0) {
@@ -124,6 +136,10 @@ async function displayFilteredExploreRecipes(recipes, emptyMessage = "No recipes
 
   for (const recipe of recipes) {
     const card = await createPublicRecipeCard(recipe);
+
+    // stop old render from appending if a newer render started
+    if (currentRenderVersion !== exploreRenderVersion) return;
+
     generalGrid.appendChild(card);
   }
 }
@@ -309,17 +325,24 @@ function createRecipeCard(recipe, isMyRecipe = false) {
   const summary = document.createElement('summary');
   summary.className = 'recipe-card-top';
 
+  // Dietary tags HTML
   const dietaryTagsHtml = recipe.dietary_tags && recipe.dietary_tags.length > 0
   ? recipe.dietary_tags.map(tag => `<span class="tag tag-diet">${tag}</span>`).join('')
+  : '';
+
+  // Allergens tags display
+  const allergenTagsHtml = recipe.allergens && recipe.allergens.length > 0
+  ? recipe.allergens.map(tag => `<span class="tag tag-allergen">${tag}</span>`).join('')
   : '';
 
   summary.innerHTML = `
     <div class="recipe-card-emoji">${recipe.emoji || '🍽️'}</div>
     <div class="recipe-card-summary">
       <div class="recipe-card-tags">
-        <span class="tag ${difficultyClass}">${recipe.difficulty || 'Easy'}</span>
-        <span class="tag tag-cost">${costDisplay}</span>
-        ${dietaryTagsHtml}
+          <span class="tag ${difficultyClass}">${recipe.difficulty || 'Easy'}</span>
+          <span class="tag tag-cost"> ${costDisplay}</span>
+          ${dietaryTagsHtml}
+          ${allergenTagsHtml}
       </div>
       <h3 class="recipe-card-title">${recipe.name}</h3>
       <div class="recipe-card-meta">
@@ -407,8 +430,14 @@ async function createPublicRecipeCard(recipe) {
   if ((recipe.cost || '').toLowerCase() === 'medium') costDisplay = '💰💰 Medium';
   if ((recipe.cost || '').toLowerCase() === 'high') costDisplay = '💰💰💰 High';
 
+  // Dietary tags HTML
   const dietaryTagsHtml = recipe.dietary_tags && recipe.dietary_tags.length > 0
   ? recipe.dietary_tags.map(tag => `<span class="tag tag-diet">${tag}</span>`).join('')
+  : '';
+
+  // Allergens tags display
+  const allergenTagsHtml = recipe.allergens && recipe.allergens.length > 0
+  ? recipe.allergens.map(tag => `<span class="tag tag-allergen">${tag}</span>`).join('')
   : '';
 
   const ownerName = recipe.owner?.email
@@ -456,8 +485,9 @@ async function createPublicRecipeCard(recipe) {
       <div class="recipe-card-summary">
         <div class="recipe-card-tags">
           <span class="tag ${difficultyClass}">${recipe.difficulty || 'Easy'}</span>
-          <span class="tag tag-cost">${costDisplay}</span>
+          <span class="tag tag-cost"> ${costDisplay}</span>
           ${dietaryTagsHtml}
+          ${allergenTagsHtml}
         </div>
         <h3 class="recipe-card-title">${recipe.name}</h3>
         <div class="recipe-card-meta">

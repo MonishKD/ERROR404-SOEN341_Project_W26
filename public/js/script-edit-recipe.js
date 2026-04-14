@@ -1,5 +1,24 @@
 import { getToken, clearToken, isAuthenticated, getInitials, logout, fetchRecipeData, notificationManager } from "./script.js";
 const API_BASE_URL = 'http://localhost:4002/api';
+
+// Helper functions that create page elements based on recipe data
+function getSelectedDietaryTags() {
+  const checkboxes = document.querySelectorAll('input[name="dietary"]:checked');
+  return Array.from(checkboxes).map(cb => cb.value);
+}
+
+// Helper function to get selected allergens, including custom ones
+function getSelectedAllergens() {
+  const checkboxes = document.querySelectorAll('input[name="allergy"]:checked');
+  const customAllergies = document.getElementById('otherAllergies')?.value
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.length > 0) || [];
+
+  const selectedAllergies = Array.from(checkboxes).map(cb => cb.value);
+  return [...selectedAllergies, ...customAllergies];
+}
+
 /**
  * Helper to set field value
  */

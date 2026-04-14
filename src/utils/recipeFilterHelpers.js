@@ -81,10 +81,17 @@ function buildDifficultyFilter(difficultyVals) {
   return difficultyOR.length ? { OR: difficultyOR } : null;
 }
 
+// normalize common allergen values to match database values for filtering
 function normalizeAllergyValue(value) {
-  if (value === "nut-free") return "Nut-Free";
-  if (value === "dairy-free") return "Dairy-Free";
-  if (value === "gluten-free") return "Gluten-Free";
+  if (value === "peanuts") return "Peanuts";
+  if (value === "tree-nuts") return "Tree Nuts";
+  if (value === "dairy") return "Dairy";
+  if (value === "eggs") return "Eggs";
+  if (value === "soy") return "Soy";
+  if (value === "wheat") return "Wheat";
+  if (value === "fish") return "Fish";
+  if (value === "shellfish") return "Shellfish";
+  if (value === "sesame") return "Sesame";
   return value;
 }
 
