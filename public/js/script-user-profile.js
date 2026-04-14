@@ -102,9 +102,21 @@ async function showPublicRecipes() {
     const dietaryTagsHtml = Array.isArray(e.dietary_tags) && e.dietary_tags.length > 0
       ? e.dietary_tags.map(tag => `<span class="tag tag-diet">${tag}</span>`).join("")
       : "";
+      
+    //allergen tags
+    const allergenTagsHtml = Array.isArray(e.allergens) && e.allergens.length > 0
+      ? e.allergens.map(tag => `<span class="tag tag-allergen">${tag}</span>`).join("")
+      : "";
 
     const recipeCard = document.createElement("div");
     recipeCard.className = "recipe-card-full";
+
+    const costDisplay =
+      (e.cost || '').toLowerCase() === 'medium'
+        ? '💰💰 Medium'
+        : (e.cost || '').toLowerCase() === 'high'
+          ? '💰💰💰 High'
+          : '💰 Low';
 
     recipeCard.innerHTML = `
         <details>
@@ -114,8 +126,9 @@ async function showPublicRecipes() {
                 <h3 class="recipe-card-title">${e.name}</h3>
                 <div class="recipe-card-tags">
                     <span class="tag tag-${e.difficulty.toLowerCase()}">${e.difficulty}</span>
-                    <span class="tag tag-cost">💰 ${e.cost}</span>
+                    <span class="tag tag-cost">${costDisplay}</span>
                     ${dietaryTagsHtml}
+                    ${allergenTagsHtml}
                 </div>
                 <div class="recipe-card-meta">
                     <span>⏱️ ${e.prep_time} min</span>
@@ -204,6 +217,17 @@ async function showPrivateRecipes() {
     const dietaryTagsHtml = Array.isArray(e.dietary_tags) && e.dietary_tags.length > 0
       ? e.dietary_tags.map(tag => `<span class="tag tag-diet">${tag}</span>`).join("")
       : "";
+    //allergen tags
+    const allergenTagsHtml = Array.isArray(e.allergens) && e.allergens.length > 0
+      ? e.allergens.map(tag => `<span class="tag tag-allergen">${tag}</span>`).join("")
+      : "";
+
+    const costDisplay =
+      (e.cost || '').toLowerCase() === 'medium'
+        ? '💰💰 Medium'
+        : (e.cost || '').toLowerCase() === 'high'
+          ? '💰💰💰 High'
+          : '💰 Low';
     
     recipeCard.innerHTML = `
         <details>
@@ -212,11 +236,12 @@ async function showPrivateRecipes() {
             <div class="recipe-card-summary">
                 <h3 class="recipe-card-title">${e.name}</h3>
                 <div class="recipe-card-tags">
-                    <span class="tag tag-${e.difficulty.toLowerCase()}">${e.difficulty}</span>
-                    <span class="tag tag-cost">💰 ${e.cost}</span>
-                    ${dietaryTagsHtml}
-                    <span class="tag tag-private">🔒 Private</span>
-                </div>
+                  <span class="tag tag-${e.difficulty.toLowerCase()}">${e.difficulty}</span>
+                  <span class="tag tag-cost">${costDisplay}</span>
+                  ${dietaryTagsHtml}
+                  ${allergenTagsHtml}
+                  <span class="tag tag-private">🔒 Private</span>
+              </div>
                 <div class="recipe-card-meta">
                     <span>⏱️ ${e.prep_time} min</span>
                 </div>
