@@ -553,6 +553,10 @@ async function saveRecipeToMyCollection(recipeId) {
 
     const recipe = await fetchRecipeData(recipeId);
 
+    if (!recipe) {
+    throw new Error("Recipe data could not be loaded");
+  }
+
     const recipeData = {
       name: recipe.name,
       ingredients: recipe.ingredients || [],
