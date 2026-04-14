@@ -1,3 +1,7 @@
+// mealPlanHelpers.js
+
+// This file contains helper functions for validating input data related to meal plans, such as meal plan items. It defines valid values for days of the week and meal types, and provides functions to validate the input for creating and updating meal plan items.
+
 export const VALID_DAYS = [
   "MONDAY",
   "TUESDAY",

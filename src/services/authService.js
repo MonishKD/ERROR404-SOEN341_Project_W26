@@ -1,5 +1,6 @@
 // authService.js
 // This file contains the authentication logic for user login and registration.
+
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../database/prisma.js';

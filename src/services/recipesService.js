@@ -1,4 +1,9 @@
 // recipesService.js
+
+// Contains service functions for recipe-related operations.
+// Handles recipe creation, retrieval, updates, deletion,
+// ratings, and video management through database queries.
+
 import { prisma } from '../database/prisma.js';
 
 // Create a new recipe

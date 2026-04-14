@@ -262,6 +262,42 @@
     font-size: 15px;
 }
 
+.empty-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.empty-state-alt {
+  margin-top: 12px;
+}
+
+.btn-outline {
+  padding: 10px 18px;
+  border: 2px solid #28a745;
+  border-radius: 30px;
+  color: #28a745;
+  text-decoration: none;
+  font-weight: 600; 
+  font-size: 14px; 
+  font-family: 'Inter', sans-serif; 
+  cursor: pointer;
+  transition: all 0.3s ease; 
+  display: inline-block;
+}
+
+.btn-outline:hover {
+  background: #28a745;
+  color: white;
+  transform: translateY(-2px); 
+  box-shadow: 0 6px 20px rgba(14, 156, 80, 0.3); 
+}
+
+.btn-outline:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(14, 156, 80, 0.2);
+}
 
 .recipe-cards-grid {
     display: grid;
@@ -334,11 +370,35 @@
     font-weight: 600;
 }
 
-.tag-easy   { background: #dcfce7; color: #16a34a; }
-.tag-medium { background: #fef9c3; color: #a16207; }
-.tag-hard   { background: #fee2e2; color: #dc2626; }
-.tag-cost   { background: #f3f4f6; color: #555; }
-.tag-diet   { background: #eff6ff; color: #2563eb; }
+.tag-easy {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.tag-medium {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.tag-hard {
+    background: #fce7f3;
+    color: #be185d;
+}
+
+.tag-cost {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.tag-diet {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.tag-allergen {
+    background: #fee2e2;
+    color: #b91c1c;
+}
 
 .recipe-card-title {
     margin: 0;
@@ -633,6 +693,7 @@
     background: #dc2626;
     color: white;
 }
+
 
 .allergen-filter .checkbox-content {
     padding: 8px 16px;

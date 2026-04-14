@@ -1,3 +1,8 @@
+// seed.js
+
+// This script seeds the database with initial recipe data.
+// It can be run with `node scripts/seed.js` to populate the recipes table with sample recipes for testing and development. 
+
 import { prisma } from "../src/database/prisma.js";
 
 async function main() {

@@ -1,3 +1,9 @@
+// mealPlanController.js
+
+// Handles HTTP requests for meal plan routes.
+// Delegates business logic to service functions and returns responses to the client.
+// Also manages input validation and error handling.
+
 import { prisma } from "../database/prisma.js";
 import {
   validateAllowDuplicate,
@@ -5,6 +11,7 @@ import {
   validateUpdateMealPlanItemInput
 } from "../utils/mealPlanHelpers.js";
 
+//Get all meal plans belonging to the authenticated user.
 export async function createMealPlanItemController(req, res) {
   console.log("HIT /api/mealPlan/item route");
 
@@ -104,6 +111,8 @@ export async function createMealPlanItemController(req, res) {
   }
 }
 
+//Resolve and validate a new recipe id during meal item updates.
+//Also checks duplicate weekly assignments unless duplicates are allowed.
 async function resolveUpdatedRecipeId({
   recipeId,
   ownerId,
@@ -158,6 +167,7 @@ async function resolveUpdatedRecipeId({
   return { parsedRecipeId };
 }
 
+//Update an existing meal plan item.
 export async function updateMealPlanItemController(req, res) {
   try {
     const itemId = Number.parseInt(req.params.itemId, 10);
@@ -242,6 +252,7 @@ export async function updateMealPlanItemController(req, res) {
   }
 }
 
+//Delete a meal plan item if it belongs to the authenticated user.
 export async function deleteMealPlanItemController(req, res) {
   try {
     const itemId = Number.parseInt(req.params.itemId, 10);
@@ -279,6 +290,7 @@ export async function deleteMealPlanItemController(req, res) {
   }
 }
 
+//Get all meal plans belonging to the authenticated user.
 export async function getOwnerMealPlansController(req, res) {
   try {
     const ownerId = Number.parseInt(req.user.userId, 10);
@@ -292,6 +304,7 @@ export async function getOwnerMealPlansController(req, res) {
   }
 }
 
+//Get a meal plan for a specific week start date.
 export async function getMealPlanByWeekController(req, res) {
   try {
     const { startDate } = req.params;
@@ -328,6 +341,7 @@ export async function getMealPlanByWeekController(req, res) {
   }
 }
 
+//Get all meal items for a specific meal plan.
 export async function getMealPlanItemsController(req, res) {
   try {
     const id = Number.parseInt(req.params.id, 10);
@@ -357,6 +371,7 @@ export async function getMealPlanItemsController(req, res) {
   }
 }
 
+//Create a new meal plan for the given week if one does not already exist.
 export async function createMealPlanController(req, res) {
   try {
     const ownerId = Number.parseInt(req.user.userId, 10);

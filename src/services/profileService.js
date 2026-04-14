@@ -1,4 +1,7 @@
 // profileService.js
+
+// This file contains the service functions for handling profile-related operations such as fetching and updating user profiles, checking profile completion status, and updating health metrics.
+ 
 import { prisma } from '../database/prisma.js';
 import jwt from 'jsonwebtoken';
 

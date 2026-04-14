@@ -1,4 +1,7 @@
 // passwordResetService.js
+
+// This file contains the service functions for handling password reset functionality. It includes functions to request a password reset, validate reset tokens, and reset the password.
+
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';

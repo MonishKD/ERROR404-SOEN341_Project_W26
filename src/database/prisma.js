@@ -1,3 +1,7 @@
+//prisma.js
+
+// This file sets up the Prisma Client to connect to the PostgreSQL database. It uses the DATABASE_URL from the .env file to establish the connection. The Prisma Client is exported for use in other parts of the application to perform database operations. It also includes error handling for common database connection issues and ensures proper cleanup on app shutdown.
+
 import { PrismaClient } from '@prisma/client'
 import pg from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
